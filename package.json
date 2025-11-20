@@ -15,7 +15,9 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "express": "^5.1.0"
+    "csv-parser": "^3.2.0",
+    "express": "^5.1.0",
+    "multer": "^1.4.5-lts.1"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.21",

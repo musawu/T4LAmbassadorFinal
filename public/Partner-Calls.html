@@ -4,13 +4,22 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>T4L Ambassador Dashboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/styles.css" />
     <link
       href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
       rel="stylesheet"
     />
     <style>
-        
+      /* Prevent horizontal overflow globally */
+      * {
+        box-sizing: border-box;
+      }
+      
+      html, body {
+        overflow-x: hidden;
+        max-width: 100vw;
+      }
+      
       .sidebar-toggle {
         display: none;
       }
@@ -206,8 +215,65 @@
         transform: translateY(-50%);
         color: #6b7280;
         z-index: 10;
+      }
+
+      /* Line clamp utility */
+      .line-clamp-3 {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+      
+      /* FIX: Prevent opportunity cards from overflowing */
+      #opportunitiesContainer {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
+      }
+      
+      #opportunitiesContainer article {
+        width: 100%;
+        max-width: 100%;
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        word-break: break-word;
+      }
+      
+      /* Ensure all text content wraps properly */
+      #opportunitiesContainer h3,
+      #opportunitiesContainer h4,
+      #opportunitiesContainer p,
+      #opportunitiesContainer span {
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        word-break: break-word;
+        max-width: 100%;
+      }
+      
+      /* Fix for buttons and action containers */
+      #opportunitiesContainer .flex {
+        flex-wrap: wrap;
+        max-width: 100%;
+      }
+      
+      /* Responsive adjustments */
+      @media (max-width: 768px) {
+        #opportunitiesContainer article {
+          padding: 1rem;
         }
+        
+        #opportunitiesContainer .flex.items-center.gap-6 {
+          gap: 1rem;
+        }
+        
+        #opportunitiesContainer button {
+          font-size: 0.875rem;
+          padding: 0.5rem 1rem;
+        }
+      }
     </style>
+    
   </head>
 
   <body class="bg-gray-50 font-sans">
@@ -233,118 +299,55 @@
         </div>
 
         <nav class="flex flex-col space-y-4 text-gray-700 w-full">
-          <div
-            class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50"
-          >
-            <i
-              class="bx bxs-home text-2xl text-[#4b0d9f] group-hover:scale-110 transition-transform duration-200"
-            ></i>
-            <span
-              class="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-[#4b0d9f] transition-colors duration-200"
-              >Home</span
-            >
-          </div>
+          <a id="homeLink" href="/ambassador-dashboard.html" class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50">
+            <i class="bx bxs-home text-2xl text-[#4b0d9f] group-hover:scale-110 transition-transform duration-200"></i>
+            <span class="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-[#4b0d9f] transition-colors duration-200">Home</span>
+          </a>
 
-          <div
-            class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50"
-          >
-            <i
-              class="bx bx-edit-alt text-2xl group-hover:text-[#4b0d9f] group-hover:scale-110 transition-all duration-200"
-            ></i>
-            <span
-              class="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-[#4b0d9f] transition-colors duration-200"
-              >Publishing</span
-            >
-          </div>
+          <a href="/article-amb.html" class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50">
+            <i class="bx bx-edit-alt text-2xl group-hover:text-[#4b0d9f] group-hover:scale-110 transition-all duration-200"></i>
+            <span class="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-[#4b0d9f] transition-colors duration-200">Publishing</span>
+          </a>
 
-          <div
-            class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50"
-          >
-            <i
-              class="bx bx-line-chart text-2xl group-hover:text-[#4b0d9f] group-hover:scale-110 transition-all duration-200"
-            ></i>
-            <span
-              class="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-[#4b0d9f] transition-colors duration-200"
-              >Impact Log</span
-            >
-          </div>
+          <a href="/journey.html" class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50">
+            <i class="bx bx-line-chart text-2xl group-hover:text-[#4b0d9f] group-hover:scale-110 transition-all duration-200"></i>
+            <span class="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-[#4b0d9f] transition-colors duration-200">Impact Log</span>
+          </a>
 
-          <div
-            class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50"
-          >
-            <i
-              class="bx bx-briefcase text-2xl group-hover:text-[#4b0d9f] group-hover:scale-110 transition-all duration-200"
-            ></i>
-            <span
-              class="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-[#4b0d9f] transition-colors duration-200"
-              >Partners</span
-            >
-          </div>
+          <a href="/Partner-Calls.html" class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50 bg-purple-50">
+            <i class="bx bx-briefcase text-2xl text-[#4b0d9f] group-hover:scale-110 transition-all duration-200"></i>
+            <span class="text-[10px] mt-1.5 font-medium text-[#4b0d9f] transition-colors duration-200">Partners</span>
+          </a>
 
-          <div
-            class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50"
-          >
-            <i
-              class="bx bx-calendar-event text-2xl group-hover:text-[#4b0d9f] group-hover:scale-110 transition-all duration-200"
-            ></i>
-            <span
-              class="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-[#4b0d9f] transition-colors duration-200"
-              >Events</span
-            >
-          </div>
+          <a href="https://www.t4leader.com/event" class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50">
+            <i class="bx bx-calendar-event text-2xl group-hover:text-[#4b0d9f] group-hover:scale-110 transition-all duration-200"></i>
+            <span class="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-[#4b0d9f] transition-colors duration-200">Events</span>
+          </a>
 
-          <div
-            class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50"
-          >
-            <i
-              class="bx bx-chat text-2xl group-hover:text-[#4b0d9f] group-hover:scale-110 transition-all duration-200"
-            ></i>
-            <span
-              class="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-[#4b0d9f] transition-colors duration-200"
-              >Chat</span
-            >
-          </div>
+          <a href="/chat-pillar.html" class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50">
+            <i class="bx bx-chat text-2xl group-hover:text-[#4b0d9f] group-hover:scale-110 transition-all duration-200"></i>
+            <span class="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-[#4b0d9f] transition-colors duration-200">Chat</span>
+          </a>
 
-          <div
-            class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50"
-          >
-            <i
-              class="bx bx-user text-2xl group-hover:text-[#4b0d9f] group-hover:scale-110 transition-all duration-200"
-            ></i>
-            <span
-              class="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-[#4b0d9f] transition-colors duration-200"
-              >Profile</span
-            >
-          </div>
+          <a href="/profile.html" class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50">
+            <i class="bx bx-user text-2xl group-hover:text-[#4b0d9f] group-hover:scale-110 transition-all duration-200"></i>
+            <span class="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-[#4b0d9f] transition-colors duration-200">Profile</span>
+          </a>
 
-          <div
-            class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50"
-          >
-            <i
-              class="bx bx-cog text-2xl group-hover:text-[#4b0d9f] group-hover:scale-110 transition-all duration-200"
-            ></i>
-            <span
-              class="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-[#4b0d9f] transition-colors duration-200"
-              >Settings</span
-            >
-          </div>
+          <a href="/profile.html" class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50">
+            <i class="bx bx-cog text-2xl group-hover:text-[#4b0d9f] group-hover:scale-110 transition-all duration-200"></i>
+            <span class="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-[#4b0d9f] transition-colors duration-200">Settings</span>
+          </a>
 
-          <div
-            class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-red-50"
-          >
-            <i
-              class="bx bx-log-out text-2xl group-hover:text-red-600 group-hover:scale-110 transition-all duration-200"
-            ></i>
-            <span
-              class="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-red-600 transition-colors duration-200"
-              >Logout</span
-            >
+          <div id="logoutBtn" class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-red-50">
+            <i class="bx bx-log-out text-2xl group-hover:text-red-600 group-hover:scale-110 transition-all duration-200"></i>
+            <span class="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-red-600 transition-colors duration-200">Logout</span>
           </div>
         </nav>
       </aside>
 
       <!-- Main Content -->
-      <main class="flex-1 p-4 md:p-6 lg:p-6">
+      <main class="flex-1 p-4 md:p-6 lg:p-6 min-w-0">
         <!-- Top Navbar -->
         <header
           class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4"
@@ -444,121 +447,9 @@
           </div>
         </section>
 
-        <!-- Opportunity Cards Section -->
-        <section class="space-y-6 mb-6">
-          <!-- Card 1 - TechLeaders Podcast -->
-          <article class="bg-white rounded-2xl p-6 md:p-8 shadow-md hover:shadow-lg transition-all">
-            <div class="flex items-start justify-between mb-4 flex-wrap gap-4">
-              <div class="flex items-center gap-4">
-                <div class="w-16 h-16 rounded-full bg-gradient-to-br from-purple-400 to-[#4b0d7f] flex items-center justify-center flex-shrink-0">
-                  <i class="bx bx-microphone text-white text-2xl"></i>
-                </div>
-                <div>
-                  <h3 class="text-lg font-bold text-gray-900">TechLeaders Podcast</h3>
-                  <p class="text-sm text-gray-500">2 hours ago</p>
-                </div>
-              </div>
-              <div class="flex gap-2 flex-wrap">
-                <span class="bg-purple-200 text-purple-800 px-4 py-1.5 rounded-full text-sm font-semibold">PodCast</span>
-                <span class="bg-gray-200 text-gray-700 px-4 py-1.5 rounded-full text-sm font-semibold">Leading Self</span>
-              </div>
-            </div>
-
-            <h4 class="text-xl md:text-2xl font-bold text-gray-900 mb-3">New Podcast Guest Spots Available - December 2025</h4>
-            <p class="text-gray-700 text-base mb-6 leading-relaxed">
-              We're opening up 5 new guest spots for our December series focused on AI Leadership. Looking for CTOs and VPs who have led AI transformation initiatives. Episodes reach 50K+ tech leaders.
-            </p>
-
-            <div class="bg-[#4b0d7f] text-white px-6 py-4 rounded-xl mb-6 flex items-center justify-between flex-wrap gap-4">
-              <span class="font-bold text-lg">Deadline: 2025-11-20</span>
-              <span class="font-semibold">5 spots available</span>
-            </div>
-
-            <div class="flex items-center justify-between flex-wrap gap-4">
-              <div class="flex items-center gap-6">
-                <button class="flex items-center gap-2 text-gray-600 hover:text-purple-700 transition-all">
-                  <i class="bx bx-heart text-2xl"></i>
-                  <span class="font-medium">24</span>
-                </button>
-                <button class="flex items-center gap-2 text-gray-600 hover:text-purple-700 transition-all">
-                  <i class="bx bx-comment text-2xl"></i>
-                  <span class="font-medium">8</span>
-                </button>
-                <div class="flex items-center gap-2 text-gray-600">
-                  <i class="bx bx-show text-2xl"></i>
-                  <span class="font-medium">160</span>
-                </div>
-              </div>
-              <div class="flex items-center gap-3">
-                <button class="text-gray-600 hover:text-purple-700 p-2 hover:bg-gray-100 rounded-lg transition-all">
-                  <i class="bx bx-bookmark text-2xl"></i>
-                </button>
-                <button class="text-gray-600 hover:text-purple-700 p-2 hover:bg-gray-100 rounded-lg transition-all">
-                  <i class="bx bx-share-alt text-2xl"></i>
-                </button>
-                <button onclick="openModal()" class="bg-[#4b0d7f] text-white px-8 py-3 rounded-xl font-bold hover:bg-purple-800 shadow-lg transition-all">
-                  Apply Now
-                </button>
-              </div>
-            </div>
-          </article>
-
-          <!-- Card 2 - Women in Tech Summit -->
-          <article class="bg-white rounded-2xl p-6 md:p-8 shadow-md hover:shadow-lg transition-all">
-            <div class="flex items-start justify-between mb-4 flex-wrap gap-4">
-              <div class="flex items-center gap-4">
-                <div class="w-16 h-16 rounded-full bg-gradient-to-br from-purple-400 to-[#4b0d7f] flex items-center justify-center flex-shrink-0">
-                  <i class="bx bx-group text-white text-2xl"></i>
-                </div>
-                <div>
-                  <h3 class="text-lg font-bold text-gray-900">Women in Tech Summit</h3>
-                  <p class="text-sm text-gray-500">2 hours ago</p>
-                </div>
-              </div>
-              <div class="flex gap-2 flex-wrap">
-                <span class="bg-blue-200 text-blue-800 px-4 py-1.5 rounded-full text-sm font-semibold">Speaking</span>
-                <span class="bg-gray-200 text-gray-700 px-4 py-1.5 rounded-full text-sm font-semibold">Transforming Orgs</span>
-              </div>
-            </div>
-
-            <h4 class="text-xl md:text-2xl font-bold text-gray-900 mb-3">Speaking at WIT Summit 2025 - Austin</h4>
-            <p class="text-gray-700 text-base mb-6 leading-relaxed">
-              Join us for the largest women in tech conference! We're looking for 3 speakers to join our leadership panel. In-person event, 1000+ attendees, full travel covered.
-            </p>
-
-            <div class="bg-[#4b0d7f] text-white px-6 py-4 rounded-xl mb-6 flex items-center justify-between flex-wrap gap-4">
-              <span class="font-bold text-lg">Deadline: 2025-11-20</span>
-              <span class="font-semibold">5 spots available</span>
-            </div>
-
-            <div class="flex items-center justify-between flex-wrap gap-4">
-              <div class="flex items-center gap-6">
-                <button class="flex items-center gap-2 text-gray-600 hover:text-purple-700 transition-all">
-                  <i class="bx bx-heart text-2xl"></i>
-                  <span class="font-medium">24</span>
-                </button>
-                <button class="flex items-center gap-2 text-gray-600 hover:text-purple-700 transition-all">
-                  <i class="bx bx-comment text-2xl"></i>
-                  <span class="font-medium">8</span>
-                </button>
-                <div class="flex items-center gap-2 text-gray-600">
-                  <i class="bx bx-show text-2xl"></i>
-                  <span class="font-medium">160</span>
-                </div>
-              </div>
-              <div class="flex items-center gap-3">
-                <button class="text-gray-600 hover:text-purple-700 p-2 hover:bg-gray-100 rounded-lg transition-all">
-                  <i class="bx bx-bookmark text-2xl"></i>
-                </button>
-                <button class="text-gray-600 hover:text-purple-700 p-2 hover:bg-gray-100 rounded-lg transition-all">
-                  <i class="bx bx-share-alt text-2xl"></i>
-                </button>
-                <button onclick="openModal()" class="bg-[#4b0d7f] text-white px-8 py-3 rounded-xl font-bold hover:bg-purple-800 shadow-lg transition-all">
-                  Apply Now
-                </button>
-              </div>
-            </div>
-          </article>
+        <!-- Opportunity Cards Section - DYNAMIC CONTENT -->
+        <section class="space-y-6 mb-6 w-full max-w-full" id="opportunitiesContainer">
+          <!-- Dynamic posts will be loaded here -->
         </section>
       </main>
     </div>
@@ -579,7 +470,7 @@
             <div class="w-20 h-20 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center flex-shrink-0 shadow-xl">
               <i class="bx bx-microphone text-white text-4xl"></i>
             </div>
-            <div class="flex-1">
+            <div class="flex-1 min-w-0">
               <h2 class="text-3xl font-bold mb-2 leading-tight">Application Form</h2>
               <p class="text-white/90 text-base mb-1 font-medium">TechLeaders Podcast</p>
               <p class="text-white/70 text-sm">December 2025 Guest Speaker Series</p>
@@ -732,7 +623,7 @@
                 <label class="form-label mb-3">
                   Prior Podcast/Speaking Experience
                 </label>
-                <div class="flex gap-6">
+                <div class="flex gap-6 flex-wrap">
                   <label class="flex items-center gap-2 cursor-pointer group">
                     <input type="radio" name="podcast-experience" value="yes" class="w-4 h-4 text-purple-600 border-gray-300 focus:ring-purple-500">
                     <span class="text-gray-700 group-hover:text-purple-700 transition-colors">Yes, I have experience</span>
@@ -827,14 +718,46 @@
       // Modal functionality
       const modal = document.getElementById("applicationModal");
 
-      function openModal() {
+      function openModal(postId = null) {
         modal.classList.add("active");
         document.body.style.overflow = "hidden";
+        
+        // Store the post ID for form submission
+        if (postId) {
+          modal.dataset.postId = postId;
+          
+          // Pre-fill form with ambassador profile data
+          fetch('/api/profile')
+            .then(response => response.json())
+            .then(profile => {
+              // Auto-fill name fields
+              const nameInputs = document.querySelectorAll('input[placeholder*="name"]');
+              if (nameInputs.length > 0 && profile.name) {
+                const nameParts = profile.name.split(' ');
+                if (nameParts.length > 0) {
+                  nameInputs[0].value = nameParts[0]; // First name
+                }
+                if (nameParts.length > 1 && nameInputs[1]) {
+                  nameInputs[1].value = nameParts.slice(1).join(' '); // Last name
+                }
+              }
+              
+              // Auto-fill email
+              const emailInput = document.querySelector('input[type="email"]');
+              if (emailInput && profile.email) {
+                emailInput.value = profile.email;
+              }
+            })
+            .catch(error => {
+              console.error('Error fetching profile:', error);
+            });
+        }
       }
 
       function closeModal() {
         modal.classList.remove("active");
         document.body.style.overflow = "auto";
+        delete modal.dataset.postId;
       }
 
       // Close modal when clicking outside
@@ -852,10 +775,51 @@
       });
 
       // Handle form submission
-      document.querySelector("form").addEventListener("submit", (e) => {
+      document.querySelector("form").addEventListener("submit", async (e) => {
         e.preventDefault();
         
-        // Create professional success notification
+        const postId = modal.dataset.postId;
+        if (!postId) {
+          alert('No opportunity selected');
+          return;
+        }
+        
+        // Get form data
+        const coverLetterTextarea = document.querySelector('textarea[placeholder*="motivation"]') || 
+                                   document.querySelector('textarea[placeholder*="Share your motivation"]');
+        const additionalInfoTextarea = document.querySelector('textarea[placeholder*="Any other information"]');
+        
+        const formData = {
+          postId: postId,
+          coverLetter: coverLetterTextarea ? coverLetterTextarea.value : '',
+          additionalInfo: additionalInfoTextarea ? additionalInfoTextarea.value : ''
+        };
+        
+        try {
+          const response = await fetch('/api/applications', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+          });
+          
+          if (response.ok) {
+            // Show success notification
+            showApplicationSuccess();
+            closeModal();
+            e.target.reset();
+          } else {
+            const error = await response.json();
+            throw new Error(error.error || 'Application failed');
+          }
+        } catch (error) {
+          console.error('Application error:', error);
+          alert('Failed to submit application: ' + error.message);
+        }
+      });
+      
+      function showApplicationSuccess() {
         const notification = document.createElement('div');
         notification.className = 'fixed top-4 right-4 bg-white rounded-xl shadow-2xl p-6 max-w-md z-[200] animate-slideIn';
         notification.style.animation = 'modalSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1)';
@@ -867,7 +831,8 @@
             <div class="flex-1">
               <h4 class="font-bold text-gray-900 text-lg mb-1">Application Submitted!</h4>
               <p class="text-gray-600 text-sm leading-relaxed">
-                Thank you for your interest. We'll review your application and contact you within 5-7 business days.
+                Your profile and CV have been automatically sent to the partner. 
+                They will review your application and contact you soon.
               </p>
             </div>
             <button onclick="this.parentElement.parentElement.remove()" class="text-gray-400 hover:text-gray-600 transition-colors">
@@ -878,16 +843,217 @@
         
         document.body.appendChild(notification);
         
-        // Auto-remove notification after 5 seconds
         setTimeout(() => {
           notification.style.animation = 'fadeOut 0.3s ease-out';
           setTimeout(() => notification.remove(), 300);
         }, 5000);
-        
-        // Close modal and reset form
-        closeModal();
-        e.target.reset();
+      }
+
+      // Load dynamic posts when page loads
+      document.addEventListener('DOMContentLoaded', function() {
+        loadOpportunities();
       });
+
+      // Helper function to format time ago
+      function timeAgo(timestamp) {
+        const now = Date.now();
+        const diff = now - timestamp;
+        
+        const minutes = Math.floor(diff / 60000);
+        const hours = Math.floor(diff / 3600000);
+        const days = Math.floor(diff / 86400000);
+        
+        if (minutes < 1) return 'Just now';
+        if (minutes < 60) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+        if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+        return `${days} day${days > 1 ? 's' : ''} ago`;
+      }
+
+      // Get post type icon
+      function getPostTypeIcon(postType) {
+        const icons = {
+          'speaking': 'bx-microphone',
+          'podcast': 'bx-podcast',
+          'webinar': 'bx-video',
+          'volunteering': 'bx-heart'
+        };
+        return icons[postType.toLowerCase()] || 'bx-briefcase';
+      }
+
+      // Get post type color
+      function getPostTypeColor(postType) {
+        const colors = {
+          'speaking': { bg: 'bg-purple-200', text: 'text-purple-800' },
+          'podcast': { bg: 'bg-amber-200', text: 'text-amber-800' },
+          'webinar': { bg: 'bg-sky-200', text: 'text-sky-800' },
+          'volunteering': { bg: 'bg-pink-200', text: 'text-pink-800' }
+        };
+        return colors[postType.toLowerCase()] || colors['speaking'];
+      }
+
+      // Load and display opportunities
+      function loadOpportunities() {
+        fetch('/api/posts?limit=20')
+          .then(response => response.json())
+          .then(data => {
+            const container = document.getElementById('opportunitiesContainer');
+            
+            if (!container) {
+              console.error('Opportunities container not found');
+              return;
+            }
+
+            // Clear existing content
+            container.innerHTML = '';
+
+            if (data.items && data.items.length > 0) {
+              data.items.forEach(post => {
+                const opportunityCard = createOpportunityCard(post);
+                container.appendChild(opportunityCard);
+              });
+            } else {
+              // Show empty state
+              container.innerHTML = `
+                <div class="bg-white rounded-2xl p-12 flex flex-col items-center justify-center text-center">
+                  <i class="bx bx-briefcase text-6xl text-gray-400 mb-4"></i>
+                  <h3 class="text-xl font-bold text-gray-900 mb-2">No opportunities available</h3>
+                  <p class="text-gray-600 mb-4">Check back later for new speaking, podcast, and webinar opportunities.</p>
+                </div>
+              `;
+            }
+          })
+          .catch(error => {
+            console.error('Error loading opportunities:', error);
+            const container = document.getElementById('opportunitiesContainer');
+            container.innerHTML = `
+              <div class="bg-white rounded-2xl p-12 flex flex-col items-center justify-center text-center">
+                <i class="bx bx-error text-6xl text-red-400 mb-4"></i>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Error loading opportunities</h3>
+                <p class="text-gray-600 mb-4">Please try refreshing the page.</p>
+                <button onclick="loadOpportunities()" class="bg-[#4b0d7f] text-white px-6 py-3 rounded-xl font-semibold hover:bg-purple-800 transition-all">
+                  Try Again
+                </button>
+              </div>
+            `;
+          });
+      }
+
+      // Create opportunity card HTML - FIXED OVERFLOW VERSION
+      function createOpportunityCard(post) {
+        const card = document.createElement('article');
+        card.className = 'bg-white rounded-2xl p-6 md:p-8 shadow-md hover:shadow-lg transition-all w-full max-w-full overflow-hidden';
+        
+        const color = getPostTypeColor(post.postType);
+        const icon = getPostTypeIcon(post.postType);
+        const timeAgoText = timeAgo(post.createdAt);
+        
+        card.innerHTML = `
+          <div class="flex items-start justify-between mb-4 flex-wrap gap-4 w-full">
+            <div class="flex items-center gap-4 min-w-0 flex-1">
+              <div class="w-16 h-16 rounded-full bg-gradient-to-br from-purple-400 to-[#4b0d7f] flex items-center justify-center flex-shrink-0">
+                <i class="bx ${icon} text-white text-2xl"></i>
+              </div>
+              <div class="min-w-0 flex-1">
+                <h3 class="text-lg font-bold text-gray-900 truncate">${post.partnerName || 'Partner'}</h3>
+                <p class="text-sm text-gray-500">${timeAgoText}</p>
+              </div>
+            </div>
+            <div class="flex gap-2 flex-wrap flex-shrink-0">
+              <span class="${color.bg} ${color.text} px-4 py-1.5 rounded-full text-sm font-semibold capitalize whitespace-nowrap">${post.postType}</span>
+              ${post.liftPillars && post.liftPillars.length > 0 ? `
+                <span class="bg-gray-200 text-gray-700 px-4 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap">${post.liftPillars[0]}</span>
+              ` : ''}
+            </div>
+          </div>
+
+          <h4 class="text-xl md:text-2xl font-bold text-gray-900 mb-3 break-words">${post.title}</h4>
+          <p class="text-gray-700 text-base mb-6 leading-relaxed line-clamp-3 break-words">
+            ${post.description}
+          </p>
+
+          <div class="bg-[#4b0d7f] text-white px-6 py-4 rounded-xl mb-6 flex items-center justify-between flex-wrap gap-4">
+            <span class="font-bold text-base md:text-lg whitespace-nowrap">Deadline: ${post.deadline}</span>
+            <span class="font-semibold whitespace-nowrap">${post.spotsAvailable || 5} spots available</span>
+          </div>
+
+          <div class="flex items-center justify-between flex-wrap gap-4">
+            <div class="flex items-center gap-4 md:gap-6 flex-wrap">
+              <button class="flex items-center gap-2 text-gray-600 hover:text-purple-700 transition-all">
+                <i class="bx bx-heart text-2xl"></i>
+                <span class="font-medium">${post.likes || 0}</span>
+              </button>
+              <button class="flex items-center gap-2 text-gray-600 hover:text-purple-700 transition-all">
+                <i class="bx bx-comment text-2xl"></i>
+                <span class="font-medium">${post.comments || 0}</span>
+              </button>
+              <div class="flex items-center gap-2 text-gray-600">
+                <i class="bx bx-show text-2xl"></i>
+                <span class="font-medium">${post.views || 0}</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-3 flex-wrap">
+              <button class="text-gray-600 hover:text-purple-700 p-2 hover:bg-gray-100 rounded-lg transition-all">
+                <i class="bx bx-bookmark text-2xl"></i>
+              </button>
+              <button class="text-gray-600 hover:text-purple-700 p-2 hover:bg-gray-100 rounded-lg transition-all">
+                <i class="bx bx-share-alt text-2xl"></i>
+              </button>
+              <button onclick="openModal('${post.id}')" class="bg-[#4b0d7f] text-white px-6 md:px-8 py-3 rounded-xl font-bold hover:bg-purple-800 shadow-lg transition-all whitespace-nowrap">
+                Apply Now
+              </button>
+            </div>
+          </div>
+        `;
+        
+        return card;
+      }
+
+      // Setup logout and navigation based on role
+      document.addEventListener('DOMContentLoaded', function() {
+        // Fetch user role to determine home link
+        fetch('/api/me')
+          .then(response => {
+            if (!response.ok) throw new Error('Not authenticated');
+            return response.json();
+          })
+          .then(data => {
+            // Update home link based on role
+            const homeLink = document.getElementById('homeLink');
+            if (homeLink && data.role) {
+              if (data.role === 'partner') {
+                homeLink.href = '/partner-dashboard.html';
+              } else if (data.role === 'ambassador') {
+                homeLink.href = '/ambassador-dashboard.html';
+              } else if (data.role === 'admin') {
+                homeLink.href = '/admin-dashboard.html';
+              }
+            }
+          })
+          .catch(error => {
+            console.error('Error fetching user data:', error);
+          });
+
+        // Logout functionality
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+          logoutBtn.addEventListener('click', function() {
+            fetch('/logout', { method: 'POST' })
+              .then(() => {
+                window.location.href = '/signin';
+              })
+              .catch(error => {
+                console.error('Logout error:', error);
+                window.location.href = '/signin';
+              });
+          });
+        }
+      });
+
+      // Make functions available globally
+      window.setActive = setActive;
+      window.openModal = openModal;
+      window.closeModal = closeModal;
+      window.loadOpportunities = loadOpportunities;
     </script>
   </body>
 </html>

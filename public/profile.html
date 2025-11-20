@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Profile - T4L</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      /* Custom styles for mobile sidebar toggle */
+      .sidebar-toggle {
+        display: none;
+      }
+      
+      @media (max-width: 768px) {
+        .sidebar-toggle {
+          display: block;
+          position: fixed;
+          top: 1rem;
+          left: 1rem;
+          z-index: 50;
+          background: #4b0d7f;
+          color: white;
+          border-radius: 50%;
+          width: 40px;
+          height: 40px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sidebar {
+          transform: translateX(-100%);
+          transition: transform 0.3s ease;
+          position: fixed;
+          height: 100vh;
+          z-index: 40;
+        }
+        
+        .sidebar.active {
+          transform: translateX(0);
+        }
+        
+        .overlay {
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: rgba(0, 0, 0, 0.5);
+          z-index: 30;
+        }
+        
+        .overlay.active {
+          display: block;
+        }
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50 font-sans">
+    <!-- Mobile Sidebar Toggle -->
+    <button class="sidebar-toggle" id="sidebarToggle">
+      <i class="bx bx-menu text-xl"></i>
+    </button>
+    
+    <!-- Overlay for mobile sidebar -->
+    <div class="overlay" id="overlay"></div>
+    
+    <div class="flex min-h-screen">
+      <!-- Sidebar -->
+      <aside class="sidebar w-20 lg:w-20 md:w-20 bg-white shadow-md flex flex-col items-center py-6 space-y-6 z-40">
+        <div class="mb-4">
+          <div class="bg-[#4b0d7f] text-white px-3 py-2 rounded-xl font-semibold text-sm">T4L</div>
+        </div>
+        <nav class="flex flex-col space-y-4 text-gray-700 w-full">
+          <a id="homeLink" href="/ambassador-dashboard.html" class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50">
+            <i class="bx bxs-home text-2xl text-[#4b0d9f] group-hover:scale-110 transition-transform duration-200"></i>
+            <span class="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-[#4b0d9f] transition-colors duration-200">Home</span>
+          </a>
+          <a id="publishingLink" href="/article-amb.html" class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50" style="display: none;">
+            <i class="bx bx-edit-alt text-2xl group-hover:text-[#4b0d9f] group-hover:scale-110 transition-all duration-200"></i>
+            <span class="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-[#4b0d9f] transition-colors duration-200">Publishing</span>
+          </a>
+          <a id="impactLogLink" href="/journey.html" class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50" style="display: none;">
+            <i class="bx bx-line-chart text-2xl group-hover:text-[#4b0d9f] group-hover:scale-110 transition-all duration-200"></i>
+            <span class="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-[#4b0d9f] transition-colors duration-200">Impact Log</span>
+          </a>
+          <a href="/Partner-Calls.html" class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50">
+            <i class="bx bx-briefcase text-2xl group-hover:text-[#4b0d9f] group-hover:scale-110 transition-all duration-200"></i>
+            <span class="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-[#4b0d9f] transition-colors duration-200">Partners</span>
+          </a>
+          <a href="https://www.t4leader.com/event" class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50">
+            <i class="bx bx-calendar-event text-2xl group-hover:text-[#4b0d9f] group-hover:scale-110 transition-all duration-200"></i>
+            <span class="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-[#4b0d9f] transition-colors duration-200">Events</span>
+          </a>
+          <a href="/chat-pillar.html" class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50">
+            <i class="bx bx-chat text-2xl group-hover:text-[#4b0d9f] group-hover:scale-110 transition-all duration-200"></i>
+            <span class="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-[#4b0d9f] transition-colors duration-200">Chat</span>
+          </a>
+          <a href="/profile.html" class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50 bg-purple-50">
+            <i class="bx bx-user text-2xl text-[#4b0d9f] group-hover:scale-110 transition-transform duration-200"></i>
+            <span class="text-[10px] mt-1.5 font-medium text-[#4b0d9f] transition-colors duration-200">Profile</span>
+          </a>
+          <a href="/profile.html" class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50">
+            <i class="bx bx-cog text-2xl group-hover:text-[#4b0d9f] group-hover:scale-110 transition-all duration-200"></i>
+            <span class="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-[#4b0d9f] transition-colors duration-200">Settings</span>
+          </a>
+          <div id="logoutBtn" class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-red-50">
+            <i class="bx bx-log-out text-2xl group-hover:text-red-600 group-hover:scale-110 transition-all duration-200"></i>
+            <span class="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-red-600 transition-colors duration-200">Logout</span>
+          </div>
+        </nav>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="flex-1 p-4 md:p-6 lg:p-6">
+        <!-- Header -->
+        <header class="mb-6">
+          <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Profile Settings</h1>
+          <p class="text-gray-600">Manage your account information and preferences</p>
+        </header>
+
+        <!-- Profile Card -->
+        <div class="bg-white rounded-2xl shadow-md p-6 md:p-8 mb-6">
+          <!-- Avatar Section -->
+          <div class="flex flex-col md:flex-row items-center md:items-start gap-6 mb-8 pb-8 border-b border-gray-200">
+            <div class="relative">
+              <div id="profileAvatar" class="w-24 h-24 bg-gradient-to-br from-[#4b0d7f] to-[#a36737] rounded-full flex items-center justify-center text-white text-3xl font-bold shadow-lg">
+                U
+              </div>
+              <button class="absolute bottom-0 right-0 bg-purple-600 text-white rounded-full p-2 hover:bg-purple-700 transition-colors shadow-md">
+                <i class="bx bx-camera text-lg"></i>
+              </button>
+            </div>
+            <div class="flex-1 text-center md:text-left">
+              <h2 id="profileName" class="text-2xl font-bold text-gray-900 mb-2">Loading...</h2>
+              <p id="profileEmail" class="text-gray-600 mb-2">Loading...</p>
+              <span id="profileRole" class="inline-block px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-semibold">
+                Loading...
+              </span>
+            </div>
+          </div>
+
+          <!-- Profile Form -->
+          <form id="profileForm" class="space-y-6">
+            <!-- Name/Contact Name Field -->
+            <div id="nameFieldContainer">
+              <label class="block text-sm font-semibold text-gray-700 mb-2">
+                <span id="nameLabel">Name</span>
+              </label>
+              <input
+                type="text"
+                id="nameInput"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                placeholder="Enter your name"
+              />
+            </div>
+
+            <!-- Organization Name Field (Partners only) -->
+            <div id="orgFieldContainer" class="hidden">
+              <label class="block text-sm font-semibold text-gray-700 mb-2">
+                Organization Name
+              </label>
+              <input
+                type="text"
+                id="orgInput"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                placeholder="Enter organization name"
+              />
+            </div>
+
+            <!-- Contact Name Field (Partners only) -->
+            <div id="contactNameFieldContainer" class="hidden">
+              <label class="block text-sm font-semibold text-gray-700 mb-2">
+                Contact Name
+              </label>
+              <input
+                type="text"
+                id="contactNameInput"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                placeholder="Enter contact name"
+              />
+            </div>
+
+            <!-- Email Field (Read-only) -->
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">
+                Email Address
+              </label>
+              <input
+                type="email"
+                id="emailInput"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed"
+                readonly
+                disabled
+              />
+            </div>
+
+            <!-- Access Code Field (Read-only) -->
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">
+                Access Code
+              </label>
+              <input
+                type="text"
+                id="accessCodeInput"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed"
+                readonly
+                disabled
+              />
+            </div>
+
+            <!-- Status Field (Read-only) -->
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">
+                Account Status
+              </label>
+              <div class="flex items-center gap-3">
+                <span id="statusBadge" class="px-4 py-2 rounded-lg text-sm font-semibold">
+                  Loading...
+                </span>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row gap-4 pt-4">
+              <button
+                type="submit"
+                class="flex-1 bg-gradient-to-r from-[#4b0d7f] to-[#6b1fa0] text-white px-6 py-3 rounded-lg font-semibold hover:shadow-lg transition-all hover:scale-105"
+              >
+                <i class="bx bx-save mr-2"></i>
+                Save Changes
+              </button>
+              <button
+                type="button"
+                id="cancelBtn"
+                class="flex-1 bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- CV Upload Card (Ambassadors Only) -->
+        <div id="cvUploadSection" class="bg-white rounded-2xl shadow-md p-6 md:p-8 mb-6 hidden">
+          <h3 class="text-xl font-bold text-gray-900 mb-6">Upload Your CV</h3>
+          
+          <!-- Current CV Display -->
+          <div id="currentCvContainer" class="mb-6 hidden">
+            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+              <div class="flex items-center space-x-3">
+                <i class="bx bx-file-blank text-3xl text-purple-600"></i>
+                <div>
+                  <p class="font-semibold text-gray-900" id="currentCvName">-</p>
+                  <p class="text-sm text-gray-500">Current CV</p>
+                </div>
+              </div>
+              <a 
+                id="downloadCvLink" 
+                href="#" 
+                target="_blank"
+                class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-semibold"
+              >
+                <i class="bx bx-download mr-2"></i>Download
+              </a>
+            </div>
+          </div>
+          
+          <!-- CV Upload Section -->
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">
+                Upload CV (PDF, DOC, DOCX)
+              </label>
+              <div class="mt-2 flex items-center justify-center w-full">
+                <label 
+                  for="cvFileInput" 
+                  class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors"
+                >
+                  <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                    <i class="bx bx-cloud-upload text-4xl text-gray-400 mb-2"></i>
+                    <p class="mb-2 text-sm text-gray-500">
+                      <span class="font-semibold">Click to upload</span> or drag and drop
+                    </p>
+                    <p class="text-xs text-gray-500">PDF, DOC, DOCX (MAX. 10MB)</p>
+                  </div>
+                  <input 
+                    id="cvFileInput" 
+                    type="file" 
+                    class="hidden" 
+                    accept=".pdf,.doc,.docx"
+                  />
+                </label>
+              </div>
+              <p id="selectedFileName" class="mt-2 text-sm text-gray-600 hidden"></p>
+            </div>
+            <button
+              type="button"
+              id="uploadCvBtn"
+              class="w-full bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+              disabled
+            >
+              <i class="bx bx-upload mr-2"></i>
+              Upload CV
+            </button>
+          </div>
+        </div>
+
+        <!-- Account Information Card -->
+        <div class="bg-white rounded-2xl shadow-md p-6 md:p-8">
+          <h3 class="text-xl font-bold text-gray-900 mb-6">Account Information</h3>
+          <div class="space-y-4">
+            <div class="flex justify-between items-center py-3 border-b border-gray-200">
+              <span class="text-gray-600">User ID</span>
+              <span id="userId" class="text-gray-900 font-semibold">-</span>
+            </div>
+            <div class="flex justify-between items-center py-3 border-b border-gray-200">
+              <span class="text-gray-600">Role</span>
+              <span id="userRole" class="text-gray-900 font-semibold">-</span>
+            </div>
+            <div class="flex justify-between items-center py-3">
+              <span class="text-gray-600">Member Since</span>
+              <span class="text-gray-900 font-semibold">-</span>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Success Toast -->
+    <div id="successToast" class="hidden fixed top-4 right-4 bg-green-500 text-white px-6 py-4 rounded-lg shadow-2xl z-50 flex items-center gap-3">
+      <i class="bx bx-check-circle text-2xl"></i>
+      <span class="font-semibold">Profile updated successfully!</span>
+    </div>
+
+    <!-- Error Toast -->
+    <div id="errorToast" class="hidden fixed top-4 right-4 bg-red-500 text-white px-6 py-4 rounded-lg shadow-2xl z-50 flex items-center gap-3">
+      <i class="bx bx-error-circle text-2xl"></i>
+      <span id="errorMessage" class="font-semibold">An error occurred</span>
+    </div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        // Mobile sidebar toggle functionality
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebar = document.querySelector('.sidebar');
+        const overlay = document.getElementById('overlay');
+        
+        if (sidebarToggle) {
+          sidebarToggle.addEventListener('click', function() {
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+          });
+        }
+        
+        if (overlay) {
+          overlay.addEventListener('click', function() {
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+          });
+        }
+
+        // Fetch user profile data
+        fetch('/api/profile')
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Not authenticated');
+            }
+            return response.json();
+          })
+          .then(data => {
+            console.log('Profile data:', data);
+            
+            // Update dashboard URL based on role
+            const homeLink = document.getElementById('homeLink');
+            if (homeLink && data.role) {
+              if (data.role === 'partner') {
+                homeLink.href = '/partner-dashboard.html';
+              } else if (data.role === 'ambassador') {
+                homeLink.href = '/ambassador-dashboard.html';
+                // Show ambassador-specific links
+                const publishingLink = document.getElementById('publishingLink');
+                const impactLogLink = document.getElementById('impactLogLink');
+                if (publishingLink) publishingLink.style.display = 'flex';
+                if (impactLogLink) impactLogLink.style.display = 'flex';
+              } else if (data.role === 'admin') {
+                homeLink.href = '/admin-dashboard.html';
+              }
+            }
+            
+            // Update logout redirect based on role
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+              logoutBtn.addEventListener('click', function() {
+                fetch('/logout', { method: 'POST' })
+                  .then(() => {
+                    if (data.role === 'partner') {
+                      window.location.href = '/partner-signin';
+                    } else if (data.role === 'admin') {
+                      window.location.href = '/admin-signin';
+                    } else {
+                      window.location.href = '/signin';
+                    }
+                  })
+                  .catch(error => {
+                    console.error('Logout error:', error);
+                    window.location.href = '/signin';
+                  });
+              });
+            }
+            
+            // Update profile information
+            document.getElementById('profileName').textContent = data.name || data.contactName || 'User';
+            document.getElementById('profileEmail').textContent = data.email || '';
+            
+            // Update avatar
+            const avatar = document.getElementById('profileAvatar');
+            const name = data.name || data.contactName || 'User';
+            const initials = name.split(' ')
+              .map(word => word[0])
+              .join('')
+              .toUpperCase()
+              .substring(0, 2);
+            avatar.textContent = initials;
+            
+            // Update role badge
+            const roleBadge = document.getElementById('profileRole');
+            roleBadge.textContent = data.role ? data.role.charAt(0).toUpperCase() + data.role.slice(1) : '';
+            
+            // Update form fields
+            if (data.role === 'partner') {
+              // Show partner-specific fields
+              document.getElementById('orgFieldContainer').classList.remove('hidden');
+              document.getElementById('contactNameFieldContainer').classList.remove('hidden');
+              document.getElementById('nameFieldContainer').classList.add('hidden');
+              
+              if (data.organizationName) {
+                document.getElementById('orgInput').value = data.organizationName;
+              }
+              if (data.contactName) {
+                document.getElementById('contactNameInput').value = data.contactName;
+              }
+            } else {
+              // Show ambassador/admin fields
+              document.getElementById('orgFieldContainer').classList.add('hidden');
+              document.getElementById('contactNameFieldContainer').classList.add('hidden');
+              document.getElementById('nameFieldContainer').classList.remove('hidden');
+              
+              if (data.name) {
+                document.getElementById('nameInput').value = data.name;
+              }
+            }
+            
+            document.getElementById('emailInput').value = data.email || '';
+            document.getElementById('accessCodeInput').value = data.accessCode || '';
+            
+            // Update status badge
+            const statusBadge = document.getElementById('statusBadge');
+            const status = data.status || 'unknown';
+            statusBadge.textContent = status.charAt(0).toUpperCase() + status.slice(1).replace('_', ' ');
+            
+            if (status === 'active' || status === 'approved') {
+              statusBadge.className = 'px-4 py-2 rounded-lg text-sm font-semibold bg-green-100 text-green-700';
+            } else if (status === 'pending') {
+              statusBadge.className = 'px-4 py-2 rounded-lg text-sm font-semibold bg-yellow-100 text-yellow-700';
+            } else {
+              statusBadge.className = 'px-4 py-2 rounded-lg text-sm font-semibold bg-gray-100 text-gray-700';
+            }
+            
+            // Update account information
+            document.getElementById('userId').textContent = data.id || '-';
+            document.getElementById('userRole').textContent = data.role ? data.role.charAt(0).toUpperCase() + data.role.slice(1) : '-';
+            
+            // Show CV upload section for ambassadors only
+            const cvUploadSection = document.getElementById('cvUploadSection');
+            if (cvUploadSection && data.role === 'ambassador') {
+              cvUploadSection.classList.remove('hidden');
+              
+              // Display current CV if available
+              if (data.cvFilename) {
+                const currentCvContainer = document.getElementById('currentCvContainer');
+                const currentCvName = document.getElementById('currentCvName');
+                const downloadCvLink = document.getElementById('downloadCvLink');
+                
+                if (currentCvContainer && currentCvName && downloadCvLink) {
+                  currentCvName.textContent = data.cvFilename;
+                  downloadCvLink.href = `/uploads/cvs/${data.cvFilename}`;
+                  currentCvContainer.classList.remove('hidden');
+                }
+              }
+            }
+          })
+          .catch(error => {
+            console.error('Error fetching profile data:', error);
+            window.location.href = '/signin';
+          });
+
+        // Handle profile form submission
+        document.getElementById('profileForm').addEventListener('submit', function(e) {
+          e.preventDefault();
+          
+          const role = document.getElementById('userRole').textContent.toLowerCase();
+          const formData = {
+            name: role === 'partner' ? null : document.getElementById('nameInput').value,
+            contactName: role === 'partner' ? document.getElementById('contactNameInput').value : null,
+            organizationName: role === 'partner' ? document.getElementById('orgInput').value : null
+          };
+          
+          fetch('/api/profile', {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+          })
+          .then(response => {
+            if (!response.ok) {
+              return response.json().then(err => { throw new Error(err.error || 'Update failed'); });
+            }
+            return response.json();
+          })
+          .then(data => {
+            showToast('successToast');
+            // Reload profile data
+            setTimeout(() => window.location.reload(), 1500);
+          })
+          .catch(error => {
+            console.error('Error updating profile:', error);
+            document.getElementById('errorMessage').textContent = error.message;
+            showToast('errorToast');
+          });
+        });
+
+        // Handle CV upload (Ambassadors only)
+        const cvFileInput = document.getElementById('cvFileInput');
+        const uploadCvBtn = document.getElementById('uploadCvBtn');
+        const selectedFileName = document.getElementById('selectedFileName');
+        
+        if (cvFileInput && uploadCvBtn) {
+          cvFileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+              // Validate file type
+              const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+              if (!allowedTypes.includes(file.type)) {
+                document.getElementById('errorMessage').textContent = 'Please upload a PDF, DOC, or DOCX file';
+                showToast('errorToast');
+                cvFileInput.value = '';
+                uploadCvBtn.disabled = true;
+                selectedFileName.classList.add('hidden');
+                return;
+              }
+              
+              // Validate file size (10MB)
+              if (file.size > 10 * 1024 * 1024) {
+                document.getElementById('errorMessage').textContent = 'File size must be less than 10MB';
+                showToast('errorToast');
+                cvFileInput.value = '';
+                uploadCvBtn.disabled = true;
+                selectedFileName.classList.add('hidden');
+                return;
+              }
+              
+              selectedFileName.textContent = `Selected: ${file.name}`;
+              selectedFileName.classList.remove('hidden');
+              uploadCvBtn.disabled = false;
+            } else {
+              uploadCvBtn.disabled = true;
+              selectedFileName.classList.add('hidden');
+            }
+          });
+          
+          uploadCvBtn.addEventListener('click', function() {
+            const file = cvFileInput.files[0];
+            if (!file) {
+              document.getElementById('errorMessage').textContent = 'Please select a file to upload';
+              showToast('errorToast');
+              return;
+            }
+            
+            const formData = new FormData();
+            formData.append('cv', file);
+            
+            uploadCvBtn.disabled = true;
+            uploadCvBtn.innerHTML = '<i class="bx bx-loader-alt bx-spin mr-2"></i>Uploading...';
+            
+            fetch('/api/profile/cv', {
+              method: 'POST',
+              body: formData
+            })
+            .then(response => {
+              if (!response.ok) {
+                return response.json().then(err => { throw new Error(err.error || 'Upload failed'); });
+              }
+              return response.json();
+            })
+            .then(data => {
+              showToast('successToast');
+              // Update current CV display
+              if (data.filename) {
+                const currentCvContainer = document.getElementById('currentCvContainer');
+                const currentCvName = document.getElementById('currentCvName');
+                const downloadCvLink = document.getElementById('downloadCvLink');
+                
+                if (currentCvContainer && currentCvName && downloadCvLink) {
+                  currentCvName.textContent = data.filename;
+                  downloadCvLink.href = `/uploads/cvs/${data.filename}`;
+                  currentCvContainer.classList.remove('hidden');
+                }
+              }
+              // Reset form
+              cvFileInput.value = '';
+              selectedFileName.classList.add('hidden');
+              uploadCvBtn.innerHTML = '<i class="bx bx-upload mr-2"></i>Upload CV';
+              uploadCvBtn.disabled = false;
+            })
+            .catch(error => {
+              console.error('Error uploading CV:', error);
+              document.getElementById('errorMessage').textContent = error.message;
+              showToast('errorToast');
+              uploadCvBtn.innerHTML = '<i class="bx bx-upload mr-2"></i>Upload CV';
+              uploadCvBtn.disabled = false;
+            });
+          });
+        }
+
+        // Cancel button
+        document.getElementById('cancelBtn').addEventListener('click', function() {
+          window.location.reload();
+        });
+
+        // Toast functions
+        function showToast(toastId) {
+          const toast = document.getElementById(toastId);
+          toast.classList.remove('hidden');
+          setTimeout(() => {
+            toast.classList.add('hidden');
+          }, 3000);
+        }
+      });
+    </script>
+  </body>
+</html>

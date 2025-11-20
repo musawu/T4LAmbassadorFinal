@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>T4L - Applications Dashboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/styles.css" />
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
@@ -409,37 +409,42 @@
             </div>
 
             <nav class="flex flex-col space-y-2 w-full px-3">
-                <div class="sidebar-link active flex flex-col items-center cursor-pointer group py-3.5 px-3 rounded-2xl hover:bg-purple-50/80 transition-all">
+                <a id="homeLink" href="/ambassador-dashboard.html" class="sidebar-link active flex flex-col items-center cursor-pointer group py-3.5 px-3 rounded-2xl hover:bg-purple-50/80 transition-all bg-purple-50/80">
                     <i class="bx bxs-home text-2xl text-[#4b0d7f] group-hover:scale-110 transition-transform"></i>
-                    <span class="text-[9px] mt-2 font-bold text-gray-700 group-hover:text-[#4b0d7f]">Home</span>
-                </div>
+                    <span class="text-[9px] mt-2 font-bold text-[#4b0d7f] group-hover:text-[#4b0d7f]">Home</span>
+                </a>
 
-                <div class="sidebar-link flex flex-col items-center cursor-pointer group py-3.5 px-3 rounded-2xl hover:bg-purple-50/80 transition-all">
+                <a href="/Partner-Calls.html" class="sidebar-link flex flex-col items-center cursor-pointer group py-3.5 px-3 rounded-2xl hover:bg-purple-50/80 transition-all">
                     <i class="bx bx-line-chart text-2xl text-gray-500 group-hover:text-[#4b0d7f] group-hover:scale-110 transition-all"></i>
-                    <span class="text-[9px] mt-2 font-bold text-gray-500 group-hover:text-[#4b0d7f]">Analytics</span>
-                </div>
+                    <span class="text-[9px] mt-2 font-bold text-gray-500 group-hover:text-[#4b0d7f]">Partners</span>
+                </a>
 
-                <div class="sidebar-link flex flex-col items-center cursor-pointer group py-3.5 px-3 rounded-2xl hover:bg-purple-50/80 transition-all">
+                <a href="/Partner-Calls.html" class="sidebar-link flex flex-col items-center cursor-pointer group py-3.5 px-3 rounded-2xl hover:bg-purple-50/80 transition-all">
                     <i class="bx bx-briefcase text-2xl text-gray-500 group-hover:text-[#4b0d7f] group-hover:scale-110 transition-all"></i>
-                    <span class="text-[9px] mt-2 font-bold text-gray-500 group-hover:text-[#4b0d7f]">Offers</span>
-                </div>
+                    <span class="text-[9px] mt-2 font-bold text-gray-500 group-hover:text-[#4b0d7f]">Opportunities</span>
+                </a>
 
-                <div class="sidebar-link flex flex-col items-center cursor-pointer group py-3.5 px-3 rounded-2xl hover:bg-purple-50/80 transition-all">
+                <a href="https://www.t4leader.com/event" class="sidebar-link flex flex-col items-center cursor-pointer group py-3.5 px-3 rounded-2xl hover:bg-purple-50/80 transition-all">
                     <i class="bx bx-calendar text-2xl text-gray-500 group-hover:text-[#4b0d7f] group-hover:scale-110 transition-all"></i>
                     <span class="text-[9px] mt-2 font-bold text-gray-500 group-hover:text-[#4b0d7f]">Events</span>
-                </div>
+                </a>
 
-                <div class="sidebar-link flex flex-col items-center cursor-pointer group py-3.5 px-3 rounded-2xl hover:bg-purple-50/80 transition-all">
+                <a href="/chat-pillar.html" class="sidebar-link flex flex-col items-center cursor-pointer group py-3.5 px-3 rounded-2xl hover:bg-purple-50/80 transition-all">
+                    <i class="bx bx-chat text-2xl text-gray-500 group-hover:text-[#4b0d7f] group-hover:scale-110 transition-all"></i>
+                    <span class="text-[9px] mt-2 font-bold text-gray-500 group-hover:text-[#4b0d7f]">Chat</span>
+                </a>
+
+                <a href="/profile.html" class="sidebar-link flex flex-col items-center cursor-pointer group py-3.5 px-3 rounded-2xl hover:bg-purple-50/80 transition-all">
                     <i class="bx bx-user text-2xl text-gray-500 group-hover:text-[#4b0d7f] group-hover:scale-110 transition-all"></i>
                     <span class="text-[9px] mt-2 font-bold text-gray-500 group-hover:text-[#4b0d7f]">Profile</span>
-                </div>
+                </a>
 
-                <div class="sidebar-link flex flex-col items-center cursor-pointer group py-3.5 px-3 rounded-2xl hover:bg-purple-50/80 transition-all">
+                <a href="/profile.html" class="sidebar-link flex flex-col items-center cursor-pointer group py-3.5 px-3 rounded-2xl hover:bg-purple-50/80 transition-all">
                     <i class="bx bx-cog text-2xl text-gray-500 group-hover:text-[#4b0d7f] group-hover:scale-110 transition-all"></i>
                     <span class="text-[9px] mt-2 font-bold text-gray-500 group-hover:text-[#4b0d7f]">Settings</span>
-                </div>
+                </a>
 
-                <div class="sidebar-link flex flex-col items-center cursor-pointer group py-3.5 px-3 rounded-2xl hover:bg-red-50/80 transition-all mt-auto">
+                <div id="logoutBtn" class="sidebar-link flex flex-col items-center cursor-pointer group py-3.5 px-3 rounded-2xl hover:bg-red-50/80 transition-all mt-auto">
                     <i class="bx bx-log-out text-2xl text-gray-500 group-hover:text-red-600 group-hover:scale-110 transition-all"></i>
                     <span class="text-[9px] mt-2 font-bold text-gray-500 group-hover:text-red-600">Logout</span>
                 </div>
@@ -821,6 +826,44 @@
         });
 
         renderApplications();
+
+        // Fetch user role to determine home link
+        fetch('/api/me')
+            .then(response => {
+                if (!response.ok) throw new Error('Not authenticated');
+                return response.json();
+            })
+            .then(data => {
+                // Update home link based on role
+                const homeLink = document.getElementById('homeLink');
+                if (homeLink && data.role) {
+                    if (data.role === 'partner') {
+                        homeLink.href = '/partner-dashboard.html';
+                    } else if (data.role === 'ambassador') {
+                        homeLink.href = '/ambassador-dashboard.html';
+                    } else if (data.role === 'admin') {
+                        homeLink.href = '/admin-dashboard.html';
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching user data:', error);
+            });
+
+        // Logout functionality
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', function() {
+                fetch('/logout', { method: 'POST' })
+                    .then(() => {
+                        window.location.href = '/signin';
+                    })
+                    .catch(error => {
+                        console.error('Logout error:', error);
+                        window.location.href = '/signin';
+                    });
+            });
+        }
     </script>
 </body>
 </html>

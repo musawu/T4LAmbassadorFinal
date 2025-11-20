@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>T4L Partner Workspace Sign-In</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/styles.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -31,12 +31,21 @@
           </p>
         </div>
 
+        <!-- Auto-fill indicator -->
+        <div id="partnerAutoFillIndicator" class="hidden mb-4 px-4 py-2 rounded-lg bg-yellow-50 border border-yellow-200 text-sm text-yellow-800 flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+          <span>Credentials auto-filled from registration</span>
+        </div>
+
         <!-- Form -->
         <form class="space-y-5" action="/partner-signin" method="POST">
           <!-- Email -->
           <div>
             <label class="text-sm font-semibold text-gray-800 block mb-2">Email Address</label>
             <input 
+              id="partner-email"
               type="email" 
               name="email"
               placeholder="you@organization.com" 
@@ -61,6 +70,7 @@
           <div>
             <label class="text-sm font-semibold text-gray-800 block mb-2">Password</label>
             <input 
+              id="partner-password"
               type="password" 
               name="password"
               placeholder="••••••••" 
@@ -91,7 +101,7 @@
         <div class="mt-2 pt-3 border-t border-gray-200 text-center">
           <p class="text-sm text-gray-600">
             Not a T4L Partner yet? 
-            <a href="#" class="text-yellow-600 hover:text-yellow-700 font-semibold transition ml-1">Apply to join</a>
+            <a href="/partner-signup" class="text-yellow-600 hover:text-yellow-700 font-semibold transition ml-1">Apply to join</a>
           </p>
         </div>
       </div>
@@ -128,3 +138,85 @@
 
   </body>
 </html>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    try {
+      // Check for auto-populate flag in URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const shouldAutoPopulate = urlParams.get('autoPopulate') === 'true';
+      
+      if (shouldAutoPopulate) {
+        // Retrieve stored credentials from localStorage
+        const storedData = localStorage.getItem('autoPopulatePartnerEmail');
+        
+        if (storedData) {
+          try {
+            const data = JSON.parse(storedData);
+            const email = data.email;
+            const accessCode = data.accessCode;
+            const savedPassword = data.password;
+            const timestamp = data.timestamp;
+            
+            // Validate timestamp (expire after 10 minutes for security)
+            const now = Date.now();
+            const maxAge = 10 * 60 * 1000; // 10 minutes
+            
+            if (timestamp && (now - timestamp) < maxAge) {
+              // Auto-fill fields
+              const emailInput = document.getElementById('partner-email');
+              const accessCodeInput = document.querySelector('input[name="accessCode"]');
+              const passwordInput = document.getElementById('partner-password');
+              
+              if (emailInput && email) {
+                emailInput.value = email;
+                emailInput.classList.add('ring-2', 'ring-yellow-400', 'border-yellow-400');
+                setTimeout(() => {
+                  emailInput.classList.remove('ring-2', 'ring-yellow-400', 'border-yellow-400');
+                }, 2000);
+              }
+              if (accessCodeInput && accessCode) {
+                accessCodeInput.value = accessCode;
+              }
+              if (passwordInput && savedPassword) {
+                passwordInput.value = savedPassword;
+              }
+              
+              // Show auto-fill indicator
+              const indicator = document.getElementById('partnerAutoFillIndicator');
+              if (indicator) {
+                indicator.classList.remove('hidden');
+                setTimeout(() => {
+                  indicator.classList.add('hidden');
+                }, 5000);
+              }
+              
+              // Focus on password field
+              if (passwordInput) {
+                setTimeout(() => {
+                  passwordInput.focus();
+                }, 100);
+              }
+            } else {
+              // Timestamp expired or invalid, clear stale data
+              localStorage.removeItem('autoPopulatePartnerEmail');
+            }
+          } catch (parseError) {
+            // Invalid JSON, clear corrupted data
+            localStorage.removeItem('autoPopulatePartnerEmail');
+          }
+        }
+        
+        // Always clear stored credentials after attempting to use them (for security)
+        localStorage.removeItem('autoPopulatePartnerEmail');
+      } else {
+        // Clear any stale data if user navigates to sign-in without autoPopulate flag
+        localStorage.removeItem('autoPopulatePartnerEmail');
+      }
+    } catch (error) {
+      // Graceful fallback - silently handle errors
+      try {
+        localStorage.removeItem('autoPopulatePartnerEmail');
+      } catch (_) {}
+    }
+  });
+</script>

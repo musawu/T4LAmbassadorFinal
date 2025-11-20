@@ -1,0 +1,145 @@
+{
+  "amb_8a759df391e18445": {
+    "currentMonth": 5,
+    "completedTasks": {
+      "0-linkedin_course": true,
+      "0-submit_profile": true,
+      "0-second_course": true,
+      "0-connect_10": true,
+      "0-post_3x": true,
+      "1-implement_audit": true,
+      "1-submit_article_1": true,
+      "1-engage_15": true,
+      "1-third_course": true,
+      "2-first_event": true,
+      "2-follow_up_3": true,
+      "2-transformation_post": true,
+      "2-submit_article_2": true,
+      "2-update_impact_log": true,
+      "3-volunteer": true,
+      "3-complete_courses": true,
+      "3-request_recommendation": true,
+      "3-post_4x": true
+    },
+    "startDate": 1763293889608,
+    "lastUpdated": 1763293982300
+  },
+  "amb_e25bb3cbe6ece6d7": {
+    "currentMonth": 8,
+    "completedTasks": {
+      "1-linkedin_course": true,
+      "1-submit_profile": true,
+      "1-post_3x": true,
+      "1-second_course": true,
+      "1-connect_10": true,
+      "2-implement_audit": true,
+      "2-submit_article_1": true,
+      "2-engage_15": true,
+      "2-third_course": true,
+      "3-first_event": true,
+      "3-follow_up_3": true,
+      "3-transformation_post": true,
+      "3-submit_article_2": true,
+      "3-update_impact_log": true,
+      "4-volunteer": true,
+      "4-complete_courses": true,
+      "4-request_recommendation": true,
+      "4-post_4x": true,
+      "5-lead_something": true,
+      "5-check_article": true,
+      "5-daily_engage": true,
+      "5-update_impact_5": true,
+      "6-quarterly_event_2": true,
+      "6-review_progress": true,
+      "6-schedule_podcast": true,
+      "6-halfway_story": true,
+      "7-prep_podcast": true,
+      "7-submit_article_next": true,
+      "7-lead_second": true,
+      "7-post_4x_m7": true
+    },
+    "startDate": 1763303180306,
+    "lastUpdated": 1763304781900
+  },
+  "amb_0d4b5f2754aa0167": {
+    "currentMonth": 2,
+    "completedTasks": {
+      "1-linkedin_course": false,
+      "1-submit_profile": false,
+      "1-second_course": false,
+      "1-connect_10": false,
+      "1-post_3x": false
+    },
+    "startDate": 1763360222107,
+    "lastUpdated": 1763360290967
+  },
+  "amb_93553b0648865711": {
+    "currentMonth": 3,
+    "completedTasks": {
+      "1-linkedin_course": true,
+      "1-submit_profile": true,
+      "1-second_course": true,
+      "1-connect_10": true,
+      "1-post_3x": true,
+      "2-implement_audit": true,
+      "2-submit_article_1": true,
+      "2-engage_15": true,
+      "2-third_course": true
+    },
+    "startDate": 1763360980329,
+    "lastUpdated": 1763361010299
+  },
+  "amb_ed0caa2dcc1a7b9b": {
+    "currentMonth": 2,
+    "completedTasks": {
+      "1-linkedin_course": true,
+      "1-submit_profile": true,
+      "1-second_course": true,
+      "1-connect_10": true,
+      "1-post_3x": true
+    },
+    "startDate": 1763362402648,
+    "lastUpdated": 1763362411133
+  },
+  "amb_585702fc62815a44": {
+    "currentMonth": 2,
+    "completedTasks": {
+      "1-linkedin_course": true,
+      "1-submit_profile": true,
+      "1-second_course": true,
+      "1-connect_10": true,
+      "1-post_3x": true
+    },
+    "startDate": 1763363117766,
+    "lastUpdated": 1763363124872
+  },
+  "amb_01f65140c6f52293": {
+    "currentMonth": 6,
+    "completedTasks": {
+      "1-linkedin_course": false,
+      "1-second_course": false,
+      "1-post_3x": false,
+      "1-connect_10": false,
+      "1-submit_profile": false,
+      "2-implement_audit": false,
+      "2-submit_article_1": false,
+      "2-engage_15": false,
+      "2-third_course": false,
+      "3-update_impact_log": true,
+      "3-submit_article_2": true,
+      "3-transformation_post": true,
+      "3-follow_up_3": true,
+      "3-first_event": false,
+      "4-request_recommendation": false,
+      "4-volunteer": false,
+      "4-complete_courses": true,
+      "4-post_4x": true,
+      "5-lead_something": true,
+      "5-check_article": true,
+      "5-daily_engage": true,
+      "5-update_impact_5": true
+    },
+    "startDate": 1763546685551,
+    "lastUpdated": 1763550372033
+  }
+}

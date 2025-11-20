@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>T4L Ambassador Dashboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/styles.css" />
     <link
       href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
       rel="stylesheet"
@@ -78,39 +78,39 @@
           <div class="bg-[#4b0d7f] text-white px-3 py-2 rounded-xl font-semibold text-sm">T4L</div>
         </div>
         <nav class="flex flex-col space-y-4 text-gray-700 w-full">
-          <div class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50">
+          <a href="/ambassador-dashboard.html" class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50 bg-purple-50">
             <i class="bx bxs-home text-2xl text-[#4b0d9f] group-hover:scale-110 transition-transform duration-200"></i>
-            <span class="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-[#4b0d9f] transition-colors duration-200">Home</span>
-          </div>
+            <span class="text-[10px] mt-1.5 font-medium text-[#4b0d9f] transition-colors duration-200">Home</span>
+          </a>
           <a href="/article-amb.html" class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50">
             <i class="bx bx-edit-alt text-2xl group-hover:text-[#4b0d9f] group-hover:scale-110 transition-all duration-200"></i>
             <span class="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-[#4b0d9f] transition-colors duration-200">Publishing</span>
           </a>
-          <div class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50">
+          <a href="/journey.html" class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50">
             <i class="bx bx-line-chart text-2xl group-hover:text-[#4b0d9f] group-hover:scale-110 transition-all duration-200"></i>
             <span class="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-[#4b0d9f] transition-colors duration-200">Impact Log</span>
-          </div>
+          </a>
           <a href="/Partner-Calls.html" class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50">
             <i class="bx bx-briefcase text-2xl group-hover:text-[#4b0d9f] group-hover:scale-110 transition-all duration-200"></i>
             <span class="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-[#4b0d9f] transition-colors duration-200">Partners</span>
           </a>
-          <div class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50">
+          <a href="https://www.t4leader.com/event" class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50">
             <i class="bx bx-calendar-event text-2xl group-hover:text-[#4b0d9f] group-hover:scale-110 transition-all duration-200"></i>
             <span class="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-[#4b0d9f] transition-colors duration-200">Events</span>
-          </div>
-          <a href="chat-pillar.html" class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50">
+          </a>
+          <a href="/chat-pillar.html" class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50">
             <i class="bx bx-chat text-2xl group-hover:text-[#4b0d9f] group-hover:scale-110 transition-all duration-200"></i>
             <span class="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-[#4b0d9f] transition-colors duration-200">Chat</span>
           </a>
-          <div class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50">
+          <a href="/profile.html" class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50">
             <i class="bx bx-user text-2xl group-hover:text-[#4b0d9f] group-hover:scale-110 transition-all duration-200"></i>
             <span class="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-[#4b0d9f] transition-colors duration-200">Profile</span>
-          </div>
-          <div class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50">
+          </a>
+          <a href="/profile.html" class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50">
             <i class="bx bx-cog text-2xl group-hover:text-[#4b0d9f] group-hover:scale-110 transition-all duration-200"></i>
             <span class="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-[#4b0d9f] transition-colors duration-200">Settings</span>
-          </div>
-          <div class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-red-50">
+          </a>
+          <div id="logoutBtn" class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-red-50">
             <i class="bx bx-log-out text-2xl group-hover:text-red-600 group-hover:scale-110 transition-all duration-200"></i>
             <span class="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-red-600 transition-colors duration-200">Logout</span>
           </div>
@@ -133,7 +133,7 @@
             </div>
             <div class="flex items-center space-x-2">
               <i class="bx bx-bell text-2xl text-gray-900"></i>
-              <div class="w-10 h-10 bg-[#4b0d7f] flex items-center justify-center rounded-full font-bold text-white">
+              <div class="w-10 h-10 bg-[#4b0d7f] flex items-center justify-center rounded-full font-bold text-white" id="userAvatar">
                 SM
               </div>
             </div>
@@ -144,8 +144,8 @@
         <section
           class="bg-gradient-to-r from-[#4b0d7f] to-[#a36737] text-white p-4 md:p-6 rounded-2xl mb-6 shadow-md"
         >
-          <h2 class="text-xl md:text-2xl font-semibold mb-2">Welcome back, Sarah!</h2>
-          <p class="text-sm mb-6">
+          <h2 class="text-xl md:text-2xl font-semibold mb-2" id="welcomeHeading">Welcome back</h2>
+          <p class="text-sm mb-6" id="heroDescription">
             You're in Month 3 <span class="font-semibold">Visibility Stage</span><br />
             There's an opportunity for you to be featured on our next podcast!
           </p>
@@ -172,11 +172,11 @@
             </div>
 
             <!-- Join Your Tribe Button -->
-            <a href="chat-pillar.html"
+            <a href="https://www.youtube.com/@T4Leaders/podcasts"
               class="flex items-center justify-center gap-4 bg-white/20 backdrop-blur-md px-4 md:px-6 py-4 rounded-lg shadow-sm hover:shadow-md transition-all flex-1"
             >
-              <i class="bx bx-group text-xl"></i>
-              <span class="font-medium">Join your Tribe</span>
+            <i class="bx bx-microphone text-xl"></i>
+              <span class="font-medium">Discover Our Podcast Channel              </span>
           </a>
           </div>
         </section>
@@ -188,9 +188,9 @@
             class="bg-white border border-purple-300 shadow hover:shadow-2xl rounded-xl p-4 md:p-5 text-center transition-all hover:-translate-y-1 hover:border-purple-500"
           >
             <i class="bx bx-trending-up text-3xl text-purple-600 mx-auto mb-2"></i>
-            <p class="font-bold text-black text-lg">25%</p>
+            <p class="font-bold text-black text-lg" id="journeyProgress">25%</p>
             <p class="text-black text-sm">Journey Progress</p>
-            <p class="text-black text-xs">Month 3 of 12</p>
+            <p class="text-black text-xs" id="journeyMonth">Month 3 of 12</p>
         </a>
 
           <!-- Completed Tasks -->
@@ -230,22 +230,27 @@
           <div class="bg-white rounded-2xl p-4 md:p-6 lg:col-span-2 border border-gray-100 flex flex-col">
             <!-- Header -->
             <div class="flex justify-between items-center mb-4">
-              <h4 class="font-semibold text-gray-900 text-lg">This Month's Video</h4>
-              <a href="#" class="text-purple-600 text-sm font-medium hover:text-purple-700 transition-colors">Watch now</a>
+              <h4 class="font-semibold text-gray-900 text-lg" id="videoTitle">This Month's Video</h4>
+              <a href="/journey.html" class="text-purple-600 text-sm font-medium hover:text-purple-700 transition-colors">View Journey</a>
             </div>
 
-            <!-- Video Area -->
-            <div class="bg-gradient-to-br from-purple-100 to-pink-100 rounded-2xl flex flex-col items-center justify-center min-h-[16rem] relative overflow-hidden">
-              <button class="bg-white text-purple-600 rounded-full p-4 shadow-lg hover:shadow-xl transition-all hover:scale-105 z-10">
-                <i class="bx bx-play text-3xl"></i>
-              </button>
-              <div class="absolute inset-0 bg-gradient-to-t from-white/20 to-transparent"></div>
+            <!-- Video Container -->
+            <div id="videoContainer" class="bg-gradient-to-br from-purple-100 to-pink-100 rounded-2xl flex flex-col items-center justify-center min-h-[16rem] relative overflow-hidden">
+              <!-- Loading State -->
+              <div class="flex flex-col items-center justify-center">
+                <div class="animate-pulse flex flex-col items-center">
+                  <div class="bg-white rounded-full p-4 mb-4">
+                    <i class="bx bx-loader-alt text-3xl text-purple-600 animate-spin"></i>
+                  </div>
+                  <p class="text-gray-700 font-medium">Loading your video...</p>
+                </div>
+              </div>
             </div>
 
-            <!-- Text Section -->
+            <!-- Video Info -->
             <div class="text-center mt-4">
-              <p class="font-semibold text-gray-900">Visibility Stage Guide</p>
-              <p class="text-sm text-gray-500">5:30 mins • Events</p>
+              <p class="font-semibold text-gray-900" id="videoDescription">Loading...</p>
+              <p class="text-sm text-gray-500" id="videoMeta">Preparing your journey content</p>
             </div>
 
             <!-- Gap between Video and Journey Courses -->
@@ -272,76 +277,61 @@
 
           <!-- Events + Partner Calls Column -->
           <div class="flex flex-col gap-6">
-            <!-- Events (now a big card like Partner Calls) -->
+            <!-- Events -->
             <div class="bg-white rounded-2xl p-4 md:p-6 border border-gray-100">
               <div class="flex justify-between items-center mb-4">
                 <h4 class="font-semibold text-gray-900 text-lg">Events</h4>
-                <a href="#" class="text-purple-600 text-sm font-medium hover:text-purple-700 transition-colors">Calendar</a>
               </div>
               <div class="space-y-3">
                 <!-- Event 1 -->
-                <div class="border border-gray-200 rounded-2xl p-4 hover:border-purple-300 hover:shadow-sm transition-all cursor-pointer">
-                  <div class="flex items-start gap-3">
-                    <div class="bg-purple-100 rounded-xl p-2 flex-shrink-0">
-                      <i class="bx bxs-group text-purple-600 text-xl"></i>
-                    </div>
-                    <div class="flex-1">
-                      <p class="font-semibold text-gray-900 text-sm mb-1">Ambassador-only Roundtable</p>
-                      <p class="text-xs text-gray-500">Private • 20 Oct</p>
+                <a href="https://www.t4leader.com/ambassador-events" target="_blank" rel="noopener noreferrer" class="block">
+                  <div class="border border-gray-200 rounded-2xl p-4 hover:border-purple-300 hover:shadow-sm transition-all cursor-pointer">
+                    <div class="flex items-start gap-3">
+                      <div class="bg-purple-100 rounded-xl p-2 flex-shrink-0">
+                        <i class="bx bxs-group text-purple-600 text-xl"></i>
+                      </div>
+                      <div class="flex-1">
+                        <p class="font-semibold text-gray-900 text-sm mb-1">Ambassador-only Roundtable</p>
+                        <p class="text-xs text-gray-500">Private • 20 Oct</p>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </a>
 
-                <!-- Event 2 -->
-                <div class="border border-gray-200 rounded-2xl p-4 hover:border-purple-300 hover:shadow-sm transition-all cursor-pointer">
-                  <div class="flex items-start gap-3">
-                    <div class="bg-purple-100 rounded-xl p-2 flex-shrink-0">
-                      <i class="bx bx-microphone text-purple-600 text-xl"></i>
-                    </div>
-                    <div class="flex-1">
-                      <p class="font-semibold text-gray-900 text-sm mb-1">Shameless Podcast-Booking</p>
-                      <p class="text-xs text-gray-500">Confirmation Pending</p>
+                <!-- Event 2 - Shameless Podcast -->
+                <a href="https://cal.com/shameless-podcast-t4l/20-mins-shameless-guest-pre-interview-call?month=2025-11" 
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   class="block">
+                  <div class="border border-gray-200 rounded-2xl p-4 hover:border-purple-300 hover:shadow-sm transition-all cursor-pointer">
+                    <div class="flex items-start gap-3">
+                      <div class="bg-purple-100 rounded-xl p-2 flex-shrink-0">
+                        <i class="bx bx-microphone text-purple-600 text-xl"></i>
+                      </div>
+                      <div class="flex-1">
+                        <p class="font-semibold text-gray-900 text-sm mb-1">Shameless Podcast-Booking</p>
+                        <p class="text-xs text-gray-500">Confirmation Pending</p>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </a>
               </div>
             </div>
 
-            <!-- Partner Calls (unchanged) -->
+            <!-- Partner Calls -->
             <div class="bg-white rounded-2xl p-4 md:p-6 border border-gray-100">
               <div class="flex justify-between items-center mb-4">
                 <h4 class="font-semibold text-gray-900 text-lg">Partner Calls</h4>
                 <a href="/Partner-Calls.html" class="text-purple-600 text-sm font-medium hover:text-purple-700 transition-colors">View all</a>
               </div>
-              <div class="space-y-3">
-                <div class="border border-gray-200 rounded-2xl p-4 hover:border-purple-300 hover:shadow-sm transition-all cursor-pointer">
-                  <div class="flex items-start gap-3">
-                    <div class="bg-purple-100 rounded-xl p-2 flex-shrink-0">
-                      <i class="bx bxs-group text-purple-600 text-xl"></i>
+              <div class="space-y-3" id="partnerCallsContainer">
+                <!-- Loading state -->
+                <div class="flex justify-center items-center py-8">
+                  <div class="animate-pulse flex flex-col items-center">
+                    <div class="bg-purple-100 rounded-full p-3 mb-2">
+                      <i class="bx bx-loader-alt text-2xl text-purple-600 animate-spin"></i>
                     </div>
-                    <div class="flex-1">
-                      <p class="font-semibold text-gray-900 text-sm mb-1">Girls in STEM</p>
-                      <p class="text-xs text-gray-500">Speaker • Online • Inspiring Others • 12 Oct</p>
-                    </div>
-                  </div>
-                </div>
-                <div class="border border-gray-200 rounded-2xl p-4 hover:border-purple-300 hover:shadow-sm transition-all cursor-pointer">
-                  <div class="flex items-start gap-3">
-                    <div class="bg-purple-100 rounded-xl p-2 flex-shrink-0">
-                      <i class="bx bxs-group text-purple-600 text-xl"></i>
-                    </div>
-                    <div class="flex-1">
-                      <p class="font-semibold text-gray-900 text-sm mb-1">Youth Code Lab</p>
-                      <p class="text-xs text-gray-500 mb-2">Nov 25 • Social Looking</p>
-                      <div class="flex items-center gap-1">
-                        <div class="flex -space-x-2">
-                          <div class="w-6 h-6 rounded-full bg-purple-500 border-2 border-white"></div>
-                          <div class="w-6 h-6 rounded-full bg-purple-400 border-2 border-white"></div>
-                          <div class="w-6 h-6 rounded-full bg-purple-300 border-2 border-white"></div>
-                        </div>
-                        <span class="text-xs text-gray-500 ml-1">3 of 10 open</span>
-                      </div>
-                    </div>
+                    <p class="text-gray-500 text-sm">Loading partner opportunities...</p>
                   </div>
                 </div>
               </div>
@@ -380,8 +370,31 @@
     </div>
 
     <script>
-      // Mobile sidebar toggle functionality
+      // Global function to play video
+      function playVideo() {
+        console.log('Play button clicked!');
+        const videoContainer = document.getElementById('videoContainer');
+        const videoUrl = window.currentVideoUrl;
+        
+        if (videoContainer && videoUrl) {
+          console.log('Loading video:', videoUrl);
+          videoContainer.innerHTML = `
+            <div class="relative w-full rounded-2xl overflow-hidden shadow-2xl" style="padding-top: 56.25%;">
+              <iframe 
+                class="absolute top-0 left-0 w-full h-full border-0"
+                src="${videoUrl}&autoplay=1"
+                allow="autoplay; fullscreen"
+                allowfullscreen>
+              </iframe>
+            </div>
+          `;
+        } else {
+          console.error('Video container or URL not found');
+        }
+      }
+
       document.addEventListener('DOMContentLoaded', function() {
+        // Mobile sidebar toggle functionality
         const sidebarToggle = document.getElementById('sidebarToggle');
         const sidebar = document.querySelector('.sidebar');
         const overlay = document.getElementById('overlay');
@@ -395,7 +408,347 @@
           sidebar.classList.remove('active');
           overlay.classList.remove('active');
         });
+
+        // Fetch and display user data
+        fetch('/api/me')
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Not authenticated');
+            }
+            return response.json();
+          })
+          .then(data => {
+            // Update the welcome message with user's name
+            const welcomeHeading = document.getElementById('welcomeHeading');
+            if (welcomeHeading && data.name) {
+              welcomeHeading.textContent = `Welcome back, ${data.name}!`;
+            }
+            
+            // Update the avatar initials
+            const avatarElement = document.getElementById('userAvatar');
+            if (avatarElement && data.name) {
+              const initials = data.name.split(' ')
+                .map(word => word[0])
+                .join('')
+                .toUpperCase()
+                .substring(0, 2);
+              avatarElement.textContent = initials;
+            }
+          })
+          .catch(error => {
+            console.error('Error fetching user data:', error);
+            window.location.href = '/signin';
+          });
+
+        // Logout functionality
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+          logoutBtn.addEventListener('click', function() {
+            fetch('/logout', { method: 'POST' })
+              .then(() => {
+                window.location.href = '/signin';
+              })
+              .catch(error => {
+                console.error('Logout error:', error);
+                window.location.href = '/signin';
+              });
+          });
+        }
+
+        // Load current month's video
+        loadCurrentMonthVideo();
+        
+        // Load latest partner calls
+        loadPartnerCalls();
       });
+      
+      async function loadPartnerCalls() {
+        try {
+          const response = await fetch('/api/posts?limit=2');
+          
+          if (!response.ok) {
+            throw new Error('Failed to load partner calls');
+          }
+          
+          const data = await response.json();
+          const partnerCallsContainer = document.getElementById('partnerCallsContainer');
+          
+          if (!partnerCallsContainer) return;
+          
+          if (!data.items || data.items.length === 0) {
+            partnerCallsContainer.innerHTML = `
+              <div class="text-center py-8">
+                <i class="bx bx-info-circle text-4xl text-gray-400 mb-2"></i>
+                <p class="text-gray-500 text-sm">No partner opportunities available yet</p>
+              </div>
+            `;
+            return;
+          }
+          
+          // Build the HTML for partner calls
+          partnerCallsContainer.innerHTML = data.items.map(post => {
+            // Format date
+            const postDate = new Date(post.createdAt);
+            const formattedDate = postDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            
+            // Get icon based on post type
+            const getIcon = (type) => {
+              const icons = {
+                'speaking': 'bxs-microphone',
+                'workshop': 'bx-chalkboard',
+                'mentoring': 'bx-user-voice',
+                'collaboration': 'bxs-group'
+              };
+              return icons[type?.toLowerCase()] || 'bxs-group';
+            };
+            
+            return `
+              <a href="/Partner-Calls.html" class="block">
+                <div class="border border-gray-200 rounded-2xl p-4 hover:border-purple-300 hover:shadow-sm transition-all cursor-pointer">
+                  <div class="flex items-start gap-3">
+                    <div class="bg-purple-100 rounded-xl p-2 flex-shrink-0">
+                      <i class="bx ${getIcon(post.postType)} text-purple-600 text-xl"></i>
+                    </div>
+                    <div class="flex-1">
+                      <p class="font-semibold text-gray-900 text-sm mb-1">${post.title}</p>
+                      <p class="text-xs text-gray-500 mb-2">${post.format || 'Online'} • ${formattedDate}</p>
+                      ${post.spotsAvailable ? `
+                        <div class="flex items-center gap-1">
+                          <div class="flex -space-x-2">
+                            <div class="w-6 h-6 rounded-full bg-purple-500 border-2 border-white"></div>
+                            <div class="w-6 h-6 rounded-full bg-purple-400 border-2 border-white"></div>
+                            <div class="w-6 h-6 rounded-full bg-purple-300 border-2 border-white"></div>
+                          </div>
+                          <span class="text-xs text-gray-500 ml-1">${post.spotsAvailable} spots available</span>
+                        </div>
+                      ` : ''}
+                    </div>
+                  </div>
+                </div>
+              </a>
+            `;
+          }).join('');
+          
+        } catch (error) {
+          console.error('Error loading partner calls:', error);
+          const partnerCallsContainer = document.getElementById('partnerCallsContainer');
+          if (partnerCallsContainer) {
+            partnerCallsContainer.innerHTML = `
+              <div class="text-center py-8">
+                <i class="bx bx-error-circle text-4xl text-red-400 mb-2"></i>
+                <p class="text-gray-500 text-sm">Unable to load partner opportunities</p>
+              </div>
+            `;
+          }
+        }
+      }
+
+      async function loadCurrentMonthVideo() {
+        try {
+          // Fetch the user's current journey progress
+          const response = await fetch('/api/ambassador/journey');
+          
+          if (!response.ok) {
+            throw new Error('Failed to load journey data');
+          }
+          
+          const journeyData = await response.json();
+          const currentMonth = journeyData.currentMonth || 1;
+          
+          // Video mapping for all 12 months
+          const videos = [
+            {
+              month: 1,
+              title: "FOUNDATION",
+              url: "https://www.canva.com/design/DAG1M6MU20c/C1-a9vTfy3AOESPfRhyxfQ/watch?embed",
+              description: "Foundation Set: Onboarding complete, first course done",
+              duration: "5:30 mins"
+            },
+            {
+              month: 2,
+              title: "OPTIMIZE",
+              url: "https://www.canva.com/design/DAGymyxxfQs/vtkXrZ8joa0giowAh60-zg/watch?embed",
+              description: "Optimized Presence: Profile updated, first article submitted",
+              duration: "6:15 mins"
+            },
+            {
+              month: 3,
+              title: "ENGAGE",
+              url: "https://www.canva.com/design/DAGym0x892o/YmDTuaFm1nNjSaJYa93ePA/watch?embed",
+              description: "Engaged Member: Building relationships, consistent content",
+              duration: "5:45 mins"
+            },
+            {
+              month: 4,
+              title: "LEAD",
+              url: "https://www.canva.com/design/DAGymzmB9zo/Oz_eCZ8_EDoXnTeseB6R-A/watch?embed",
+              description: "Leadership Activated: Growing visibility, all courses complete",
+              duration: "7:00 mins"
+            },
+            {
+              month: 5,
+              title: "AMPLIFY",
+              url: "https://www.canva.com/design/DAGym1aI8Gw/Sf85oXevN7qOm5zvehr9dQ/watch?embed",
+              description: "Amplified Impact: Leading initiatives, consistent support",
+              duration: "6:30 mins"
+            },
+            {
+              month: 6,
+              title: "MIDPOINT",
+              url: "https://www.canva.com/design/DAGym9YIUZk/OIRe6vWYWkaZjWLuMomzrg/watch?embed",
+              description: "Halfway Strong: Story shared, momentum building",
+              duration: "8:00 mins"
+            },
+            {
+              month: 7,
+              title: "VISIBILITY",
+              url: "https://www.canva.com/design/DAGym2_NkFI/NLk8fNcIBNm7mX3lT5mJGQ/watch?embed",
+              description: "Visible Leader: Podcast prep, strong content cadence",
+              duration: "6:45 mins"
+            },
+            {
+              month: 8,
+              title: "EXPAND",
+              url: "https://www.canva.com/design/DAGzJ0qBXKM/JeRKp6jCYA88iE3RJBUvGA/watch?embed",
+              description: "Expanded Reach: Podcast recorded, portfolio growing",
+              duration: "7:15 mins"
+            },
+            {
+              month: 9,
+              title: "CONNECT",
+              url: "https://www.canva.com/design/DAGynDXe7nM/XwF5fSUo3GJfpJBR4sO4Vg/watch?embed",
+              description: "Connected Leader: Deep relationships, podcast live",
+              duration: "6:00 mins"
+            },
+            {
+              month: 10,
+              title: "ACCELERATE",
+              url: "https://www.canva.com/design/DAGynMCn0XU/-9LPKLzn5Zc6W5bJS8ktXQ/watch?embed",
+              description: "Accelerating: Final articles, opportunities in pipeline",
+              duration: "7:30 mins"
+            },
+            {
+              month: 11,
+              title: "CELEBRATE",
+              url: "https://www.canva.com/design/DAGynKgil_I/FVdnkZFWNsKo1iBsbX7omg/watch?embed",
+              description: "Celebrating: Year documented, impact quantified",
+              duration: "8:15 mins"
+            },
+            {
+              month: 12,
+              title: "RENEW",
+              url: "https://www.canva.com/design/DAGynMcNxQI/INWdK-bvAm30aMLK45OMfw/watch?embed",
+              description: "Transformation Complete: Full year tracked, portfolio built",
+              duration: "9:00 mins"
+            }
+          ];
+          
+          // Get the video for the current month
+          const currentVideo = videos.find(v => v.month === currentMonth) || videos[0];
+          
+          // Update stats section
+          const journeyProgress = document.getElementById('journeyProgress');
+          if (journeyProgress) {
+            const percentage = Math.round((currentMonth / 12) * 100);
+            journeyProgress.textContent = `${percentage}%`;
+          }
+
+          const journeyMonth = document.getElementById('journeyMonth');
+          if (journeyMonth) {
+            journeyMonth.textContent = `Month ${currentMonth} of 12`;
+          }
+
+          // Update hero description
+          const heroDescription = document.getElementById('heroDescription');
+          if (heroDescription && journeyData.months && journeyData.months[currentMonth - 1]) {
+            const monthData = journeyData.months[currentMonth - 1];
+            heroDescription.innerHTML = `
+              You're in Month ${currentMonth} <span class="font-semibold">${monthData.title} Stage</span><br />
+              ${monthData.milestone}
+            `;
+          }
+          
+          // Update video section
+          const videoTitle = document.getElementById('videoTitle');
+          if (videoTitle) {
+            videoTitle.textContent = `Month ${currentMonth}: ${currentVideo.title}`;
+          }
+          
+          const videoDescription = document.getElementById('videoDescription');
+          if (videoDescription) {
+            videoDescription.textContent = currentVideo.description;
+          }
+          
+          const videoMeta = document.getElementById('videoMeta');
+          if (videoMeta) {
+            videoMeta.textContent = `${currentVideo.duration} • Month ${currentMonth}`;
+          }
+          
+          // Load the video with YouTube-style player
+          const videoContainer = document.getElementById('videoContainer');
+          if (videoContainer) {
+            console.log('Loading video for month:', currentMonth);
+            console.log('Video URL:', currentVideo.url);
+            
+            // Create video preview with play button overlay
+            videoContainer.innerHTML = `
+              <div class="relative w-full rounded-2xl overflow-hidden cursor-pointer group" style="padding-top: 56.25%;" onclick="playVideo()">
+                <!-- Actual Video Preview (no autoplay) -->
+                <iframe 
+                  class="absolute top-0 left-0 w-full h-full border-0"
+                  src="${currentVideo.url}"
+                  allow="fullscreen"
+                  style="pointer-events: none;">
+                </iframe>
+                
+                <!-- Dark Overlay on hover -->
+                <div class="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-all duration-300"></div>
+                
+                <!-- Play Button (YouTube style) -->
+                <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <div class="relative">
+                    <!-- Main play button -->
+                    <div class="relative bg-red-600 group-hover:bg-red-700 rounded-full w-20 h-20 md:w-24 md:h-24 flex items-center justify-center shadow-2xl group-hover:scale-110 transition-all duration-300">
+                      <svg class="w-10 h-10 md:w-12 md:h-12 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z"/>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Video Info Overlay -->
+                <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent pointer-events-none">
+                  <div class="flex items-center gap-2 text-white">
+                    <i class="bx bx-play-circle text-2xl"></i>
+                    <div>
+                      <p class="font-semibold text-sm">${currentVideo.title}</p>
+                      <p class="text-xs opacity-80">${currentVideo.duration}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            `;
+            
+            // Store video URL globally for the click handler
+            window.currentVideoUrl = currentVideo.url;
+          }
+          
+        } catch (error) {
+          console.error('Error loading video:', error);
+          
+          // Show error state
+          const videoContainer = document.getElementById('videoContainer');
+          if (videoContainer) {
+            videoContainer.innerHTML = `
+              <div class="flex flex-col items-center justify-center p-8">
+                <i class="bx bx-error-circle text-5xl text-red-500 mb-4"></i>
+                <p class="text-gray-700 font-medium mb-2">Unable to load video</p>
+                <p class="text-gray-500 text-sm">Please refresh the page or contact support</p>
+              </div>
+            `;
+          }
+        }
+      }
     </script>
   </body>
 </html>

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CommunityPartView - Groups</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/styles.css" />
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
@@ -94,25 +94,35 @@
             </div>
 
             <nav class="flex flex-col space-y-2 w-full px-3">
-                <a href="/ambassador-dashboard.html" class="sidebar-link flex flex-col items-center cursor-pointer group py-3.5 px-3 rounded-2xl hover:bg-purple-50/80 transition-all">
+                <a id="homeLink" href="/ambassador-dashboard.html" class="sidebar-link flex flex-col items-center cursor-pointer group py-3.5 px-3 rounded-2xl hover:bg-purple-50/80 transition-all">
                     <i class="bx bxs-home text-2xl text-gray-500 group-hover:text-[#4b0d7f] group-hover:scale-110 transition-transform"></i>
                     <span class="text-[9px] mt-2 font-bold text-gray-700 group-hover:text-[#4b0d7f]">Home</span>
                 </a>
 
-                <div class="sidebar-link flex flex-col items-center cursor-pointer group py-3.5 px-3 rounded-2xl hover:bg-purple-50/80 transition-all">
-                    <i class="bx bx-chat text-2xl text-gray-600 mb-1"></i>
-                    <span class="text-[9px] mt-2 font-bold text-gray-500 group-hover:text-[#4b0d7f]">Messages</span>
-                </div>
+                <a href="/chat-pillar.html" class="sidebar-link active flex flex-col items-center cursor-pointer group py-3.5 px-3 rounded-2xl hover:bg-purple-50/80 transition-all bg-purple-50/80">
+                    <i class="bx bx-chat text-2xl text-purple-600 mb-1"></i>
+                    <span class="text-[9px] mt-2 font-bold text-[#4b0d7f]">Chat</span>
+                </a>
 
-                <div class="sidebar-link active flex flex-col items-center cursor-pointer group py-3.5 px-3 rounded-2xl hover:bg-purple-50/80 transition-all">
-                    <i class="bx bxs-group text-2xl text-purple-600 mb-1"></i>
-                    <span class="text-[9px] mt-2 font-bold text-[#4b0d7f]">Groups</span>
-                </div>
+                <a href="/chat-pillar.html" class="sidebar-link flex flex-col items-center cursor-pointer group py-3.5 px-3 rounded-2xl hover:bg-purple-50/80 transition-all">
+                    <i class="bx bxs-group text-2xl text-gray-600 mb-1 group-hover:text-[#4b0d7f]"></i>
+                    <span class="text-[9px] mt-2 font-bold text-gray-500 group-hover:text-[#4b0d7f]">Groups</span>
+                </a>
 
-                <a href="chat-region.html" class="sidebar-link flex flex-col items-center cursor-pointer group py-3.5 px-3 rounded-2xl hover:bg-purple-50/80 transition-all">
-                    <i class="bx bx-world text-2xl text-gray-600 mb-1"></i>
+                <a href="/chat-region.html" class="sidebar-link flex flex-col items-center cursor-pointer group py-3.5 px-3 rounded-2xl hover:bg-purple-50/80 transition-all">
+                    <i class="bx bx-world text-2xl text-gray-600 mb-1 group-hover:text-[#4b0d7f]"></i>
                     <span class="text-[9px] mt-2 font-bold text-gray-500 group-hover:text-[#4b0d7f]">My Region</span>
                 </a>
+
+                <a href="/profile.html" class="sidebar-link flex flex-col items-center cursor-pointer group py-3.5 px-3 rounded-2xl hover:bg-purple-50/80 transition-all">
+                    <i class="bx bx-user text-2xl text-gray-600 mb-1 group-hover:text-[#4b0d7f]"></i>
+                    <span class="text-[9px] mt-2 font-bold text-gray-500 group-hover:text-[#4b0d7f]">Profile</span>
+                </a>
+
+                <div id="logoutBtn" class="sidebar-link sidebar-logout flex flex-col items-center cursor-pointer group py-3.5 px-3 rounded-2xl hover:bg-red-50/80 transition-all">
+                    <i class="bx bx-log-out text-2xl text-gray-600 mb-1 group-hover:text-red-600"></i>
+                    <span class="text-[9px] mt-2 font-bold text-gray-500 group-hover:text-red-600">Logout</span>
+                </div>
             </nav>
         </aside>
 
@@ -313,10 +323,57 @@
         
         sidebarLinks.forEach(link => {
             link.addEventListener('click', function() {
-                sidebarLinks.forEach(l => l.classList.remove('active'));
-                this.classList.add('active');
+                // Don't remove active class from logout button clicks
+                if (!this.id || this.id !== 'logoutBtn') {
+                    sidebarLinks.forEach(l => {
+                        if (!l.id || l.id !== 'logoutBtn') {
+                            l.classList.remove('active');
+                        }
+                    });
+                    if (!this.id || this.id !== 'logoutBtn') {
+                        this.classList.add('active');
+                    }
+                }
             });
         });
+
+        // Fetch user role to determine home link
+        fetch('/api/me')
+            .then(response => {
+                if (!response.ok) throw new Error('Not authenticated');
+                return response.json();
+            })
+            .then(data => {
+                // Update home link based on role
+                const homeLink = document.getElementById('homeLink');
+                if (homeLink && data.role) {
+                    if (data.role === 'partner') {
+                        homeLink.href = '/partner-dashboard.html';
+                    } else if (data.role === 'ambassador') {
+                        homeLink.href = '/ambassador-dashboard.html';
+                    } else if (data.role === 'admin') {
+                        homeLink.href = '/admin-dashboard.html';
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching user data:', error);
+            });
+
+        // Logout functionality
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', function() {
+                fetch('/logout', { method: 'POST' })
+                    .then(() => {
+                        window.location.href = '/signin';
+                    })
+                    .catch(error => {
+                        console.error('Logout error:', error);
+                        window.location.href = '/signin';
+                    });
+            });
+        }
     </script>
 </body>
 </html>

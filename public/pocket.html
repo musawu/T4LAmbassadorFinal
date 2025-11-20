@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fill Your Transformation Story</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 2em;
+    }
+
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 1.1em;
+    }
+
+    .template-preview {
+      border: 3px solid #667eea;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    .template-preview iframe {
+      width: 100%;
+      height: 450px;
+      border: none;
+      display: block;
+    }
+
+    .btn-canva {
+      display: inline-block;
+      background: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);
+      color: white;
+      padding: 18px 40px;
+      text-decoration: none;
+      border-radius: 50px;
+      font-weight: bold;
+      font-size: 1.1em;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 20px rgba(0,114,255,0.3);
+      margin-bottom: 30px;
+    }
+
+    .btn-canva:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px rgba(0,114,255,0.5);
+    }
+
+    .instructions {
+      background: #f8f9ff;
+      padding: 25px;
+      border-radius: 12px;
+      border-left: 5px solid #667eea;
+      margin-bottom: 30px;
+    }
+
+    .instructions h3 {
+      color: #667eea;
+      margin-bottom: 15px;
+    }
+
+    .instructions ol {
+      margin-left: 20px;
+      color: #555;
+      line-height: 1.8;
+    }
+
+    .instructions li {
+      margin-bottom: 10px;
+    }
+
+    .upload-section {
+      background: #fff8f0;
+      padding: 30px;
+      border-radius: 12px;
+      border: 2px dashed #ff9800;
+      text-align: center;
+    }
+
+    .upload-section h3 {
+      color: #ff9800;
+      margin-bottom: 20px;
+    }
+
+    .file-input-wrapper {
+      position: relative;
+      display: inline-block;
+      margin-bottom: 20px;
+    }
+
+    .file-input-wrapper input[type="file"] {
+      position: absolute;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+
+    .file-input-label {
+      display: inline-block;
+      padding: 15px 30px;
+      background: white;
+      border: 2px solid #ff9800;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      color: #ff9800;
+      transition: all 0.3s ease;
+    }
+
+    .file-input-label:hover {
+      background: #ff9800;
+      color: white;
+    }
+
+    .file-name {
+      margin-top: 15px;
+      color: #666;
+      font-style: italic;
+    }
+
+    .btn-submit {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+      border: none;
+      padding: 15px 40px;
+      border-radius: 50px;
+      font-size: 1em;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 20px rgba(245,87,108,0.3);
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px rgba(245,87,108,0.5);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .success-message {
+      background: #d4edda;
+      color: #155724;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 20px;
+      display: none;
+    }
+
+    .success-message.show {
+      display: block;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #667eea;
+      color: white;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 0.85em;
+      margin-bottom: 15px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <span class="badge">📝 Template Tool</span>
+    <h1>🎬 Your Transformation Story</h1>
+    <p class="subtitle">Fill in the template with your personal journey and inspire others!</p>
+
+    <!-- Template Preview -->
+    <div class="template-preview">
+      <iframe src="https://gamma.app/embed/29g1oeqjmvn8o50" 
+              allow="fullscreen" 
+              title="Transformation Story Template">
+      </iframe>
+    </div>
+
+    <!-- Edit Button -->
+    <a href="https://www.canva.com/design/DAG5D4YdK2I/UUewL0Sz35CofNajIdtg0g/view?utm_content=DAG5D4YdK2I&utm_campaign=designshare&utm_medium=link&utm_source=sharebutton&mode=preview" 
+       target="_blank"
+       class="btn-canva">
+      ✏️ Fill Template in Canva
+    </a>
+
+    <!-- Instructions -->
+    <div class="instructions">
+      <h3>📋 How to Complete Your Story</h3>
+      <ol>
+        <li><strong>Click the blue button above</strong> to open the template in Canva</li>
+        <li><strong>Canva will create your own copy</strong> - you can edit freely!</li>
+        <li><strong>Fill in your story:</strong> Add your before/after photos, write your journey, include key milestones</li>
+        <li><strong>Download your completed template</strong> (PDF or PNG)</li>
+        <li><strong>Upload it below</strong> to add it to your ambassador profile</li>
+      </ol>
+    </div>
+
+    <!-- Upload Section -->
+    <div class="upload-section">
+      <h3>📤 Upload Your Completed Story</h3>
+      <p style="color: #666; margin-bottom: 20px;">
+        Once you've filled the template in Canva, upload it here
+      </p>
+
+      <div class="file-input-wrapper">
+        <input type="file" 
+               id="templateFile" 
+               accept=".pdf,.png,.jpg,.jpeg"
+               onchange="handleFileSelect(event)">
+        <label for="templateFile" class="file-input-label">
+          📁 Choose File
+        </label>
+      </div>
+
+      <div class="file-name" id="fileName">No file selected</div>
+
+      <button class="btn-submit" id="submitBtn" onclick="uploadTemplate()" disabled>
+        🚀 Submit My Story
+      </button>
+
+      <div class="success-message" id="successMsg">
+        ✅ Success! Your transformation story has been saved to your profile.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let selectedFile = null;
+
+    function handleFileSelect(event) {
+      selectedFile = event.target.files[0];
+      const fileNameDisplay = document.getElementById('fileName');
+      const submitBtn = document.getElementById('submitBtn');
+
+      if (selectedFile) {
+        fileNameDisplay.textContent = `Selected: ${selectedFile.name}`;
+        fileNameDisplay.style.color = '#4CAF50';
+        fileNameDisplay.style.fontWeight = 'bold';
+        submitBtn.disabled = false;
+      } else {
+        fileNameDisplay.textContent = 'No file selected';
+        fileNameDisplay.style.color = '#666';
+        submitBtn.disabled = true;
+      }
+    }
+
+    async function uploadTemplate() {
+      if (!selectedFile) {
+        alert('Please select a file first!');
+        return;
+      }
+
+      const submitBtn = document.getElementById('submitBtn');
+      const successMsg = document.getElementById('successMsg');
+
+      submitBtn.textContent = '⏳ Uploading...';
+      submitBtn.disabled = true;
+
+      // Create FormData for file upload
+      const formData = new FormData();
+      formData.append('template', selectedFile);
+      formData.append('type', 'transformation_story');
+      formData.append('timestamp', new Date().toISOString());
+
+      try {
+        // Replace with your actual backend endpoint
+        const response = await fetch('/api/upload-template', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (response.ok) {
+          successMsg.classList.add('show');
+          submitBtn.textContent = '✅ Uploaded!';
+          
+          // Reset after 3 seconds
+          setTimeout(() => {
+            selectedFile = null;
+            document.getElementById('templateFile').value = '';
+            document.getElementById('fileName').textContent = 'No file selected';
+            document.getElementById('fileName').style.color = '#666';
+            submitBtn.textContent = '🚀 Submit My Story';
+            submitBtn.disabled = true;
+            successMsg.classList.remove('show');
+          }, 3000);
+        } else {
+          throw new Error('Upload failed');
+        }
+      } catch (error) {
+        alert('Upload failed. Please try again.');
+        submitBtn.textContent = '🚀 Submit My Story';
+        submitBtn.disabled = false;
+      }
+    }
+
+    // Simulate backend endpoint for demo purposes
+    // In production, replace this with actual server endpoint
+    if (!window.fetch.polyfilled) {
+      const originalFetch = window.fetch;
+      window.fetch = function(url, options) {
+        if (url === '/api/upload-template') {
+          return new Promise((resolve) => {
+            setTimeout(() => {
+              resolve({
+                ok: true,
+                json: () => Promise.resolve({ success: true })
+              });
+            }, 1500);
+          });
+        }
+        return originalFetch(url, options);
+      };
+      window.fetch.polyfilled = true;
+    }
+  </script>
+</body>
+</html>

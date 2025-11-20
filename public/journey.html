@@ -1,345 +1,671 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>T4L Ambassador - Your Journey</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>T4L Journey Tracker</title>
+    <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" />
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        
-        * {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      .sidebar-toggle { display: none; }
+      @media (max-width: 768px) {
+        .sidebar-toggle { 
+          display: block; 
+          position: fixed; 
+          top: 1rem; 
+          left: 1rem; 
+          z-index: 50; 
+          background: #4b0d7f; 
+          color: white; 
+          border-radius: 50%; 
+          width: 40px; 
+          height: 40px; 
+          display: flex; 
+          align-items: center; 
+          justify-content: center; 
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
         }
-
-        body {
-            background: #e5e5e5;
+        .sidebar { 
+          transform: translateX(-100%); 
+          transition: transform 0.3s ease; 
+          position: fixed; 
+          height: 100vh; 
+          z-index: 40; 
         }
-
-        .journey-card {
-            transition: all 0.2s ease;
+        .sidebar.active { transform: translateX(0); }
+        .overlay { 
+          display: none; 
+          position: fixed; 
+          top: 0; 
+          left: 0; 
+          right: 0; 
+          bottom: 0; 
+          background-color: rgba(0, 0, 0, 0.5); 
+          z-index: 30; 
         }
-
-        .journey-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-        }
-
-        .status-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            flex-shrink: 0;
-        }
-
-        .completed {
-            background: #10b981;
-            color: white;
-        }
-
-        .current {
-            background: #7c3aed;
-            color: white;
-        }
-
-        .upcoming {
-            background: #e5e7eb;
-            color: #9ca3af;
-            border: 3px solid #d1d5db;
-        }
-
-        .sidebar-icon {
-            width: 48px;
-            height: 48px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 12px;
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-
-        .sidebar-icon:hover {
-            background: #f3f4f6;
-        }
-
-        .sidebar-icon.active {
-            background: #1f2937;
-            color: white;
-        }
+        .overlay.active { display: block; }
+      }
+      .skeleton { 
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); 
+        background-size: 200% 100%; 
+        animation: loading 1.5s infinite; 
+      }
+      @keyframes loading { 
+        0% { background-position: 200% 0; } 
+        100% { background-position: -200% 0; } 
+      }
+      .toast { 
+        position: fixed; 
+        top: 1rem; 
+        right: 1rem; 
+        z-index: 100; 
+        padding: 1rem 1.5rem; 
+        border-radius: 0.5rem; 
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+        animation: slideIn 0.3s ease-out; 
+      }
+      @keyframes slideIn { 
+        from { transform: translateX(100%); opacity: 0; } 
+        to { transform: translateX(0); opacity: 1; } 
+      }
+      .toast.success { background: #10b981; color: white; }
+      .toast.error { background: #ef4444; color: white; }
+      .toast.info { background: #3b82f6; color: white; }
+      .journey-card {
+        transition: all 0.3s ease;
+      }
+      .journey-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+      }
+      .task-checkbox:checked + label {
+        text-decoration: line-through;
+        opacity: 0.6;
+      }
+      .progress-ring {
+        transform: rotate(-90deg);
+      }
+      .progress-ring-circle {
+        transition: stroke-dashoffset 0.35s;
+      }
     </style>
-</head>
-<body class="bg-gray-200">
-    <div class="flex min-h-screen">
-        <!-- Sidebar -->
-        <div class="w-20 bg-white shadow-lg flex flex-col items-center py-6 gap-4">
-            <div class="sidebar-icon active">
-                <i class='bx bxs-home text-2xl'></i>
-            </div>
-            <div class="sidebar-icon">
-                <i class='bx bx-briefcase text-2xl text-gray-600'></i>
-            </div>
-            <div class="sidebar-icon">
-                <i class='bx bx-bar-chart-alt-2 text-2xl text-gray-600'></i>
-            </div>
-            <div class="sidebar-icon">
-                <i class='bx bx-heart text-2xl text-gray-600'></i>
-            </div>
-            <div class="sidebar-icon">
-                <i class='bx bx-calendar text-2xl text-gray-600'></i>
-            </div>
-            <div class="sidebar-icon">
-                <i class='bx bx-user text-2xl text-gray-600'></i>
-            </div>
-            <div class="mt-auto sidebar-icon">
-                <i class='bx bx-cog text-2xl text-gray-600'></i>
-            </div>
-            <div class="sidebar-icon">
-                <i class='bx bx-log-out text-2xl text-gray-600'></i>
-            </div>
-        </div>
+  </head>
+  <body class="bg-gray-50 font-sans">
+    <div id="root"></div>
 
-        <!-- Main Content -->
-        <div class="flex-1 p-8">
-            <div class="max-w-5xl mx-auto">
-                <!-- Header -->
-                <div class="bg-white rounded-2xl shadow-md p-6 mb-6">
-                    <div class="flex items-center justify-between">
-                        <!-- Logo -->
-                        <div class="flex items-center gap-3">
-                            <div class="w-12 h-12 bg-purple-600 rounded-xl flex items-center justify-center">
-                                <span class="text-white font-bold text-sm">T4L</span>
-                            </div>
-                            <span class="text-lg font-semibold text-gray-800">T4L Ambassador</span>
-                        </div>
+    <script type="text/babel">
+      const { useState, useEffect, useCallback } = React;
 
-                        <!-- Search Bar -->
-                        <div class="flex-1 max-w-md mx-8">
-                            <input 
-                                type="text" 
-                                placeholder="Search articles, events, partners..."
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white"
-                            />
-                        </div>
+      // Toast Component
+      function Toast({ message, type, onClose }) {
+        useEffect(() => {
+          const timer = setTimeout(() => onClose(), 3000);
+          return () => clearTimeout(timer);
+        }, [onClose]);
+        return (
+          <div className={`toast ${type}`}>
+            {message}
+          </div>
+        );
+      }
 
-                        <!-- Right Icons -->
-                        <div class="flex items-center gap-4">
-                            <button class="relative p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                                <i class='bx bx-bell text-2xl text-gray-700'></i>
-                                <span class="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full"></span>
-                            </button>
-                            <div class="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center text-white font-bold cursor-pointer hover:bg-purple-700 transition-colors">
-                                SM
-                            </div>
-                        </div>
+      // Task Item Component
+      function TaskItem({ task, monthIndex, isCompleted, onToggle, isLocked }) {
+        const getTaskAction = (taskId) => {
+          // Route to actual action pages based on task type
+          const actions = {
+            'linkedin_course': 'https://www.t4leader.com/challenge-page/linkedin-warrior-set-up-your-profile?programId=51ebfc25-4d89-4894-b317-9a607bb0d7e2',
+            'submit_profile': '/profile.html?action=submit-audit',
+            'second_course': 'https://www.t4leader.com/challenge-page/transformational-leadership?programId=d4e58ca0-f0e6-4f12-b2a8-9dc5fcf6e335',
+            'connect_10': '/network.html?goal=connect',
+            'post_3x': '/content.html?type=linkedin-post',
+            'implement_audit': '/profile.html?action=implement-recommendations',
+            'submit_article_1': '/article-amb.html',
+            'engage_15': '/community.html?action=engage',
+            'third_course': 'https://www.t4leader.com/challenge-page/the-science-of-you-personality-strengths-for-growth?programId=18da4c45-2f2d-4535-9bf3-fd3672ec8121',
+            'first_event': 'https://www.t4leader.com/ambassador-events',
+            'follow_up_3': '/network.html?action=follow-up',
+            'transformation_post': '/content.html?type=transformation',
+            'submit_article_2': '/article-amb.html',
+            'update_impact_log': '/impact-log.html',
+            'volunteer': 'https://survey.zohopublic.com/zs/H3MwU1',
+            'complete_courses': 'https://www.t4leader.com/challenge-page/92edc747-fd90-43d0-b4f6-5a3df43ad7d0?programId=92edc747-fd90-43d0-b4f6-5a3df43ad7d0',
+            'request_recommendation': 'https://survey.zohopublic.com/zs/UgMRQs',
+            'post_4x': '/content.html?type=linkedin-post&goal=4',
+            'lead_something': '/leadership.html?action=lead',
+            'check_article': '/article-progress.html',
+            'daily_engage': '/community.html?action=daily-engage',
+            'update_impact_5': '/impact-log.html',
+            'quarterly_event_2': 'https://www.t4leader.com/ambassador-events',
+            'review_progress': '/journey.html?view=review',
+            'schedule_podcast': '/podcast.html?action=schedule',
+            'halfway_story': '/content.html?type=halfway-story',
+            'prep_podcast': '/podcast.html?action=prep',
+            'submit_article_next': '/article-amb.html',
+            'lead_second': '/leadership.html?action=lead',
+            'post_4x_m7': '/content.html?type=linkedin-post&goal=4',
+            'record_podcast': '/podcast.html?action=record',
+            'check_partners': '/Partner-Calls.html',
+            'update_speaker': '/profile.html?action=speaker-materials',
+            'speaking_pitch': '/opportunities.html?action=pitch',
+            'update_impact_8': '/impact-log.html',
+            'quarterly_event_3': 'https://www.t4leader.com/ambassador-events',
+            'follow_up_5': '/network.html?action=follow-up&goal=5',
+            'promote_podcast': '/content.html?type=podcast-promo',
+            'lead_third': '/leadership.html?action=lead',
+            'submit_final': '/article-amb.html?type=final',
+            'update_impact_10': '/impact-log.html',
+            'post_impact': '/content.html?type=impact-story',
+            'apply_speaking': '/opportunities.html?action=apply',
+            'quarterly_event_4': 'https://www.t4leader.com/ambassador-events',
+            'final_impact': '/impact-log.html?view=final',
+            'transformation_story': '/content.html?type=transformation-final',
+            'update_bio': '/profile.html?action=bio',
+            'review_year': '/journey.html?view=year-review',
+            'update_materials': '/profile.html?action=materials',
+            'decide_renewal': '/renewal.html',
+            'schedule_call': '/renewal.html?action=schedule-call'
+          };
+          return actions[taskId] || '#';
+        };
+
+        return (
+          <div className={`border-2 rounded-xl p-4 transition-all bg-white hover:shadow-lg hover:scale-[1.01] ${
+            isCompleted ? 'border-gray-200 bg-gray-50/30' : 'border-gray-200'
+          }`}>
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start gap-3 flex-1">
+                <input
+                  type="checkbox"
+                  id={`task-${monthIndex}-${task.id}`}
+                  checked={isCompleted}
+                  onChange={() => !isLocked && onToggle(monthIndex, task.id)}
+                  disabled={isLocked}
+                  className="w-5 h-5 text-[#4b0d7f] rounded border-gray-300 focus:ring-[#4b0d7f] mt-0.5 cursor-pointer disabled:opacity-50"
+                />
+                <div className="flex-1">
+                  <label
+                    htmlFor={`task-${monthIndex}-${task.id}`}
+                    className={`block font-medium cursor-pointer ${
+                      isCompleted ? 'text-gray-600 line-through opacity-75' : 'text-gray-900'
+                    }`}
+                  >
+                    {task.text}
+                  </label>
+                  {(task.time || task.deadline) && (
+                    <div className="text-xs text-gray-500 mt-1">
+                      {task.time && <span>⏱ {task.time}</span>}
+                      {task.deadline && <span className={task.time ? ' ml-2' : ''}>📅 {task.deadline}</span>}
                     </div>
+                  )}
                 </div>
-
-                <!-- Journey Section -->
-                <div class="bg-white rounded-2xl shadow-md p-8">
-                    <h1 class="text-2xl font-bold text-gray-900 mb-8">Your 12-Month Journey</h1>
-
-                    <!-- Month 1: Onboarding -->
-                    <div class="journey-card bg-white border-2 border-gray-200 rounded-2xl p-6 mb-4 shadow-sm">
-                        <div class="flex items-start justify-between">
-                            <div class="flex items-start gap-4 flex-1">
-                                <div class="status-icon completed">
-                                    <i class='bx bx-check' style="font-size: 28px;"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <h3 class="text-lg font-bold text-gray-900 mb-3">Month 1: Onboarding</h3>
-                                    <div class="flex flex-wrap gap-2">
-                                        <span class="px-4 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium">Welcome Email</span>
-                                        <span class="px-4 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium">Profile Setup</span>
-                                        <span class="px-4 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium">Orientation Call</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <span class="px-4 py-1.5 bg-green-100 text-green-700 rounded-lg text-xs font-bold">COMPLETED</span>
-                        </div>
-                    </div>
-
-                    <!-- Month 2: Engagement -->
-                    <div class="journey-card bg-white border-2 border-gray-200 rounded-2xl p-6 mb-4 shadow-sm">
-                        <div class="flex items-start justify-between">
-                            <div class="flex items-start gap-4 flex-1">
-                                <div class="status-icon completed">
-                                    <i class='bx bx-check' style="font-size: 28px;"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <h3 class="text-lg font-bold text-gray-900 mb-3">Month 2: Engagement</h3>
-                                    <div class="flex flex-wrap gap-2">
-                                        <span class="px-4 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium">Press Release</span>
-                                        <span class="px-4 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium">Community Access</span>
-                                        <span class="px-4 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium">Social Audit</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <span class="px-4 py-1.5 bg-green-100 text-green-700 rounded-lg text-xs font-bold">COMPLETED</span>
-                        </div>
-                    </div>
-
-                    <!-- Month 3: Visibility (Current) -->
-                    <div class="journey-card bg-purple-50 border-2 border-purple-200 rounded-2xl p-6 mb-4 shadow-sm">
-                        <div class="flex items-start justify-between">
-                            <div class="flex items-start gap-4 flex-1">
-                                <div class="status-icon current">
-                                    <i class='bx bx-circle' style="font-size: 12px;"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <h3 class="text-lg font-bold text-gray-900 mb-3">Month 3: Visibility</h3>
-                                    <div class="flex flex-wrap gap-2">
-                                        <span class="px-4 py-1.5 bg-white text-gray-700 rounded-lg text-sm font-medium">Podcast Session</span>
-                                        <span class="px-4 py-1.5 bg-white text-gray-700 rounded-lg text-sm font-medium">Speaker Profile</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <span class="px-4 py-1.5 bg-purple-200 text-purple-800 rounded-lg text-xs font-bold">CURRENT</span>
-                        </div>
-                    </div>
-
-                    <!-- Month 4: Visibility -->
-                    <div class="journey-card bg-white border-2 border-gray-200 rounded-2xl p-6 mb-4 shadow-sm">
-                        <div class="flex items-start gap-4">
-                            <div class="status-icon upcoming">
-                                <i class='bx bx-circle' style="font-size: 12px;"></i>
-                            </div>
-                            <div class="flex-1">
-                                <h3 class="text-lg font-bold text-gray-900 mb-3">Month 4: Visibility</h3>
-                                <div class="flex flex-wrap gap-2">
-                                    <span class="px-4 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium">Webinar Planning</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Month 5: Visibility -->
-                    <div class="journey-card bg-white border-2 border-gray-200 rounded-2xl p-6 mb-4 shadow-sm">
-                        <div class="flex items-start gap-4">
-                            <div class="status-icon upcoming">
-                                <i class='bx bx-circle' style="font-size: 12px;"></i>
-                            </div>
-                            <div class="flex-1">
-                                <h3 class="text-lg font-bold text-gray-900 mb-3">Month 5: Visibility</h3>
-                                <div class="flex flex-wrap gap-2">
-                                    <span class="px-4 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium">White Paper</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Month 6: Check-In -->
-                    <div class="journey-card bg-white border-2 border-gray-200 rounded-2xl p-6 mb-4 shadow-sm">
-                        <div class="flex items-start gap-4">
-                            <div class="status-icon upcoming">
-                                <i class='bx bx-circle' style="font-size: 12px;"></i>
-                            </div>
-                            <div class="flex-1">
-                                <h3 class="text-lg font-bold text-gray-900 mb-3">Month 6: Check-In</h3>
-                                <div class="flex flex-wrap gap-2">
-                                    <span class="px-4 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium">Mid-Year Survey</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Month 7: Expansion -->
-                    <div class="journey-card bg-white border-2 border-gray-200 rounded-2xl p-6 mb-4 shadow-sm">
-                        <div class="flex items-start gap-4">
-                            <div class="status-icon upcoming">
-                                <i class='bx bx-circle' style="font-size: 12px;"></i>
-                            </div>
-                            <div class="flex-1">
-                                <h3 class="text-lg font-bold text-gray-900 mb-3">Month 7: Expansion</h3>
-                                <div class="flex flex-wrap gap-2">
-                                    <span class="px-4 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium">Blog Writing</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Month 8: Expansion -->
-                    <div class="journey-card bg-white border-2 border-gray-200 rounded-2xl p-6 mb-4 shadow-sm">
-                        <div class="flex items-start gap-4">
-                            <div class="status-icon upcoming">
-                                <i class='bx bx-circle' style="font-size: 12px;"></i>
-                            </div>
-                            <div class="flex-1">
-                                <h3 class="text-lg font-bold text-gray-900 mb-3">Month 8: Expansion</h3>
-                                <div class="flex flex-wrap gap-2">
-                                    <span class="px-4 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium">Peer Session</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Month 9: Leadership -->
-                    <div class="journey-card bg-white border-2 border-gray-200 rounded-2xl p-6 mb-4 shadow-sm">
-                        <div class="flex items-start gap-4">
-                            <div class="status-icon upcoming">
-                                <i class='bx bx-circle' style="font-size: 12px;"></i>
-                            </div>
-                            <div class="flex-1">
-                                <h3 class="text-lg font-bold text-gray-900 mb-3">Month 9: Leadership</h3>
-                                <div class="flex flex-wrap gap-2">
-                                    <span class="px-4 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium">Impact Log</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Month 10: Engagement -->
-                    <div class="journey-card bg-white border-2 border-gray-200 rounded-2xl p-6 mb-4 shadow-sm">
-                        <div class="flex items-start gap-4">
-                            <div class="status-icon upcoming">
-                                <i class='bx bx-circle' style="font-size: 12px;"></i>
-                            </div>
-                            <div class="flex-1">
-                                <h3 class="text-lg font-bold text-gray-900 mb-3">Month 10: Engagement</h3>
-                                <div class="flex flex-wrap gap-2">
-                                    <span class="px-4 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium">Roundtable</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Month 11: Recognition -->
-                    <div class="journey-card bg-white border-2 border-gray-200 rounded-2xl p-6 mb-4 shadow-sm">
-                        <div class="flex items-start gap-4">
-                            <div class="status-icon upcoming">
-                                <i class='bx bx-circle' style="font-size: 12px;"></i>
-                            </div>
-                            <div class="flex-1">
-                                <h3 class="text-lg font-bold text-gray-900 mb-3">Month 11: Recognition</h3>
-                                <div class="flex flex-wrap gap-2">
-                                    <span class="px-4 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium">Top Voices</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Month 12: Renewal -->
-                    <div class="journey-card bg-white border-2 border-gray-200 rounded-2xl p-6 shadow-sm">
-                        <div class="flex items-start gap-4">
-                            <div class="status-icon upcoming">
-                                <i class='bx bx-circle' style="font-size: 12px;"></i>
-                            </div>
-                            <div class="flex-1">
-                                <h3 class="text-lg font-bold text-gray-900 mb-3">Month 12: Renewal</h3>
-                                <div class="flex flex-wrap gap-2">
-                                    <span class="px-4 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium">Final Survey</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+              </div>
+              
+              <div className="flex items-center gap-2 flex-shrink-0">
+                {task.critical && !isCompleted && (
+                  <span className="bg-red-100 text-red-700 text-xs px-2 py-1 rounded font-semibold whitespace-nowrap">
+                    CRITICAL
+                  </span>
+                )}
+                
+                {!isCompleted && !isLocked && (
+                  <a
+                    href={getTaskAction(task.id)}
+                    className="px-4 py-2 bg-[#4b0d7f] hover:bg-[#3a0a63] text-white text-sm font-semibold rounded-lg transition-colors whitespace-nowrap shadow-md hover:shadow-lg"
+                  >
+                    Start Task →
+                  </a>
+                )}
+                
+                {isCompleted && (
+                  <span className="text-gray-500 text-sm font-medium whitespace-nowrap flex items-center gap-1">
+                    <i className="bx bx-check-circle"></i> Done
+                  </span>
+                )}
+              </div>
             </div>
-        </div>
-    </div>
-</body>
+          </div>
+        );
+      }
+
+      // Month Card Component
+      function MonthCard({ month, currentMonth, completedTasks, onToggleTask, onNextMonth }) {
+        const monthIndex = month.month;
+        const isCurrent = monthIndex === currentMonth;
+        const isCompleted = monthIndex < currentMonth;
+        const isLocked = monthIndex > currentMonth;
+        
+        const completedCount = month.tasks.filter(t => completedTasks[`${monthIndex}-${t.id}`]).length;
+        const totalTasks = month.tasks.length;
+        const progress = totalTasks > 0 ? (completedCount / totalTasks) * 100 : 0;
+        const allCriticalDone = month.tasks.filter(t => t.critical).every(t => completedTasks[`${monthIndex}-${t.id}`]);
+        const allDone = completedCount === totalTasks;
+
+        const getStatusConfig = () => {
+          if (isCompleted) {
+            return {
+              bg: 'bg-gray-50',
+              border: 'border-gray-200',
+              badge: 'bg-gray-200 text-gray-700',
+              label: 'COMPLETED',
+              icon: 'bx-check-circle',
+              iconColor: 'text-gray-500',
+              progressColor: 'bg-gray-400',
+              metricColor: 'text-gray-600'
+            };
+          } else if (isCurrent) {
+            return {
+              bg: 'bg-[#f5f0ff]',
+              border: 'border-[#4b0d7f]',
+              badge: 'bg-[#4b0d7f] text-white',
+              label: 'CURRENT',
+              icon: 'bx-circle',
+              iconColor: 'text-[#4b0d7f]',
+              progressColor: 'bg-[#4b0d7f]',
+              metricColor: 'text-[#4b0d7f]'
+            };
+          } else {
+            return {
+              bg: 'bg-slate-50',
+              border: 'border-slate-300',
+              badge: 'bg-slate-300 text-slate-700',
+              label: 'UPCOMING',
+              icon: 'bx-lock-alt',
+              iconColor: 'text-slate-500',
+              progressColor: 'bg-slate-400',
+              metricColor: 'text-slate-600'
+            };
+          }
+        };
+
+        const config = getStatusConfig();
+
+        return (
+          <div className={`journey-card ${config.bg} border-2 ${config.border} rounded-2xl p-6 mb-6 shadow-lg hover:shadow-xl transition-all duration-300 ${isLocked ? 'opacity-60' : ''}`}>
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center gap-4">
+                <div className={`${config.iconColor} text-3xl flex items-center justify-center w-12 h-12 rounded-xl bg-white shadow-sm`}>
+                  <i className={`bx ${config.icon}`}></i>
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900">
+                    Month {monthIndex}: {month.title}
+                  </h3>
+                  <p className="text-sm text-gray-600 mt-1">{month.milestone}</p>
+                </div>
+              </div>
+              <span className={`px-4 py-2 ${config.badge} rounded-lg text-xs font-bold whitespace-nowrap shadow-sm`}>
+                {config.label}
+              </span>
+            </div>
+
+            {/* Progress Bar */}
+            <div className="mb-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-gray-700">
+                  Progress: {completedCount} / {totalTasks} tasks
+                </span>
+                <span className="text-sm font-semibold text-gray-700">{Math.round(progress)}%</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                <div
+                  className={`${config.progressColor} h-3 rounded-full transition-all duration-500 shadow-sm`}
+                  style={{ width: `${progress}%` }}
+                ></div>
+              </div>
+            </div>
+
+            {/* Tasks */}
+            <div className="space-y-3 mb-4">
+              {month.tasks.map(task => (
+                <TaskItem
+                  key={task.id}
+                  task={task}
+                  monthIndex={monthIndex}
+                  isCompleted={!!completedTasks[`${monthIndex}-${task.id}`]}
+                  onToggle={onToggleTask}
+                  isLocked={isLocked}
+                />
+              ))}
+            </div>
+
+            {/* Metrics */}
+            {month.metrics && (
+              <div className="flex flex-wrap gap-3 mt-4 pt-4 border-t border-gray-200">
+                {Object.entries(month.metrics).map(([key, value]) => (
+                  <div key={key} className={`flex items-center gap-2 px-3 py-1.5 bg-white rounded-lg border border-gray-100 shadow-sm hover:shadow-md transition-shadow`}>
+                    <span className="text-xs font-semibold text-gray-600 uppercase">{key}:</span>
+                    <span className={`text-sm font-bold ${config.metricColor}`}>{value}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Next Month Button */}
+            {isCurrent && allDone && (
+              <button
+                onClick={onNextMonth}
+                className="mt-4 w-full px-4 py-3 bg-gradient-to-r from-[#4b0d7f] to-[#3a0a63] text-white rounded-lg font-semibold hover:from-[#3a0a63] hover:to-[#2d084d] transition-all shadow-lg hover:shadow-xl"
+              >
+                Move to Month {monthIndex + 1} →
+              </button>
+            )}
+
+            {isCurrent && !allCriticalDone && (
+              <div className="mt-4 p-3 bg-gray-100 border border-gray-300 rounded-lg">
+                <p className="text-sm text-gray-700">
+                  ⚠️ Complete all critical tasks to proceed to the next month.
+                </p>
+              </div>
+            )}
+          </div>
+        );
+      }
+
+      // Main App Component
+      function App() {
+        const [journeyData, setJourneyData] = useState(null);
+        const [loading, setLoading] = useState(true);
+        const [error, setError] = useState(null);
+        const [toast, setToast] = useState(null);
+        const [user, setUser] = useState(null);
+
+        const showToast = useCallback((message, type = 'info') => {
+          setToast({ message, type, id: Date.now() });
+        }, []);
+
+        const closeToast = useCallback(() => {
+          setToast(null);
+        }, []);
+
+        // Fetch user data
+        useEffect(() => {
+          fetch('/api/me')
+            .then(res => res.json())
+            .then(data => setUser(data))
+            .catch(err => console.error('Failed to fetch user:', err));
+        }, []);
+
+        // Fetch journey data
+        useEffect(() => {
+          setLoading(true);
+          fetch('/api/ambassador/journey')
+            .then(res => {
+              if (!res.ok) throw new Error('Failed to load journey');
+              return res.json();
+            })
+            .then(data => {
+              setJourneyData(data);
+              setError(null);
+            })
+            .catch(err => {
+              setError(err.message);
+              showToast('Failed to load journey data', 'error');
+            })
+            .finally(() => setLoading(false));
+        }, [showToast]);
+
+        const handleToggleTask = useCallback(async (monthIndex, taskId) => {
+          try {
+            const res = await fetch('/api/ambassador/journey/toggle', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ monthIndex, taskId })
+            });
+
+            if (!res.ok) throw new Error('Failed to toggle task');
+
+            const data = await res.json();
+            setJourneyData(prev => ({
+              ...prev,
+              completedTasks: data.completedTasks
+            }));
+
+            const isCompleted = data.completedTasks[`${monthIndex}-${taskId}`];
+            showToast(isCompleted ? 'Task completed! ✅' : 'Task unchecked', 'success');
+          } catch (err) {
+            showToast('Failed to update task', 'error');
+          }
+        }, [showToast]);
+
+        const handleNextMonth = useCallback(async () => {
+          if (!confirm('Move to the next month? This action cannot be undone.')) return;
+
+          try {
+            const res = await fetch('/api/ambassador/journey/next-month', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' }
+            });
+
+            if (!res.ok) {
+              const error = await res.json();
+              throw new Error(error.error || 'Failed to advance month');
+            }
+
+            const data = await res.json();
+            setJourneyData(prev => ({
+              ...prev,
+              currentMonth: data.currentMonth
+            }));
+
+            showToast(`Advanced to Month ${data.currentMonth}! 🎉`, 'success');
+          } catch (err) {
+            showToast(err.message || 'Failed to advance month', 'error');
+          }
+        }, [showToast]);
+
+        // Mobile sidebar handlers
+        useEffect(() => {
+          const sidebarToggle = document.getElementById('sidebarToggle');
+          const sidebar = document.querySelector('.sidebar');
+          const overlay = document.getElementById('overlay');
+
+          if (sidebarToggle && sidebar && overlay) {
+            sidebarToggle.addEventListener('click', () => {
+              sidebar.classList.toggle('active');
+              overlay.classList.toggle('active');
+            });
+            overlay.addEventListener('click', () => {
+              sidebar.classList.remove('active');
+              overlay.classList.remove('active');
+            });
+          }
+
+          // Logout handler
+          const logoutBtn = document.getElementById('logoutBtn');
+          if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => {
+              fetch('/logout', { method: 'POST' })
+                .then(() => window.location.href = '/signin')
+                .catch(() => window.location.href = '/signin');
+            });
+          }
+        }, []);
+
+        if (loading) {
+          return (
+            <div className="flex min-h-screen">
+              <Sidebar />
+              <div className="flex-1 p-8">
+                <div className="space-y-4">
+                  <div className="skeleton h-32 rounded-2xl"></div>
+                  <div className="skeleton h-32 rounded-2xl"></div>
+                  <div className="skeleton h-32 rounded-2xl"></div>
+                </div>
+              </div>
+            </div>
+          );
+        }
+
+        if (error) {
+          return (
+            <div className="flex min-h-screen">
+              <Sidebar />
+              <div className="flex-1 p-8">
+                <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-6">
+                  <p className="text-red-800">Error: {error}</p>
+                </div>
+              </div>
+            </div>
+          );
+        }
+
+        if (!journeyData) return null;
+
+        const { currentMonth, completedTasks, months } = journeyData;
+        const currentMonthData = months.find(m => m.month === currentMonth);
+        const overallProgress = months.reduce((acc, m) => {
+          const completed = m.tasks.filter(t => completedTasks[`${m.month}-${t.id}`]).length;
+          return acc + (completed / m.tasks.length);
+        }, 0) / months.length * 100;
+
+        return (
+          <div className="flex min-h-screen">
+            <button className="sidebar-toggle" id="sidebarToggle">
+              <i className="bx bx-menu text-xl"></i>
+            </button>
+            <div className="overlay" id="overlay"></div>
+            <Sidebar />
+            <div className="flex-1 p-8">
+              {/* Header */}
+              <div className="bg-white rounded-2xl shadow-md p-6 mb-6">
+                <div className="flex items-center justify-between flex-wrap gap-4">
+                  <div>
+                    <h1 className="text-2xl font-bold text-gray-900">
+                      {user?.name ? `${user.name}'s Journey` : 'Your 12-Month Journey'}
+                    </h1>
+                    <p className="text-sm text-gray-600 mt-1">
+                      Track your transformation progress
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="text-right">
+                      <div className="text-sm text-gray-600">Overall Progress</div>
+                      <div className="text-2xl font-bold text-[#4b0d7f]">{Math.round(overallProgress)}%</div>
+                    </div>
+                    <div className="w-16 h-16">
+                      <svg className="progress-ring w-16 h-16">
+                        <circle
+                          className="progress-ring-circle"
+                          stroke="#e5e7eb"
+                          strokeWidth="8"
+                          fill="transparent"
+                          r="28"
+                          cx="32"
+                          cy="32"
+                        />
+                        <circle
+                          className="progress-ring-circle"
+                          stroke="#4b0d7f"
+                          strokeWidth="8"
+                          fill="transparent"
+                          r="28"
+                          cx="32"
+                          cy="32"
+                          strokeDasharray={`${2 * Math.PI * 28}`}
+                          strokeDashoffset={`${2 * Math.PI * 28 * (1 - overallProgress / 100)}`}
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+             {/* Current Month Highlight */}
+              {currentMonthData && (
+                <div className="bg-gradient-to-r from-[#4b0d7f] to-[#6b1fa1] rounded-2xl p-6 mb-6 text-white shadow-lg">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-sm font-medium opacity-90 mb-1">Current Focus</div>
+                      <h2 className="text-2xl font-bold">
+                        Month {currentMonth}: {currentMonthData.title}
+                      </h2>
+                      <p className="text-sm opacity-90 mt-2">{currentMonthData.milestone}</p>
+                    </div>
+                    <div className="text-4xl">
+                      <i className="bx bx-trophy"></i>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Journey Months */}
+              <div className="space-y-6">
+                {months.map(month => (
+                  <MonthCard
+                    key={month.month}
+                    month={month}
+                    currentMonth={currentMonth}
+                    completedTasks={completedTasks}
+                    onToggleTask={handleToggleTask}
+                    onNextMonth={handleNextMonth}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {toast && (
+              <Toast
+                message={toast.message}
+                type={toast.type}
+                onClose={closeToast}
+              />
+            )}
+          </div>
+        );
+      }
+
+      // Sidebar Component
+      function Sidebar() {
+        return (
+          <aside className="sidebar w-20 lg:w-20 md:w-20 bg-white shadow-md flex flex-col items-center py-6 space-y-6 z-40">
+            <div className="mb-4">
+              <div className="bg-[#4b0d7f] text-white px-3 py-2 rounded-xl font-semibold text-sm">T4L</div>
+            </div>
+            <nav className="flex flex-col space-y-4 text-gray-700 w-full">
+              <a href="/ambassador-dashboard.html" className="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-[#f5f0ff]">
+                <i className="bx bxs-home text-2xl text-[#4b0d7f] group-hover:scale-110 transition-transform duration-200"></i>
+                <span className="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-[#4b0d7f] transition-colors duration-200">Home</span>
+              </a>
+              <a href="/article-amb.html" className="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-[#f5f0ff]">
+                <i className="bx bx-edit-alt text-2xl group-hover:text-[#4b0d7f] group-hover:scale-110 transition-all duration-200"></i>
+                <span className="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-[#4b0d7f] transition-colors duration-200">Publishing</span>
+              </a>
+              <a href="/journey.html" className="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-[#f5f0ff] bg-[#f5f0ff]">
+                <i className="bx bx-line-chart text-2xl text-[#4b0d7f] group-hover:scale-110 transition-all duration-200"></i>
+                <span className="text-[10px] mt-1.5 font-medium text-[#4b0d7f] transition-colors duration-200">Impact Log</span>
+              </a>
+              <a href="/Partner-Calls.html" className="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-[#f5f0ff]">
+                <i className="bx bx-briefcase text-2xl group-hover:text-[#4b0d7f] group-hover:scale-110 transition-all duration-200"></i>
+                <span className="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-[#4b0d7f] transition-colors duration-200">Partners</span>
+              </a>
+              <a href="https://www.t4leader.com/event" className="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-[#f5f0ff]">
+                <i className="bx bx-calendar-event text-2xl group-hover:text-[#4b0d7f] group-hover:scale-110 transition-all duration-200"></i>
+                <span className="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-[#4b0d7f] transition-colors duration-200">Events</span>
+              </a>
+              <a href="/chat-pillar.html" className="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-[#f5f0ff]">
+                <i className="bx bx-chat text-2xl group-hover:text-[#4b0d7f] group-hover:scale-110 transition-all duration-200"></i>
+                <span className="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-[#4b0d7f] transition-colors duration-200">Chat</span>
+              </a>
+              <a href="/profile.html" className="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-[#f5f0ff]">
+                <i className="bx bx-user text-2xl group-hover:text-[#4b0d7f] group-hover:scale-110 transition-all duration-200"></i>
+                <span className="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-[#4b0d7f] transition-colors duration-200">Profile</span>
+              </a>
+              <div id="logoutBtn" className="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-red-50">
+                <i className="bx bx-log-out text-2xl group-hover:text-red-600 group-hover:scale-110 transition-all duration-200"></i>
+                <span className="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-red-600 transition-colors duration-200">Logout</span>
+              </div>
+            </nav>
+          </aside>
+        );
+      }
+
+      // Render App
+      const root = ReactDOM.createRoot(document.getElementById('root'));
+      root.render(<App />);
+    </script>
+  </body>
 </html>

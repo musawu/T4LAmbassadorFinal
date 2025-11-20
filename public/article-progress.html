@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>T4L Ambassador - Track Progress</title>
+    <link rel="stylesheet" href="css/styles.css" />
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        
+        * {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background: #f5f7fa;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Progress Timeline Styles */
+        .progress-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .progress-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .progress-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-subtitle {
+            color: #6b7280;
+            font-size: 1rem;
+        }
+
+        /* Timeline Container */
+        .timeline {
+            position: relative;
+            padding: 2rem 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(to bottom, #10b981 0%, #10b981 var(--progress, 0%), #e5e7eb var(--progress, 0%), #e5e7eb 100%);
+            border-radius: 2px;
+        }
+
+        /* Timeline Item */
+        .timeline-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4rem;
+            position: relative;
+        }
+
+        .timeline-item:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Alternate sides */
+        .timeline-item:nth-child(odd) .timeline-content {
+            order: 1;
+        }
+
+        .timeline-item:nth-child(odd) .timeline-marker {
+            order: 2;
+        }
+
+        .timeline-item:nth-child(odd) .timeline-empty {
+            order: 3;
+        }
+
+        .timeline-item:nth-child(even) .timeline-empty {
+            order: 1;
+        }
+
+        .timeline-item:nth-child(even) .timeline-marker {
+            order: 2;
+        }
+
+        .timeline-item:nth-child(even) .timeline-content {
+            order: 3;
+        }
+
+        /* Timeline Content */
+        .timeline-content {
+            flex: 1;
+            max-width: 45%;
+            background: white;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+            transition: all 0.3s ease;
+        }
+
+        .timeline-content:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+        }
+
+        .timeline-content.completed {
+            border-left: 4px solid #10b981;
+            background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+        }
+
+        .timeline-content.in-progress {
+            border-left: 4px solid #3b82f6;
+            background: linear-gradient(135deg, #ffffff 0%, #dbeafe 100%);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .timeline-content.pending {
+            border-left: 4px solid #e5e7eb;
+            opacity: 0.7;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 4px 6px rgba(59, 130, 246, 0.1); }
+            50% { box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3); }
+        }
+
+        .timeline-empty {
+            flex: 1;
+            max-width: 45%;
+        }
+
+        /* Timeline Marker */
+        .timeline-marker {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 10;
+            background: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            flex-shrink: 0;
+        }
+
+        .timeline-marker.completed {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        .timeline-marker.in-progress {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .timeline-marker.pending {
+            background: #f3f4f6;
+        }
+
+        .timeline-marker i {
+            font-size: 1.75rem;
+        }
+
+        .timeline-marker.completed i {
+            color: white;
+        }
+
+        .timeline-marker.in-progress i {
+            color: white;
+        }
+
+        .timeline-marker.pending i {
+            color: #9ca3af;
+        }
+
+        /* Content Details */
+        .stage-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .stage-status {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: auto;
+        }
+
+        .stage-status.completed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .stage-status.in-progress {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .stage-status.pending {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+
+        .stage-description {
+            color: #6b7280;
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .stage-date {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #9ca3af;
+            font-size: 0.85rem;
+            margin-top: 1rem;
+        }
+
+        /* Article Info Card */
+        .article-info-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+        }
+
+        .article-title-display {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 1rem;
+        }
+
+        .article-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        .article-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: #4b0d9f;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #3d0b7f;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(75, 13, 159, 0.3);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #4b0d9f;
+            border: 2px solid #4b0d9f;
+        }
+
+        .btn-secondary:hover {
+            background: #f5f3ff;
+            transform: translateY(-2px);
+        }
+
+        /* Published Section Styles */
+        .published-section {
+            margin-top: 4rem;
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 1.5rem;
+            background: #4b0d9f;
+            border-radius: 2px;
+        }
+
+        .article-list {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .article-item {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: block;
+        }
+
+        .article-item:hover {
+            background: white;
+            border-color: #4b0d9f;
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px rgba(75, 13, 159, 0.1);
+        }
+
+        .article-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.75rem;
+            line-height: 1.4;
+        }
+
+        .article-item .article-meta {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .article-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            background: #d1fae5;
+            color: #065f46;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .article-date {
+            color: #6b7280;
+            font-size: 0.85rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #9ca3af;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state p {
+            font-size: 0.95rem;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .timeline::before {
+                left: 30px;
+            }
+
+            .timeline-item {
+                flex-direction: column;
+                align-items: flex-start;
+                padding-left: 60px;
+                margin-bottom: 3rem;
+            }
+
+            .timeline-marker {
+                position: absolute;
+                left: 0;
+                top: 0;
+            }
+
+            .timeline-content {
+                max-width: 100%;
+                margin-left: 0;
+            }
+
+            .timeline-empty {
+                display: none;
+            }
+
+            .timeline-item:nth-child(odd) .timeline-content,
+            .timeline-item:nth-child(even) .timeline-content {
+                order: 2;
+            }
+
+            .progress-title {
+                font-size: 1.5rem;
+            }
+
+            .published-section {
+                margin-top: 2rem;
+                padding: 1.5rem;
+            }
+
+            .section-title {
+                font-size: 1.25rem;
+            }
+        }
+
+        /* Loading State */
+        .loading-container {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #4b0d9f;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Mobile Menu Toggle -->
+    <button id="mobileMenuBtn" class="md:hidden fixed top-4 left-4 z-50 bg-purple-600 text-white p-3 rounded-xl shadow-lg">
+        <i class="bx bx-menu text-2xl"></i>
+    </button>
+
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar w-20 lg:w-20 md:w-20 bg-white shadow-md flex flex-col items-center py-6 space-y-6 z-40">
+            <div class="mb-4">
+                <div class="bg-[#4b0d7f] text-white px-3 py-2 rounded-xl font-semibold text-sm">T4L</div>
+            </div>
+            <nav class="flex flex-col space-y-4 text-gray-700 w-full">
+                <a href="/ambassador-dashboard.html" class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50">
+                    <i class="bx bxs-home text-2xl text-[#4b0d9f] group-hover:scale-110 transition-transform duration-200"></i>
+                    <span class="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-[#4b0d9f] transition-colors duration-200">Home</span>
+                </a>
+                <a href="/article-amb.html" class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50">
+                    <i class="bx bx-edit-alt text-2xl group-hover:text-[#4b0d9f] group-hover:scale-110 transition-all duration-200"></i>
+                    <span class="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-[#4b0d9f] transition-colors duration-200">Publishing</span>
+                </a>
+                <a href="/journey.html" class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50">
+                    <i class="bx bx-line-chart text-2xl group-hover:text-[#4b0d9f] group-hover:scale-110 transition-all duration-200"></i>
+                    <span class="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-[#4b0d9f] transition-colors duration-200">Impact Log</span>
+                </a>
+                <a href="/Partner-Calls.html" class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50">
+                    <i class="bx bx-briefcase text-2xl group-hover:text-[#4b0d9f] group-hover:scale-110 transition-all duration-200"></i>
+                    <span class="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-[#4b0d9f] transition-colors duration-200">Partners</span>
+                </a>
+                <a href="/chat-pillar.html" class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50">
+                    <i class="bx bx-chat text-2xl group-hover:text-[#4b0d9f] group-hover:scale-110 transition-all duration-200"></i>
+                    <span class="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-[#4b0d9f] transition-colors duration-200">Chat</span>
+                </a>
+                <a href="/profile.html" class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50">
+                    <i class="bx bx-user text-2xl group-hover:text-[#4b0d9f] group-hover:scale-110 transition-all duration-200"></i>
+                    <span class="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-[#4b0d9f] transition-colors duration-200">Profile</span>
+                </a>
+                <div id="logoutBtn" class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-red-50">
+                    <i class="bx bx-log-out text-2xl group-hover:text-red-600 group-hover:scale-110 transition-all duration-200"></i>
+                    <span class="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-red-600 transition-colors duration-200">Logout</span>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1">
+            <!-- Top Navbar -->
+            <header class="bg-white sticky top-0 z-30 border-b border-gray-200 shadow-sm">
+                <div class="flex flex-col md:flex-row md:items-center justify-between p-4 md:p-6 gap-4">
+                    <h1 class="text-2xl font-bold text-gray-900">Track Article Progress</h1>
+                    <div class="flex items-center space-x-4 w-full md:w-auto">
+                        <div class="relative flex-1 md:flex-none">
+                            <input type="text" placeholder="Search..." class="border border-gray-300 rounded-full pl-10 pr-4 py-2.5 text-sm w-full md:w-80 focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-50"/>
+                            <i class="bx bx-search absolute left-3 top-2.5 text-gray-500"></i>
+                        </div>
+                        <button class="relative p-2 hover:bg-gray-100 rounded-full transition-colors">
+                            <i class="bx bx-bell text-2xl text-gray-700"></i>
+                            <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                        </button>
+                        <div id="userAvatar" class="w-10 h-10 bg-gradient-to-br from-purple-600 to-purple-800 flex items-center justify-center rounded-full font-bold text-white shadow-md cursor-pointer hover:shadow-lg transition-shadow">
+                            AM
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Progress Content -->
+            <div class="progress-container" id="progressContainer">
+                <!-- Loading State -->
+                <div class="loading-container" id="loadingState">
+                    <div class="loading-spinner"></div>
+                    <p class="text-gray-600">Loading article progress...</p>
+                </div>
+
+                <!-- Content (hidden initially) -->
+                <div id="mainContent" style="display: none;">
+                    <!-- Article Info Card -->
+                    <div class="article-info-card">
+                        <h2 class="article-title-display" id="articleTitleDisplay">Loading...</h2>
+                        <div class="article-meta">
+                            <div class="article-meta-item">
+                                <i class="bx bx-calendar"></i>
+                                <span id="submittedDate">--</span>
+                            </div>
+                            <div class="article-meta-item">
+                                <i class="bx bx-user"></i>
+                                <span id="authorByline">--</span>
+                            </div>
+                            <div class="article-meta-item">
+                                <i class="bx bx-info-circle"></i>
+                                <span id="currentStatus">--</span>
+                            </div>
+                        </div>
+                        <div class="action-buttons">
+                            <a href="/ambassador-review.html" id="btnViewArticle" class="btn btn-primary">
+                                <i class="bx bx-show"></i>
+                                View Article
+                            </a>
+                            <a href="/article-amb.html" class="btn btn-secondary">
+                                <i class="bx bx-arrow-back"></i>
+                                Back to Editor
+                            </a>
+                            <button id="btnViewPublished" class="btn btn-secondary">
+                                <i class="bx bx-book-open"></i>
+                                My Published Content
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Progress Header -->
+                    <div class="progress-header">
+                        <h1 class="progress-title">Article Journey</h1>
+                        <p class="progress-subtitle">Track your article from submission to publication</p>
+                    </div>
+
+                    <!-- Timeline -->
+                    <div class="timeline" id="timeline">
+                        <!-- Timeline items will be dynamically generated -->
+                    </div>
+
+                    <!-- Published Content Section -->
+                    <div class="published-section" id="publishedSection">
+                        <h3 class="section-title">My published content</h3>
+                        <div class="article-list" id="publishedArticlesList">
+                            <!-- Articles will be dynamically loaded here -->
+                            <div class="empty-state">
+                                <i class="bx bx-file"></i>
+                                <p>No published articles yet</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Helper Functions
+        function showToast(msg, isError = false) {
+            const div = document.createElement('div');
+            div.textContent = msg;
+            div.className = `fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg text-sm ${isError ? 'bg-red-600 text-white' : 'bg-green-600 text-white'}`;
+            document.body.appendChild(div);
+            setTimeout(() => div.remove(), 3000);
+        }
+
+        function formatDate(timestamp) {
+            if (!timestamp) return 'Not available';
+            const date = new Date(timestamp);
+            return date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric'
+            });
+        }
+
+        function formatDateTime(timestamp) {
+            if (!timestamp) return 'Not available';
+            const date = new Date(timestamp);
+            return date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function getArticleIdFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('articleId');
+        }
+
+        // Auth check
+        function checkAuth() {
+            return fetch('/api/me', { credentials: 'include' })
+                .then(r => { if (!r.ok) throw new Error(String(r.status)); return r.json(); })
+                .then(me => {
+                    if (!me || me.role !== 'ambassador') {
+                        throw new Error('forbidden');
+                    }
+                    return me;
+                })
+                .catch(err => {
+                    const redirectParam = encodeURIComponent(window.location.pathname);
+                    window.location.href = `/signin?redirect=${redirectParam}`;
+                    throw err;
+                });
+        }
+
+        // Define timeline stages
+        const TIMELINE_STAGES = [
+            {
+                id: 'draft',
+                title: 'Draft Created',
+                description: 'Your article has been created and saved as a draft.',
+                icon: 'bx-file',
+                statuses: ['draft']
+            },
+            {
+                id: 'submitted',
+                title: 'Submitted for Review',
+                description: 'Your article has been submitted and is waiting for admin review.',
+                icon: 'bx-send',
+                statuses: ['pending']
+            },
+            {
+                id: 'editing',
+                title: 'Under Review',
+                description: 'Our editorial team is reviewing your article for quality and accuracy.',
+                icon: 'bx-edit',
+                statuses: ['pending', 'needs_update']
+            },
+            {
+                id: 'finalizing',
+                title: 'Approved & Finalizing',
+                description: 'Great news! Your article has been approved and is being prepared for publication.',
+                icon: 'bx-check-circle',
+                statuses: ['approved', 'published']
+            }
+        ];
+
+        // Determine stage status based on article status
+        function getStageStatus(stageId, articleStatus) {
+            const stage = TIMELINE_STAGES.find(s => s.id === stageId);
+            if (!stage) return 'pending';
+
+            const statusOrder = ['draft', 'pending', 'needs_update', 'approved', 'published'];
+            const currentIndex = statusOrder.indexOf(articleStatus);
+            const stageIndex = TIMELINE_STAGES.findIndex(s => s.id === stageId);
+
+            if (stageIndex < TIMELINE_STAGES.findIndex(s => s.statuses.includes(articleStatus))) {
+                return 'completed';
+            } else if (stage.statuses.includes(articleStatus)) {
+                return 'in-progress';
+            } else {
+                return 'pending';
+            }
+        }
+
+        // Calculate progress percentage
+        function calculateProgress(articleStatus) {
+            const statusProgress = {
+                'draft': 25,
+                'pending': 50,
+                'needs_update': 50,
+                'approved': 75,
+                'published': 100
+            };
+            return statusProgress[articleStatus] || 0;
+        }
+
+        // Render timeline
+        function renderTimeline(article) {
+            const timeline = document.getElementById('timeline');
+            const progress = calculateProgress(article.status);
+            
+            // Set CSS variable for progress line
+            timeline.style.setProperty('--progress', `${progress}%`);
+
+            timeline.innerHTML = TIMELINE_STAGES.map((stage, index) => {
+                const status = getStageStatus(stage.id, article.status);
+                const isOdd = index % 2 === 0;
+
+                return `
+                    <div class="timeline-item">
+                        <div class="timeline-content ${status}">
+                            <div class="stage-title">
+                                ${stage.title}
+                                <span class="stage-status ${status}">
+                                    ${status === 'completed' ? 'Completed' : status === 'in-progress' ? 'In Progress' : 'Pending'}
+                                </span>
+                            </div>
+                            <p class="stage-description">${stage.description}</p>
+                            ${status === 'completed' || status === 'in-progress' ? `
+                                <div class="stage-date">
+                                    <i class="bx bx-time"></i>
+                                    <span>${formatDateTime(article.createdAt)}</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                        <div class="timeline-marker ${status}">
+                            <i class="bx ${stage.icon}"></i>
+                        </div>
+                        <div class="timeline-empty"></div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Load published articles
+        async function loadPublishedArticles() {
+            try {
+                const response = await fetch('/api/ambassador/articles?limit=50', {
+                    credentials: 'include'
+                });
+
+                if (!response.ok) throw new Error('Failed to load articles');
+
+                const data = await response.json();
+                const publishedArticles = data.items.filter(a => a.status === 'published');
+
+                const container = document.getElementById('publishedArticlesList');
+
+                if (publishedArticles.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <i class="bx bx-file"></i>
+                            <p>No published articles yet</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = publishedArticles.map(article => `
+                    <a href="/ambassador-review.html?articleId=${article.id}" class="article-item">
+                        <h4 class="article-title">${article.title || 'Untitled Article'}</h4>
+                        <div class="article-meta">
+                            <span class="article-badge">Article</span>
+                            <span class="article-date">${formatDate(article.createdAt)}</span>
+                        </div>
+                    </a>
+                `).join('');
+
+            } catch (error) {
+                console.error('Error loading published articles:', error);
+            }
+        }
+
+        // Load article progress
+        async function loadArticleProgress() {
+            let articleId = getArticleIdFromUrl();
+
+            if (!articleId) {
+                articleId = localStorage.getItem('lastSubmittedArticleId');
+            }
+
+            if (!articleId) {
+                showToast('No article selected', true);
+                document.getElementById('loadingState').innerHTML = `
+                    <i class="bx bx-error-circle text-6xl text-red-500 mb-4"></i>
+                    <p class="text-gray-600">No article found. Please submit an article first.</p>
+                    <a href="/article-amb.html" class="btn btn-primary mt-4">
+                        <i class="bx bx-plus"></i>
+                        Create Article
+                    </a>
+                `;
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/ambassador/articles/${articleId}`, {
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to load article');
+                }
+
+                const data = await response.json();
+                const article = data.article;
+
+                // Update article info
+                document.getElementById('articleTitleDisplay').textContent = article.title || 'Untitled Article';
+                document.getElementById('submittedDate').textContent = 'Submitted ' + formatDate(article.createdAt);
+                document.getElementById('authorByline').textContent = article.byline || 'Unknown';
+                document.getElementById('currentStatus').textContent = formatStatus(article.status);
+                document.getElementById('btnViewArticle').href = `/ambassador-review.html?articleId=${articleId}`;
+
+                // Render timeline
+                renderTimeline(article);
+
+                // Load published articles
+                await loadPublishedArticles();
+
+                // Show content
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
+
+            } catch (error) {
+                console.error('Error loading article:', error);
+                showToast('Failed to load article progress', true);
+                document.getElementById('loadingState').innerHTML = `
+                    <i class="bx bx-error-circle text-6xl text-red-500 mb-4"></i>
+                    <p class="text-gray-600">Failed to load article. Please try again.</p>
+                    <button onclick="location.reload()" class="btn btn-primary mt-4">
+                        <i class="bx bx-refresh"></i>
+                        Retry
+                    </button>
+                `;
+            }
+        }
+
+        function formatStatus(status) {
+            const statusMap = {
+                'pending': 'Pending Review',
+                'needs_update': 'Needs Updates',
+                'approved': 'Approved',
+                'published': 'Published',
+                'draft': 'Draft'
+            };
+            return statusMap[status] || status;
+        }
+
+        // Mobile menu toggle
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const sidebar = document.getElementById('sidebar');
+        if (mobileMenuBtn) {
+            mobileMenuBtn.addEventListener('click', () => { 
+                sidebar.classList.toggle('active'); 
+            });
+        }
+
+        // Logout
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', function() {
+                fetch('/logout', { method: 'POST' })
+                    .then(() => window.location.href = '/signin')
+                    .catch(() => window.location.href = '/signin');
+            });
+        }
+
+        // Scroll to published content section
+        document.addEventListener('DOMContentLoaded', function() {
+            const btnViewPublished = document.getElementById('btnViewPublished');
+            if (btnViewPublished) {
+                btnViewPublished.addEventListener('click', function() {
+                    const publishedSection = document.getElementById('publishedSection');
+                    if (publishedSection) {
+                        publishedSection.scrollIntoView({ 
+                            behavior: 'smooth', 
+                            block: 'start' 
+                        });
+                    }
+                });
+            }
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuth()
+                .then(() => loadArticleProgress())
+                .catch(() => {});
+        });
+    </script>
+</body>
+</html>

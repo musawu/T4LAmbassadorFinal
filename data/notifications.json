@@ -1,0 +1,114 @@
+{
+  "amb_5e0a63a2780d6b95": [
+    {
+      "id": "ntf_1b3b6266d335b6db",
+      "userId": "amb_5e0a63a2780d6b95",
+      "articleId": "art_8944d68015d11ad8",
+      "type": "needs_update",
+      "message": "blablabla blablabla blablabla blablabla blablabla blablabla blablabla blablabla blablabla",
+      "severity": "neutral",
+      "scheduledAt": null,
+      "createdAt": 1762696183685
+    },
+    {
+      "id": "ntf_9dedf315104f2f5b",
+      "userId": "amb_5e0a63a2780d6b95",
+      "articleId": "art_8944d68015d11ad8",
+      "type": "needs_update",
+      "message": "blablabla blablabla blablabla blablabla blablabla blablabla blablabla blablabla blablabla",
+      "severity": "minor",
+      "scheduledAt": null,
+      "createdAt": 1762696259901
+    },
+    {
+      "id": "ntf_98e837d8dcf34d47",
+      "userId": "amb_5e0a63a2780d6b95",
+      "articleId": "art_8944d68015d11ad8",
+      "type": "needs_update",
+      "message": "blablabla blablabla blablabla blablabla blablabla blablabla blablabla blablabla blablabla",
+      "severity": "moderate",
+      "scheduledAt": null,
+      "createdAt": 1762696290669
+    },
+    {
+      "id": "ntf_d0715e71be4ebef5",
+      "userId": "amb_5e0a63a2780d6b95",
+      "articleId": "art_8944d68015d11ad8",
+      "type": "needs_update",
+      "message": "blablabla blablabla blablabla blablabla blablabla blablabla blablabla blablabla blablabla",
+      "severity": "critical",
+      "scheduledAt": null,
+      "createdAt": 1762696340200
+    }
+  ],
+  "amb_58072f80cea7d7d0": [
+    {
+      "id": "ntf_8a3f26510721edd0",
+      "userId": "amb_58072f80cea7d7d0",
+      "articleId": "art_d8fe1afef7d8f402",
+      "type": "needs_update",
+      "message": "",
+      "severity": "neutral",
+      "scheduledAt": null,
+      "createdAt": 1762702215812
+    }
+  ],
+  "amb_e9a269da0ad661eb": [
+    {
+      "id": "ntf_1b9d20ad47bbff66",
+      "userId": "amb_e9a269da0ad661eb",
+      "articleId": "art_2b1b50d3b653f8e2",
+      "type": "needs_update",
+      "message": "U need improvement on xyz",
+      "severity": "moderate",
+      "scheduledAt": null,
+      "createdAt": 1762766593796
+    }
+  ],
+  "amb_7107401e22a49da7": [
+    {
+      "id": "ntf_be58ea09dc70a421",
+      "userId": "amb_7107401e22a49da7",
+      "articleId": "art_9b1e8b221624a1f5",
+      "type": "needs_update",
+      "message": "Ur article needs major improvement on xyz",
+      "severity": "moderate",
+      "scheduledAt": null,
+      "createdAt": 1762766643945
+    }
+  ],
+  "amb_7a40ca3e0b6f5bfe": [
+    {
+      "id": "ntf_f468dc0f218fac3d",
+      "userId": "amb_7a40ca3e0b6f5bfe",
+      "articleId": "art_79e51830894d3746",
+      "type": "needs_update",
+      "message": "Pleasese review authenticity of yr txt, add citations .........",
+      "severity": "critical",
+      "scheduledAt": null,
+      "createdAt": 1762870460895
+    },
+    {
+      "id": "ntf_39c82626ac4fb09f",
+      "userId": "amb_7a40ca3e0b6f5bfe",
+      "articleId": "art_b9c04446510cbfae",
+      "type": "ready_to_publish",
+      "message": "",
+      "severity": "neutral",
+      "scheduledAt": "2025-11-21",
+      "createdAt": 1762870603918
+    }
+  ],
+  "amb_55c7ded6f98632c2": [
+    {
+      "id": "ntf_23b37f4062cebca0",
+      "userId": "amb_55c7ded6f98632c2",
+      "articleId": "art_3b868e62df1acefb",
+      "type": "needs_update",
+      "message": "xyz, please correct your aticle jnenckneck mkcbybibiubiubi",
+      "severity": "critical",
+      "scheduledAt": null,
+      "createdAt": 1762957393936
+    }
+  ]
+}

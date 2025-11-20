@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>T4L Ambassador - Submit Article</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/styles.css" />
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
@@ -20,8 +20,6 @@
         .step-indicator {
             transition: all 0.3s ease;
         }
-
-
 
         .step-indicator.inactive {
             background: #e5e7eb;
@@ -85,24 +83,30 @@
 
         #editor {
             outline: none;
+            line-height: 1.8;
+            color: #1f2937; /* matches text-gray-800 */
+        }
+
+        #editor h1, #editor h2, #editor h3 {
+            font-weight: bold;
+            margin-top: 1.5em;
+            margin-bottom: 0.75em;
         }
 
         #editor h1 {
             font-size: 2em;
-            font-weight: bold;
-            margin: 0.67em 0;
         }
 
         #editor h2 {
             font-size: 1.5em;
-            font-weight: bold;
-            margin: 0.75em 0;
         }
 
         #editor h3 {
-            font-size: 1.17em;
-            font-weight: bold;
-            margin: 0.83em 0;
+            font-size: 1.25em;
+        }
+
+        #editor p {
+            margin-bottom: 1em;
         }
 
         #editor ul, #editor ol {
@@ -110,9 +114,20 @@
             padding-left: 2em;
         }
 
+        #editor li {
+            margin-bottom: 0.5em;
+        }
+
         #editor a {
             color: #7c3aed;
             text-decoration: underline;
+        }
+
+        #editor img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 0.5rem;
+            margin: 1em 0;
         }
     </style>
 </head>
@@ -129,39 +144,39 @@
                 <div class="bg-[#4b0d7f] text-white px-3 py-2 rounded-xl font-semibold text-sm">T4L</div>
             </div>
             <nav class="flex flex-col space-y-4 text-gray-700 w-full">
-                <div class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50">
+                <a href="/ambassador-dashboard.html" class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50">
                     <i class="bx bxs-home text-2xl text-[#4b0d9f] group-hover:scale-110 transition-transform duration-200"></i>
                     <span class="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-[#4b0d9f] transition-colors duration-200">Home</span>
-                </div>
-                <a href="/article-amb.html" class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50">
-                    <i class="bx bx-edit-alt text-2xl group-hover:text-[#4b0d9f] group-hover:scale-110 transition-all duration-200"></i>
-                    <span class="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-[#4b0d9f] transition-colors duration-200">Publishing</span>
                 </a>
-                <div class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50">
+                <a href="/article-amb.html" class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50 bg-purple-50">
+                    <i class="bx bx-edit-alt text-2xl text-[#4b0d9f] group-hover:scale-110 transition-all duration-200"></i>
+                    <span class="text-[10px] mt-1.5 font-medium text-[#4b0d9f] transition-colors duration-200">Publishing</span>
+                </a>
+                <a href="/journey.html" class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50">
                     <i class="bx bx-line-chart text-2xl group-hover:text-[#4b0d9f] group-hover:scale-110 transition-all duration-200"></i>
                     <span class="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-[#4b0d9f] transition-colors duration-200">Impact Log</span>
-                </div>
+                </a>
                 <a href="/Partner-Calls.html" class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50">
                     <i class="bx bx-briefcase text-2xl group-hover:text-[#4b0d9f] group-hover:scale-110 transition-all duration-200"></i>
                     <span class="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-[#4b0d9f] transition-colors duration-200">Partners</span>
                 </a>
-                <div class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50">
+                <a href="https://www.t4leader.com/event" class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50">
                     <i class="bx bx-calendar-event text-2xl group-hover:text-[#4b0d9f] group-hover:scale-110 transition-all duration-200"></i>
                     <span class="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-[#4b0d9f] transition-colors duration-200">Events</span>
-                </div>
-                <div class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50">
+                </a>
+                <a href="/chat-pillar.html" class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50">
                     <i class="bx bx-chat text-2xl group-hover:text-[#4b0d9f] group-hover:scale-110 transition-all duration-200"></i>
                     <span class="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-[#4b0d9f] transition-colors duration-200">Chat</span>
-                </div>
-                <div class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50">
+                </a>
+                <a href="/profile.html" class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50">
                     <i class="bx bx-user text-2xl group-hover:text-[#4b0d9f] group-hover:scale-110 transition-all duration-200"></i>
                     <span class="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-[#4b0d9f] transition-colors duration-200">Profile</span>
-                </div>
-                <div class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50">
+                </a>
+                <a href="/profile.html" class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-purple-50">
                     <i class="bx bx-cog text-2xl group-hover:text-[#4b0d9f] group-hover:scale-110 transition-all duration-200"></i>
                     <span class="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-[#4b0d9f] transition-colors duration-200">Settings</span>
-                </div>
-                <div class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-red-50">
+                </a>
+                <div id="logoutBtn" class="flex flex-col items-center cursor-pointer group transition-all duration-200 py-2 px-3 rounded-lg hover:bg-red-50">
                     <i class="bx bx-log-out text-2xl group-hover:text-red-600 group-hover:scale-110 transition-all duration-200"></i>
                     <span class="text-[10px] mt-1.5 font-medium text-gray-600 group-hover:text-red-600 transition-colors duration-200">Logout</span>
                 </div>
@@ -201,7 +216,7 @@
           <div class="max-w-7xl mx-auto">
                 <!-- Submit Button & Steps -->
                 <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
-                    <button class="bg-[#4b0d9f] text-white px-10 py-3 rounded-xl font-bold shadow-lg">
+                    <button id="submitTop" class="bg-[#4b0d9f] text-white px-10 py-3 rounded-xl font-bold shadow-lg">
                         Submit
                     </button>
 
@@ -215,16 +230,22 @@
                 </div>
 
                 <!-- Inactive Step -->
-                <div class="step-indicator inactive flex items-center gap-2 px-4 md:px-6 py-2 rounded-lg bg-blue-100 text-gray-700 font-medium shadow-sm border-2 border-gray-300 hover:border-gray-400 hover:shadow-md transition-all duration-200 transform hover:scale-[1.02] whitespace-nowrap cursor-pointer">
+                <a href="/ambassador-review.html" class="step-indicator inactive flex items-center gap-2 px-4 md:px-6 py-2 rounded-lg bg-blue-100 text-gray-700 font-medium shadow-sm border-2 border-gray-300 hover:border-gray-400 hover:shadow-md transition-all duration-200 transform hover:scale-[1.02] whitespace-nowrap cursor-pointer">
                     <span class="w-7 h-7 bg-gray-300 text-gray-700 rounded-full flex items-center justify-center font-bold text-sm">2</span>
                     <span class="text-sm md:text-base">Review</span>
-                </div>
+                </a>
 
                 <!-- Inactive Step -->
                 <div class="step-indicator inactive flex items-center gap-2 px-4 md:px-6 py-2 rounded-lg bg-gray-100 text-gray-700 font-medium shadow-sm border-2 border-gray-300 hover:border-gray-400 hover:shadow-md transition-all duration-200 transform hover:scale-[1.02] whitespace-nowrap cursor-pointer">
                     <span class="w-7 h-7 bg-gray-300 text-gray-700 rounded-full flex items-center justify-center font-bold text-sm">3</span>
                     <span class="text-sm md:text-base">Publish</span>
                 </div>
+
+                <!-- Track Progress Button -->
+                <a href="/article-progress.html" class="step-indicator flex items-center gap-2 px-4 md:px-6 py-2 rounded-lg bg-purple-600 text-white font-semibold shadow-md hover:bg-purple-700 hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02] whitespace-nowrap cursor-pointer">
+                    <i class="bx bx-line-chart text-xl"></i>
+                    <span class="text-sm md:text-base">Track Progress</span>
+                </a>
                 </div>
 
 
@@ -239,6 +260,7 @@
                                 Article Title <span class="text-red-500">*</span>
                             </label>
                             <input 
+                                id="articleTitle"
                                 type="text" 
                                 placeholder="Article Title" 
                                 class="input-field w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none bg-gray-50"
@@ -321,53 +343,29 @@
                             ></div>
                         </div>
 
-                        <!-- About You Section -->
+                        <!-- Byline Section -->
                         <div class="bg-white rounded-2xl p-6 card-shadow">
                             <div class="flex items-center gap-3 mb-6">
-                                <div class="w-12 h-12 bg-[#4b0d9f] rounded-xl flex items-center justify-center">
-                                    <i class="bx bx-user text-white text-2xl"></i>
-                                </div>
-                                <h2 class="text-lg font-bold text-gray-900">
-                                    About You <span class="text-red-500">*</span>
-                                </h2>
+                                <i class='bx bx-user-circle text-3xl text-purple-600'></i>
+                                <h3 class="text-lg font-bold text-gray-900">Author Byline</h3>
                             </div>
 
-                        <div class="space-y-6">
-                            <!-- Name & Role -->
                             <div>
                                 <label class="block text-gray-900 font-bold mb-2">
-                                    Your Name & Role <span class="text-red-500">*</span>
+                                    Byline <span class="text-red-500">*</span>
                                 </label>
-                                <div class="flex gap-4 items-center">
-                                    <div class="w-12 h-12 bg-[#4b0d9f] rounded-xl flex items-center justify-center text-white text-lg font-bold flex-shrink-0">
-                                        N
-                                    </div>
-                                    <input 
-                                        type="text" 
-                                        placeholder="e.g.: Nurh, CTO" 
-                                        class="input-field flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none bg-gray-50"
-                                    >
-                                </div>
+                                <input 
+                                    id="byline"
+                                    type="text"
+                                    placeholder="e.g: John Smith, Senior Product Manager at Tech Corp" 
+                                    class="input-field w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none bg-gray-50"
+                                />
                             </div>
-
-                            <!-- Company & Description -->
-                            <div>
-                                <label class="block text-gray-900 font-bold mb-2">
-                                    Company & Description <span class="text-red-500">*</span>
-                                </label>
-                                <textarea 
-                                    placeholder="e.g: Data sentinel, building scalable systems that meets the user need" 
-                                    rows="3" 
-                                    class="input-field w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none bg-gray-50 resize-none"
-                                ></textarea>
-                            </div>
-                        </div>
-
                         </div>
 
                         <!-- Submit Button -->
                         <div class="flex justify-center pt-4">
-                            <button class="bg-[#4b0d9f] text-white px-16 py-4 rounded-xl font-bold text-lg shadow-lg">
+                            <button id="submitBottom" class="bg-[#4b0d9f] text-white px-16 py-4 rounded-xl font-bold text-lg shadow-lg">
                                 Submit
                             </button>
                         </div>
@@ -421,18 +419,52 @@
     </div>
 
     <script>
+        // Simple toast
+        function showToast(msg, isError = false) {
+            const div = document.createElement('div');
+            div.textContent = msg;
+            div.className = `fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg text-sm ${isError ? 'bg-red-600 text-white' : 'bg-green-600 text-white'}`;
+            document.body.appendChild(div);
+            setTimeout(() => div.remove(), 3000);
+        }
+
+        // Mobile sidebar toggle
         const mobileMenuBtn = document.getElementById('mobileMenuBtn');
         const sidebar = document.getElementById('sidebar');
-
-        mobileMenuBtn.addEventListener('click', () => {
-            sidebar.classList.toggle('active');
-        });
-
+        mobileMenuBtn.addEventListener('click', () => { sidebar.classList.toggle('active'); });
         document.addEventListener('click', (e) => {
             if (!sidebar.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
                 sidebar.classList.remove('active');
             }
         });
+
+        // Auth check
+        function checkAuth() {
+            return fetch('/api/me', { credentials: 'include' })
+                .then(r => { if (!r.ok) throw new Error(String(r.status)); return r.json(); })
+                .then(me => {
+                    if (!me || me.role !== 'ambassador') {
+                        throw new Error('forbidden');
+                    }
+                    return me;
+                })
+                .catch(err => {
+                    const redirectParam = encodeURIComponent(window.location.pathname);
+                    if (err.message === '401') {
+                        // Not logged in
+                        window.location.href = `/signin?redirect=${redirectParam}`;
+                        throw err;
+                    }
+                    if (err.message === 'forbidden' || err.message === '403') {
+                        showToast('You do not have permission to submit articles.', true);
+                        window.location.href = '/signin';
+                        throw err;
+                    }
+                    // Unknown error -> force signin
+                    window.location.href = `/signin?redirect=${redirectParam}`;
+                    throw err;
+                });
+        }
 
         // Rich Text Editor Functions
         function formatText(command, value = null) {
@@ -448,17 +480,332 @@
         }
 
         // Placeholder functionality
-        const editor = document.getElementById('editor');
-        editor.addEventListener('focus', function() {
-            if (this.innerHTML === '') {
-                this.setAttribute('data-placeholder', '');
-            }
-        });
+        function setupEditorPlaceholder() {
+            const editor = document.getElementById('editor');
+            if (!editor) return;
+            
+            editor.addEventListener('focus', function() {
+                if (this.innerHTML === '') {
+                    this.setAttribute('data-placeholder', '');
+                }
+            });
+            editor.addEventListener('blur', function() {
+                if (this.innerHTML === '') {
+                    this.setAttribute('data-placeholder', 'Start writing your article...');
+                }
+            });
+        }
 
-        editor.addEventListener('blur', function() {
-            if (this.innerHTML === '') {
-                this.setAttribute('data-placeholder', 'Start writing your article...');
+        // ✅ ENHANCED: Check if we're in edit mode and load article
+        function checkEditModeAndLoadArticle() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const editArticleId = urlParams.get('edit');
+            
+            if (editArticleId) {
+                console.log('✅ Edit mode detected for article:', editArticleId);
+                showToast('Loading article for editing...');
+                
+                // Try multiple methods to get the article data
+                let articleData = null;
+                
+                // Method 1: Try localStorage with the article ID
+                const savedArticle = localStorage.getItem(`article_${editArticleId}`);
+                if (savedArticle) {
+                    try {
+                        articleData = JSON.parse(savedArticle);
+                        console.log('✅ Article loaded from localStorage with ID method');
+                    } catch (error) {
+                        console.error('❌ Error loading article from localStorage:', error);
+                    }
+                }
+                
+                // Method 2: If still no data, try the editArticleId flag
+                if (!articleData) {
+                    const editFlagId = localStorage.getItem('editArticleId');
+                    if (editFlagId === editArticleId) {
+                        const flaggedArticle = localStorage.getItem(`article_${editFlagId}`);
+                        if (flaggedArticle) {
+                            try {
+                                articleData = JSON.parse(flaggedArticle);
+                                console.log('✅ Article loaded from localStorage with flag method');
+                            } catch (error) {
+                                console.error('❌ Error loading flagged article:', error);
+                            }
+                        }
+                    }
+                }
+                
+                // Method 3: If still no data, fetch from server
+                if (!articleData) {
+                    console.log('🔄 Article not in localStorage, fetching from server...');
+                    fetchArticleForEditing(editArticleId);
+                    return; // fetchArticleForEditing will handle population
+                }
+                
+                // Populate the form with the found data
+                populateFormWithArticle(articleData);
+                showToast('Article loaded for editing');
+                
+            } else {
+                console.log('📝 New article mode - no edit parameter detected');
             }
+        }
+
+        // ✅ ENHANCED: Populate form with article data
+        function populateFormWithArticle(articleData) {
+            if (!articleData) {
+                console.error('❌ No article data provided to populate form');
+                showToast('Could not load article data', true);
+                return;
+            }
+
+            console.log('🔄 Populating form with article data:', {
+                title: articleData.title,
+                hasContent: !!articleData.contentHtml,
+                byline: articleData.byline,
+                fullData: articleData
+            });
+
+            // Populate title
+            if (articleData.title) {
+                document.getElementById('articleTitle').value = articleData.title;
+            }
+
+            // Populate content - handle both contentHtml and content fields
+            let content = '';
+            if (articleData.contentHtml) {
+                content = articleData.contentHtml;
+            } else if (articleData.content) {
+                content = articleData.content;
+            }
+            
+            if (content) {
+                const editor = document.getElementById('editor');
+                editor.innerHTML = content;
+                // Remove any placeholder text
+                editor.removeAttribute('data-placeholder');
+            }
+
+            // Populate byline
+            if (articleData.byline) {
+                document.getElementById('byline').value = articleData.byline;
+            }
+            
+            // Update submit button to indicate editing mode
+            const submitButtons = document.querySelectorAll('#submitTop, #submitBottom');
+            submitButtons.forEach(btn => {
+                if (btn) {
+                    btn.textContent = 'Update Article';
+                    btn.style.backgroundColor = '#dc2626'; // Red color for update
+                    console.log('✅ Submit buttons updated to "Update Article"');
+                }
+            });
+
+            // Update page title to indicate editing
+            document.title = `T4L Ambassador - Edit: ${articleData.title || 'Article'}`;
+            
+            console.log('✅ Form populated successfully');
+        }
+
+        // ✅ ENHANCED: Fetch article from server for editing
+        function fetchArticleForEditing(articleId) {
+            console.log('🔄 Fetching article from server:', articleId);
+            
+            fetch(`/api/ambassador/articles/${articleId}`, {
+                credentials: 'include'
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: Failed to fetch article`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.article) {
+                    console.log('✅ Article fetched successfully from server');
+                    populateFormWithArticle(data.article);
+                    // Also save to localStorage for future edits and offline access
+                    localStorage.setItem(`article_${articleId}`, JSON.stringify(data.article));
+                    console.log('✅ Article saved to localStorage for future edits');
+                } else {
+                    throw new Error('No article data in response');
+                }
+            })
+            .catch(error => {
+                console.error('❌ Error fetching article:', error);
+                showToast('Could not load article for editing. Please try again.', true);
+                
+                // Try to load from sessionStorage as last resort
+                const sessionArticle = sessionStorage.getItem(`article_${articleId}`);
+                if (sessionArticle) {
+                    try {
+                        const articleData = JSON.parse(sessionArticle);
+                        populateFormWithArticle(articleData);
+                        showToast('Loaded from session storage');
+                    } catch (e) {
+                        console.error('Failed to load from sessionStorage:', e);
+                    }
+                }
+            });
+        }
+
+        // Submission handling
+        function collectAndValidate() {
+            const title = (document.getElementById('articleTitle').value || '').trim();
+            const contentHtml = (document.getElementById('editor').innerHTML || '').trim();
+            const byline = (document.getElementById('byline').value || '').trim();
+            const errors = [];
+            if (!title) errors.push('Title is required');
+            const textContent = contentHtml.replace(/<[^>]*>/g, '').trim();
+            if (!textContent) errors.push('Content is required');
+            if (!byline) errors.push('Byline is required');
+            return { title, contentHtml, byline, errors };
+        }
+
+        function submitArticle() {
+            const { title, contentHtml, byline, errors } = collectAndValidate();
+            if (errors.length) { showToast(errors[0], true); return; }
+
+            // ✅ CHECK IF EDIT MODE
+            const urlParams = new URLSearchParams(window.location.search);
+            const editArticleId = urlParams.get('edit');
+            
+            const isEditMode = !!editArticleId;
+            const endpoint = isEditMode ? `/api/ambassador/articles/${editArticleId}` : '/api/ambassador/articles';
+            const method = isEditMode ? 'PATCH' : 'POST';
+
+            console.log(`🔄 ${isEditMode ? 'Updating' : 'Submitting'} article...`);
+
+            // Ensure authenticated before submit
+            checkAuth().then(() => {
+                return fetch(endpoint, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ 
+                        title, 
+                        contentHtml, 
+                        byline,
+                        // For PATCH requests, reset status to pending
+                        ...(isEditMode && { status: 'pending' })
+                    })
+                });
+            }).then(async res => {
+                if (!res.ok) {
+                    if (res.status === 401) {
+                        const redirectParam = encodeURIComponent(window.location.pathname);
+                        showToast('Please sign in to submit.', true);
+                        window.location.href = `/signin?redirect=${redirectParam}`;
+                        throw new Error('Unauthorized');
+                    }
+                    if (res.status === 403) {
+                        showToast('You do not have permission to submit articles.', true);
+                        throw new Error('Forbidden');
+                    }
+                    let msg = isEditMode ? 'Update failed' : 'Submission failed';
+                    try { const j = await res.json(); if (j && j.error) msg = j.error; } catch(_) {}
+                    throw new Error(msg);
+                }
+                return res.json();
+            }).then((data) => {
+                const successMessage = isEditMode ? 'Article updated successfully' : 'Article submitted for review';
+                showToast(successMessage);
+                
+                // ✅ STORE/UPDATED ARTICLE DATA IN LOCALSTORAGE
+                const articleId = isEditMode ? editArticleId : (data.id || data.article?.id);
+                if (articleId) {
+                    const articleData = {
+                        id: articleId,
+                        title: title,
+                        contentHtml: contentHtml,
+                        byline: byline,
+                        status: isEditMode ? 'pending' : (data.status || 'pending'),
+                        createdAt: Date.now(),
+                        updatedAt: isEditMode ? Date.now() : undefined
+                    };
+                    localStorage.setItem(`article_${articleId}`, JSON.stringify(articleData));
+                    localStorage.setItem('lastSubmittedArticleId', articleId);
+                    sessionStorage.setItem('currentArticleId', articleId);
+                    
+                    console.log('✅ Article saved to localStorage:', articleId);
+                    
+                    // ✅ REDIRECT TO REVIEW PAGE
+                    setTimeout(() => {
+                        window.location.href = `/ambassador-review.html?articleId=${articleId}`;
+                    }, 1000);
+                }
+            }).catch(err => {
+                console.error('❌ Submission error:', err);
+                if (err && (err.message === 'Unauthorized' || err.message === 'Forbidden')) return;
+                showToast(err.message || (isEditMode ? 'Update failed' : 'Submission failed'), true);
+            });
+        }
+
+        // Logout functionality
+        function setupLogout() {
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', function() {
+                    fetch('/logout', { method: 'POST' })
+                        .then(() => {
+                            window.location.href = '/signin';
+                        })
+                        .catch(error => {
+                            console.error('Logout error:', error);
+                            window.location.href = '/signin';
+                        });
+                });
+            }
+        }
+
+        function goToReviewPage() {
+            const lastArticleId = localStorage.getItem('lastSubmittedArticleId');
+            if (lastArticleId) {
+                window.location.href = `/ambassador-review.html?articleId=${lastArticleId}`;
+            } else {
+                window.location.href = '/ambassador-review.html';
+            }
+        }
+
+        function updateReviewPageLinks() {
+            const lastArticleId = localStorage.getItem('lastSubmittedArticleId');
+            const reviewLinks = document.querySelectorAll('a[href*="ambassador-review"]');
+            
+            reviewLinks.forEach(link => {
+                const href = link.getAttribute('href') || '';
+                if (!lastArticleId) return;
+                if (href.includes('articleId=')) return;
+                const separator = href.includes('?') ? '&' : '?';
+                link.setAttribute('href', `${href}${separator}articleId=${lastArticleId}`);
+            });
+        }
+
+        // Gate page on load and bind event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuth().catch(() => {});
+            
+            // Setup editor placeholder
+            setupEditorPlaceholder();
+            
+            // Setup logout
+            setupLogout();
+            
+            // ✅ ENHANCED: CHECK EDIT MODE AND LOAD ARTICLE
+            checkEditModeAndLoadArticle();
+            
+            // Bind submit button event listeners after DOM is ready
+            const submitTop = document.getElementById('submitTop');
+            const submitBottom = document.getElementById('submitBottom');
+            
+            if (submitTop) {
+                submitTop.addEventListener('click', submitArticle);
+            }
+            
+            if (submitBottom) {
+                submitBottom.addEventListener('click', submitArticle);
+            }
+
+            updateReviewPageLinks();
         });
     </script>
 </body>

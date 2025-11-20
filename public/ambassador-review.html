@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>T4L Ambassador • Review Feedback</title>
+    <link rel="stylesheet" href="css/styles.css" />
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+    <style>
+      .step { display:inline-flex; align-items:center; gap:.5rem; padding:.35rem .7rem; border-radius:9999px; font-weight:600; font-size:.85rem; }
+      .step.active { background:#e9d5ff; color:#6b21a8; }
+      .step.inactive { background:#f3f4f6; color:#374151; }
+      .card { 
+        background:#fff; 
+        border:1px solid #e5e7eb; 
+        border-radius:1rem; 
+        overflow-x: hidden;
+        word-wrap: break-word;
+      }
+      
+      /* Article content styling */
+      #articleContent {
+        line-height: 1.8;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        word-break: break-word;
+        max-width: 100%;
+        overflow-x: auto;
+      }
+      #articleContent * {
+        max-width: 100%;
+      }
+      #articleContent h1, #articleContent h2, #articleContent h3 {
+        font-weight: bold;
+        margin-top: 1.5em;
+        margin-bottom: 0.75em;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+      }
+      #articleContent h1 { font-size: 2em; }
+      #articleContent h2 { font-size: 1.5em; }
+      #articleContent h3 { font-size: 1.25em; }
+      #articleContent p {
+        margin-bottom: 1em;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+      }
+      #articleContent ul, #articleContent ol {
+        margin: 1em 0;
+        padding-left: 2em;
+        overflow-wrap: break-word;
+      }
+      #articleContent li {
+        margin-bottom: 0.5em;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+      }
+      #articleContent a {
+        color: #7c3aed;
+        text-decoration: underline;
+        word-break: break-all;
+      }
+      #articleContent img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 0.5rem;
+        margin: 1em 0;
+        display: block;
+      }
+      #articleContent pre,
+      #articleContent code {
+        max-width: 100%;
+        overflow-x: auto;
+        word-wrap: break-word;
+        white-space: pre-wrap;
+      }
+      #articleContent table {
+        max-width: 100%;
+        overflow-x: auto;
+        display: block;
+        white-space: nowrap;
+      }
+      
+      /* Cache indicator */
+      .cache-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.25rem 0.5rem;
+        background: #dbeafe;
+        color: #1e40af;
+        border-radius: 0.375rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+      }
+      
+      .article-selection {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .article-selection h3 {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: #111827;
+      }
+
+      .article-option {
+        border: 1px solid #e5e7eb;
+        border-radius: 0.75rem;
+        padding: 1rem;
+        background: #fafafa;
+        cursor: pointer;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+      }
+
+      .article-option:hover {
+        border-color: #a855f7;
+        box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        transform: translateY(-2px);
+      }
+
+      .article-option strong {
+        display: block;
+        font-size: 1rem;
+        color: #1f2937;
+      }
+
+      .article-option .status {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.15rem 0.55rem;
+        border-radius: 9999px;
+        background: #ede9fe;
+        color: #5b21b6;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-right: 0.5rem;
+      }
+
+      .article-option .date {
+        font-size: 0.75rem;
+        color: #6b7280;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50 font-sans">
+    <header class="bg-white border-b border-gray-200">
+      <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <a href="/ambassador-dashboard.html" class="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-white cursor-pointer hover:opacity-80 transition-opacity" style="background:#4b0d7f" title="Go to Dashboard">T4L</a>
+          <div class="text-gray-900 font-semibold">T4L Ambassador</div>
+        </div>
+        <div class="relative w-full max-w-md hidden sm:block">
+          <input id="search" class="w-full border border-gray-300 rounded-full pl-10 pr-4 py-2 text-sm" placeholder="Search articles, feedback..." />
+          <i class="bx bx-search absolute left-3 top-2.5 text-gray-500"></i>
+        </div>
+        <div class="flex items-center gap-3">
+          <a href="/profile.html" id="meInitials" class="w-9 h-9 bg-gray-900 text-white rounded-full flex items-center justify-center text-sm font-bold cursor-pointer hover:bg-gray-700 transition-colors" title="Profile">AM</a>
+          <button id="logoutBtn" class="w-9 h-9 bg-red-600 text-white rounded-full flex items-center justify-center text-sm font-bold cursor-pointer hover:bg-red-700 transition-colors" title="Logout">
+            <i class="bx bx-log-out text-lg"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <section class="lg:col-span-2 space-y-4">
+        <div class="card p-4" id="article-container">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="step inactive"><i class="bx bx-pencil"></i> Write</span>
+            <span class="text-gray-400">›</span>
+            <span class="step active"><i class="bx bx-check-circle"></i> Review</span>
+            <span class="text-gray-400">›</span>
+            <span class="step inactive"><i class="bx bx-upload"></i> Publish</span>
+          </div>
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <div id="articleMeta" class="text-xs text-gray-600 bg-gray-50 inline-block px-3 py-1 rounded-lg">-</div>
+              <div id="cacheIndicator" class="cache-badge" style="display:none;">
+                <i class="bx bx-cloud-download"></i>
+                <span>Cached offline</span>
+              </div>
+            </div>
+            <span id="statusBadge" class="px-3 py-1 rounded-lg text-xs font-semibold border">pending</span>
+          </div>
+          <h1 id="articleTitle" class="mt-3 text-xl font-semibold text-gray-900">Article Title</h1>
+          <div class="mt-2 flex items-center gap-3">
+            <div id="authorAvatar" class="w-10 h-10 rounded-full bg-purple-100 text-purple-800 flex items-center justify-center font-bold">A</div>
+            <div>
+              <div id="authorName" class="text-sm font-semibold text-gray-900">-</div>
+              <div id="company" class="text-xs text-gray-600">-</div>
+            </div>
+          </div>
+          <div id="articleContent" class="mt-4 text-gray-800 leading-6 prose max-w-none"></div>
+        </div>
+
+        <div class="card p-4">
+          <div class="flex items-center gap-2 mb-4">
+            <i class="bx bx-message-dots text-xl text-purple-600"></i>
+            <div class="text-sm font-semibold text-gray-800">Admin Feedback</div>
+          </div>
+          <div id="adminFeedbackContainer" class="space-y-4">
+            <div class="text-center py-8 text-gray-500">
+              <i class="bx bx-info-circle text-4xl mb-2"></i>
+              <p>Loading feedback...</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="space-y-4">
+        <div class="card p-4">
+          <div class="text-sm font-semibold text-gray-800 mb-3">Review Actions</div>
+          <div class="space-y-2">
+            <button id="btnOpenEditor" class="w-full px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 text-sm">Open in Editor</button>
+
+            <a href="/article-progress.html" id="btnTrackProgress" class="w-full px-4 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700 font-semibold text-sm text-center transition-all shadow-md hover:shadow-lg transform hover:scale-[1.02] flex items-center justify-center gap-2">
+              <i class="bx bx-line-chart text-lg"></i>
+              <span>Track Progress</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="card p-4">
+          <div class="text-sm font-semibold text-gray-800 mb-3">Requested Changes</div>
+          <ul id="changesList" class="space-y-2 text-sm text-gray-800"></ul>
+        </div>
+      </aside>
+    </main>
+
+    <script>
+      // ==========================================
+      // LOCALSTORAGE FUNCTIONS (ENHANCED)
+      // ==========================================
+      
+      const CACHE_VERSION = 1;
+      const CACHE_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7 days
+      let articleContainerTemplate = '';
+      let articleSelectionVisible = false;
+      
+      /**
+       * Save article to localStorage with metadata
+       */
+      function saveArticleToLocalStorage(article) {
+        if (!article || !article.id) return;
+        
+        try {
+          const cached = {
+            article: {
+              id: article.id,
+              title: article.title,
+              contentHtml: article.contentHtml,
+              byline: article.byline,
+              status: article.status,
+              createdAt: article.createdAt,
+              updatedAt: article.updatedAt
+            },
+            cachedAt: Date.now(),
+            version: CACHE_VERSION
+          };
+          
+          localStorage.setItem(`article_${article.id}`, JSON.stringify(cached));
+          console.log(`✅ Article ${article.id} cached to localStorage`);
+          return true;
+        } catch (err) {
+          console.warn('❌ Failed to cache article:', err);
+          return false;
+        }
+      }
+      
+      /**
+       * Load article from localStorage with cache validation
+       */
+      function loadArticleFromLocalStorage(articleId) {
+        if (!articleId) return null;
+        
+        try {
+          const data = localStorage.getItem(`article_${articleId}`);
+          if (!data) return null;
+          
+          const cached = JSON.parse(data);
+          
+          // Version check
+          if (cached.version !== CACHE_VERSION) {
+            console.log('Cache version mismatch, clearing...');
+            localStorage.removeItem(`article_${articleId}`);
+            return null;
+          }
+          
+          // Age check
+          const age = Date.now() - cached.cachedAt;
+          if (age > CACHE_MAX_AGE) {
+            console.log('Cache expired, clearing...');
+            localStorage.removeItem(`article_${articleId}`);
+            return null;
+          }
+          
+          console.log(`✅ Article ${articleId} loaded from cache (${Math.round(age / 1000 / 60)} minutes old)`);
+          return cached.article;
+        } catch (err) {
+          console.warn('❌ Failed to load cached article:', err);
+          return null;
+        }
+      }
+      
+      /**
+       * Clear specific article from cache
+       */
+      function clearArticleCache(articleId) {
+        if (!articleId) return;
+        try {
+          localStorage.removeItem(`article_${articleId}`);
+          console.log(`🗑️ Cleared cache for article ${articleId}`);
+        } catch (err) {
+          console.warn('Failed to clear cache:', err);
+        }
+      }
+      
+      /**
+       * Clear all article caches
+       */
+      function clearAllArticleCaches() {
+        try {
+          const keys = Object.keys(localStorage);
+          keys.forEach(key => {
+            if (key.startsWith('article_')) {
+              localStorage.removeItem(key);
+            }
+          });
+          console.log('🗑️ Cleared all article caches');
+        } catch (err) {
+          console.warn('Failed to clear caches:', err);
+        }
+      }
+
+      function showArticleView() {
+        if (!articleSelectionVisible) return;
+        const container = document.getElementById('article-container');
+        if (container && articleContainerTemplate) {
+          container.innerHTML = articleContainerTemplate;
+        }
+        articleSelectionVisible = false;
+      }
+
+      async function loadUserArticlesFallback() {
+        const container = document.getElementById('article-container');
+        if (!container) return;
+
+        try {
+          const response = await fetch('/api/ambassador/articles?limit=10', {
+            credentials: 'include'
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            if (Array.isArray(data.items) && data.items.length > 0) {
+              showArticleSelection(data.items);
+            } else {
+              showError('No articles found. Please submit an article first.');
+            }
+          } else {
+            showError('Unable to load your recent articles.');
+          }
+        } catch (error) {
+          console.error('Error loading articles list:', error);
+        }
+      }
+
+      function showArticleSelection(articles) {
+        const container = document.getElementById('article-container');
+        if (!container) return;
+
+        if (!articleContainerTemplate) {
+          articleContainerTemplate = container.innerHTML;
+        }
+
+        articleSelectionVisible = true;
+        const html = `
+          <div class="article-selection">
+            <h3>Select an Article to Review</h3>
+            ${articles.map(article => `
+              <div class="article-option" onclick="selectArticle('${article.id}')">
+                <strong>${escapeHtml(article.title || 'Untitled Article')}</strong>
+                <div>
+                  <span class="status">${escapeHtml(formatStatus(article.status || 'pending'))}</span>
+                  <span class="date">${new Date(article.createdAt || Date.now()).toLocaleDateString()}</span>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+
+        container.innerHTML = html;
+      }
+
+      function selectArticle(articleId) {
+        if (!articleId) return;
+        localStorage.setItem('lastSubmittedArticleId', articleId);
+        sessionStorage.setItem('currentArticleId', articleId);
+        const newUrl = `${window.location.pathname}?articleId=${articleId}`;
+        window.history.replaceState({}, '', newUrl);
+        articleSelectionVisible = true;
+        showDebugInfo(articleId, 'selection');
+        loadArticle();
+      }
+
+      // ==========================================
+      // HELPER FUNCTIONS
+      // ==========================================
+      
+      function showToast(msg, isError) {
+        try { 
+          const d = document.createElement('div'); 
+          d.textContent = String(msg || ''); 
+          d.className = `fixed top-4 right-4 z-[100] px-4 py-3 rounded-lg shadow-lg text-sm ${isError ? 'bg-red-600 text-white' : 'bg-green-600 text-white'}`; 
+          document.body.appendChild(d); 
+          setTimeout(() => d.remove(), 3000);
+        } catch(_) {}
+      }
+
+      function showError(message) {
+        showToast(message || 'Something went wrong', true);
+      }
+
+      function showWarning(message) {
+        showToast(message || 'Something needs your attention', false);
+      }
+
+      function showDebugInfo(articleId, source) {
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+          console.log('🔍 Article Loading Debug:');
+          console.log(' - Article ID:', articleId);
+          console.log(' - Source:', source);
+          console.log(' - URL Params:', new URLSearchParams(window.location.search).toString());
+          console.log(' - localStorage ID:', localStorage.getItem('lastSubmittedArticleId'));
+          console.log(' - sessionStorage ID:', sessionStorage.getItem('currentArticleId'));
+        }
+      }
+
+      function statusBadgeClass(status) {
+        const s = String(status || '').toLowerCase();
+        if (s === 'published') return 'border-blue-300 text-blue-700 bg-blue-50';
+        if (s === 'approved') return 'border-green-300 text-green-700 bg-green-50';
+        if (s === 'rejected') return 'border-red-300 text-red-700 bg-red-50';
+        if (s === 'needs_update') return 'border-orange-300 text-orange-700 bg-orange-50';
+        if (s === 'pending') return 'border-yellow-300 text-yellow-700 bg-yellow-50';
+        return 'border-gray-300 text-gray-700 bg-gray-50';
+      }
+
+      function formatStatus(status) {
+        const statusMap = {
+          'pending': 'Pending Review',
+          'needs_update': 'Needs Updates',
+          'approved': 'Approved',
+          'published': 'Published',
+          'rejected': 'Rejected'
+        };
+        return statusMap[status] || status;
+      }
+
+      function initials(name) {
+        return (String(name || 'A').trim().split(' ').map(w => w[0]).join('').toUpperCase() || 'A').substring(0, 2);
+      }
+
+      function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      function getArticleIdFromUrl() {
+        const params = new URLSearchParams(window.location.search);
+        return params.get('articleId');
+      }
+
+      function ensureAmbassador() {
+        return fetch('/api/me', { credentials: 'include' })
+          .then(r => { if (!r.ok) throw new Error('auth'); return r.json(); })
+          .then(me => { if (me.role !== 'ambassador') throw new Error('forbidden'); return me; })
+          .catch(() => { window.location.href = '/signin'; throw new Error('redirect'); });
+      }
+
+      // ==========================================
+      // ARTICLE LOADING (WITH MULTI-FALLBACK)
+      // ==========================================
+      
+      async function loadArticle() {
+        let articleId = null;
+        let source = 'url';
+        const urlParams = new URLSearchParams(window.location.search);
+        articleId = urlParams.get('articleId');
+
+        if (!articleId) {
+          articleId = localStorage.getItem('lastSubmittedArticleId');
+          source = 'localStorage';
+        }
+
+        if (!articleId) {
+          articleId = sessionStorage.getItem('currentArticleId');
+          source = 'sessionStorage';
+        }
+
+        if (!articleId) {
+          await loadUserArticlesFallback();
+          showError('No article selected. Please submit an article first.');
+          showDebugInfo(null, 'none');
+          return;
+        }
+
+        showDebugInfo(articleId, source);
+
+        try {
+          const response = await fetch(`/api/ambassador/articles/${articleId}`, {
+            credentials: 'include'
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            if (!data || !data.article) {
+              throw new Error('Article data missing');
+            }
+            saveArticleToLocalStorage(data.article);
+            showArticleView();
+            displayArticle(data.article, false);
+            displayNotifications(data.notifications || []);
+            localStorage.setItem('lastSubmittedArticleId', articleId);
+            sessionStorage.setItem('currentArticleId', articleId);
+            return;
+          }
+
+          const cachedArticle = loadArticleFromLocalStorage(articleId);
+          if (cachedArticle) {
+            showArticleView();
+            displayArticle(cachedArticle, true);
+            displayNotifications([]);
+            showWarning('Loaded from cache - some features may be limited');
+            localStorage.setItem('lastSubmittedArticleId', articleId);
+            sessionStorage.setItem('currentArticleId', articleId);
+            return;
+          } else {
+            showError('Article not found. It may have been deleted or you may not have permission to view it.');
+            await loadUserArticlesFallback();
+            return;
+          }
+        } catch (error) {
+          console.error('Error loading article:', error);
+          const cachedArticle = loadArticleFromLocalStorage(articleId);
+          if (cachedArticle) {
+            showArticleView();
+            displayArticle(cachedArticle, true);
+            displayNotifications([]);
+            showWarning('Loaded from cache - some features may be limited');
+            localStorage.setItem('lastSubmittedArticleId', articleId);
+            sessionStorage.setItem('currentArticleId', articleId);
+            return;
+          } else {
+            showError('Failed to load article. Please check your connection.');
+            await loadUserArticlesFallback();
+            return;
+          }
+        }
+      }
+
+      // ==========================================
+      // DISPLAY ARTICLE (UPDATED WITH CONDITIONAL EDITOR BUTTON)
+      // ==========================================
+      
+      function displayArticle(article, fromCache = false) {
+        showArticleView();
+        if (!article) {
+          document.getElementById('articleTitle').textContent = 'Article not found';
+          document.getElementById('articleContent').textContent = 'The article you are looking for does not exist or you do not have permission to view it.';
+          return;
+        }
+
+        // Show cache indicator
+        const cacheIndicator = document.getElementById('cacheIndicator');
+        if (cacheIndicator) {
+          cacheIndicator.style.display = fromCache ? 'inline-flex' : 'none';
+        }
+
+        // Update metadata
+        const submittedDate = new Date(article.createdAt || Date.now()).toLocaleDateString();
+        document.getElementById('articleMeta').textContent = `Submitted on ${submittedDate}`;
+
+        // Update title
+        document.getElementById('articleTitle').textContent = article.title || 'Untitled Article';
+
+        // Update author info
+        const bylineText = article.byline || 'Unknown Author';
+        document.getElementById('authorName').textContent = bylineText;
+        document.getElementById('company').textContent = '';
+        document.getElementById('authorAvatar').textContent = initials(bylineText);
+
+        // Update status badge
+        const badge = document.getElementById('statusBadge');
+        badge.textContent = formatStatus(article.status || 'pending');
+        badge.className = `px-3 py-1 rounded-lg text-xs font-semibold border ${statusBadgeClass(article.status || 'pending')}`;
+
+        // Update article content
+        const contentDiv = document.getElementById('articleContent');
+        if (article.contentHtml) {
+          contentDiv.innerHTML = article.contentHtml;
+        } else {
+          contentDiv.textContent = 'No content available.';
+        }
+
+        // Update user avatar
+        const avatar = document.getElementById('meInitials');
+        if (avatar) {
+          fetch('/api/me', { credentials: 'include' })
+            .then(r => r.json())
+            .then(me => {
+              if (me && me.name) {
+                avatar.textContent = initials(me.name);
+              }
+            })
+            .catch(() => {});
+        }
+
+        // ✅ FIXED: Conditional "Open in Editor" button - ONLY ENABLED FOR "needs_update" STATUS
+        const btnOpenEditor = document.getElementById('btnOpenEditor');
+        const articleStatus = (article.status || '').toLowerCase();
+        
+        if (articleStatus === 'needs_update') {
+          // Enable button for "needs_update" status
+          btnOpenEditor.disabled = false;
+          btnOpenEditor.className = 'w-full px-4 py-2 rounded-lg border border-purple-600 bg-purple-600 text-white hover:bg-purple-700 text-sm font-semibold cursor-pointer transition-all';
+          btnOpenEditor.textContent = 'Open in Editor';
+          
+          // ✅ FIXED: Save article data to localStorage BEFORE redirecting
+          btnOpenEditor.onclick = () => { 
+            const targetArticleId = article.id || getArticleIdFromUrl();
+            if (targetArticleId) {
+              // Save the complete article data to localStorage so editor can load it
+              const articleData = {
+                id: targetArticleId,
+                title: article.title,
+                contentHtml: article.contentHtml,
+                byline: article.byline,
+                status: article.status,
+                createdAt: article.createdAt,
+                updatedAt: article.updatedAt
+              };
+              
+              // ✅ CRITICAL FIX: Save with proper structure that the editor expects
+              localStorage.setItem(`article_${targetArticleId}`, JSON.stringify(articleData));
+              
+              // ✅ ADDITIONAL FIX: Also set a flag so editor knows to load immediately
+              localStorage.setItem('editArticleId', targetArticleId);
+              sessionStorage.setItem('editArticleId', targetArticleId);
+              
+              console.log('✅ Saved article to localStorage for editing:', targetArticleId);
+              console.log('✅ Article data saved:', {
+                title: article.title,
+                hasContent: !!article.contentHtml,
+                byline: article.byline
+              });
+              
+              // Redirect to editor with edit parameter
+              window.location.href = `/article-amb.html?edit=${targetArticleId}`;
+            } else {
+              window.location.href = `/article-amb.html`;
+            }
+          };
+        } else {
+          // Disable button for all other statuses with clear messaging
+          btnOpenEditor.disabled = true;
+          btnOpenEditor.className = 'w-full px-4 py-2 rounded-lg border border-gray-300 bg-gray-100 text-gray-500 text-sm cursor-not-allowed';
+          
+          // Set appropriate message based on status
+          if (articleStatus === 'pending') {
+            btnOpenEditor.textContent = 'Awaiting Review';
+          } else if (articleStatus === 'approved') {
+            btnOpenEditor.textContent = 'Article Approved ✓';
+          } else if (articleStatus === 'published') {
+            btnOpenEditor.textContent = 'Article Published ✓';
+          } else if (articleStatus === 'rejected') {
+            btnOpenEditor.textContent = 'Article Rejected';
+          } else {
+            btnOpenEditor.textContent = 'Editor Unavailable';
+          }
+          
+          btnOpenEditor.onclick = (e) => {
+            e.preventDefault();
+            let toastMessage = 'Editor is only available when admin requests updates';
+            if (articleStatus === 'pending') {
+              toastMessage = 'Your article is still under review. Please wait for admin feedback.';
+            } else if (articleStatus === 'approved' || articleStatus === 'published') {
+              toastMessage = 'Your article has been approved. No edits needed.';
+            } else if (articleStatus === 'rejected') {
+              toastMessage = 'This article has been rejected. Please create a new one.';
+            }
+            showToast(toastMessage, true);
+          };
+        }
+        
+        // Update Track Progress button (always enabled)
+        const trackProgressBtn = document.getElementById('btnTrackProgress');
+        if (trackProgressBtn && article.id) {
+          trackProgressBtn.href = `/article-progress.html?articleId=${article.id}`;
+        }
+      }
+
+      // ==========================================
+      // DISPLAY NOTIFICATIONS
+      // ==========================================
+      
+      function displayNotifications(notifications) {
+        const container = document.getElementById('adminFeedbackContainer');
+        
+        if (!notifications || notifications.length === 0) {
+          container.innerHTML = `
+            <div class="text-center py-8 text-gray-500">
+              <i class="bx bx-info-circle text-4xl mb-2"></i>
+              <p>No feedback yet. Your article is being reviewed.</p>
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = notifications.map(notif => {
+          const date = new Date(notif.createdAt || Date.now()).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+          
+          return `
+            <div class="bg-white rounded-xl p-6 border-l-4 border-purple-600 shadow-sm">
+              <div class="flex items-start justify-between mb-3">
+                <div class="flex items-center gap-2">
+                  <i class="bx bx-message-dots text-xl text-purple-600"></i>
+                  <span class="font-semibold text-gray-900">${escapeHtml(notif.type || 'Feedback')}</span>
+                </div>
+                <span class="text-xs text-gray-500">
+                  ${date}
+                </span>
+              </div>
+              <p class="text-gray-700 whitespace-pre-wrap leading-relaxed">${escapeHtml(notif.message || 'No message')}</p>
+            </div>
+          `;
+        }).join('');
+
+        // Update requested changes list
+        const changes = [];
+        notifications.forEach(notif => {
+          if (notif.message) {
+            notif.message.split('\n').forEach(line => {
+              const t = line.trim();
+              if (/^[-•]/.test(t)) {
+                changes.push(t.replace(/^[-•]\s*/, ''));
+              }
+            });
+          }
+        });
+
+        const ul = document.getElementById('changesList');
+        ul.innerHTML = '';
+        if (!changes.length) {
+          const li = document.createElement('li');
+          li.className = 'text-gray-600';
+          li.textContent = 'No specific changes requested.';
+          ul.appendChild(li);
+        } else {
+          changes.forEach(c => {
+            const li = document.createElement('li');
+            li.className = 'flex items-start gap-2';
+            li.innerHTML = `<span class="text-green-600 mt-0.5"><i class="bx bx-check-circle"></i></span><span>${escapeHtml(c)}</span>`;
+            ul.appendChild(li);
+          });
+        }
+      }
+
+      // ==========================================
+      // INITIALIZATION
+      // ==========================================
+      
+      document.addEventListener('DOMContentLoaded', function() {
+        const container = document.getElementById('article-container');
+        if (container) {
+          articleContainerTemplate = container.innerHTML;
+        }
+
+        ensureAmbassador()
+          .then(() => loadArticle())
+          .catch((err) => {
+            try {
+              document.getElementById('articleTitle').textContent = 'Unable to load review';
+              document.getElementById('articleContent').textContent = 'Please sign in again or check your connection, then retry.';
+              const badge = document.getElementById('statusBadge');
+              badge.textContent = 'unknown';
+              badge.className = 'px-3 py-1 rounded-lg text-xs font-semibold border border-gray-300 text-gray-700 bg-gray-50';
+            } catch (_) {}
+            if (err.message !== 'redirect') {
+              showToast('Could not load review data', true);
+            }
+          });
+
+        // Logout functionality
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+          logoutBtn.addEventListener('click', function() {
+            fetch('/logout', { method: 'POST' })
+              .then(() => {
+                window.location.href = '/signin';
+              })
+              .catch(error => {
+                console.error('Logout error:', error);
+                window.location.href = '/signin';
+              });
+          });
+        }
+      });
+    </script>
+  </body>
+</html>
