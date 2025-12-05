@@ -1,0 +1,114 @@
+<!-- Profile Audit Popup -->
+<div id="profileAuditPopup" class="popup-overlay hidden">
+    <div class="popup-content" style="max-width: 1200px;">
+      <button class="popup-close" onclick="closeProfileAuditPopup()">×</button>
+      <div class="template-container">
+        <span class="badge"><i class='bx bx-search-alt'></i> Digital Audit</span>
+        <h1 class="template-title"><i class='bx bx-user-check'></i> Profile Audit Recommendations</h1>
+        <p class="template-subtitle">Review your digital audit results and implement the recommendations to optimize your profile</p>
+  
+        <!-- Gamma Presentation Container -->
+        <div class="template-preview" style="height: 600px;">
+          <div class="preview-overlay">
+            <i class='bx bx-show'></i> Digital Audit Presentation
+          </div>
+          <div class="loading-message" id="auditLoader">
+            <div class="loader"></div>
+            <p>Loading digital audit presentation...</p>
+          </div>
+          
+          <!-- Fixed Gamma Embed -->
+          <div id="gammaContainer" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #f8f9fa;">
+            <div style="text-align: center; padding: 40px;">
+              <i class='bx bx-slideshow' style="font-size: 48px; color: #4b0d7f; margin-bottom: 16px;"></i>
+              <h3 style="color: #4b0d7f; margin-bottom: 12px;">Digital Audit Presentation</h3>
+              <p style="color: #666; margin-bottom: 24px;">Click below to view your profile audit recommendations</p>
+              <button onclick="openGammaPresentation()" class="btn-submit" style="margin-bottom: 16px;">
+                <i class='bx bx-slideshow'></i> Open Audit Presentation
+              </button>
+              <p style="color: #888; font-size: 0.9em;">The presentation will open in a new tab for the best viewing experience</p>
+            </div>
+          </div>
+        </div>
+  
+        <div class="instructions">
+          <h3><i class='bx bx-list-check'></i> How to Implement Recommendations</h3>
+          <ol>
+            <li><strong>Click the button above</strong> to open your digital audit presentation</li>
+            <li><strong>Review each slide carefully</strong> to understand the recommendations</li>
+            <li><strong>Update your LinkedIn profile</strong> based on the specific suggestions</li>
+            <li><strong>Focus on key areas:</strong> Profile picture, headline, about section, experience, and skills</li>
+            <li><strong>Optimize for your goals:</strong> Ensure your profile reflects your career objectives</li>
+            <li><strong>Once completed</strong>, mark this task as done using the button below</li>
+          </ol>
+        </div>
+  
+        <div class="upload-section">
+          <h3><i class='bx bx-check-circle'></i> Mark as Complete</h3>
+          <p style="color: #666; margin-bottom: 20px;">
+            After reviewing the audit and implementing the recommendations, mark this task as complete
+          </p>
+  
+          <div class="action-buttons">
+            <button class="btn-submit" onclick="markAuditComplete()">
+              <i class='bx bx-check'></i> I've Implemented the Recommendations
+            </button>
+          </div>
+  
+          <div class="success-message" id="auditSuccessMsg">
+            <i class='bx bx-check-circle'></i> Success! Profile audit implementation marked as complete.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+  // Profile Audit Popup Functions
+  function openProfileAuditPopup() {
+    const popup = document.getElementById('profileAuditPopup');
+    popup.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    resetAuditPopupState();
+  }
+  
+  function closeProfileAuditPopup() {
+    const popup = document.getElementById('profileAuditPopup');
+    popup.classList.add('hidden');
+    document.body.style.overflow = 'auto';
+  }
+  
+  function resetAuditPopupState() {
+    document.getElementById('auditSuccessMsg').classList.remove('show');
+  }
+  
+  function openGammaPresentation() {
+    // Open Gamma presentation in a new tab
+    window.open('https://gamma.app/docs/Lyonga-Mbesa-Digital-Audit-qo6eoxg0ai618j3', '_blank');
+    
+    // Hide loader since we're opening in new tab
+    document.getElementById('auditLoader').classList.add('hidden');
+  }
+  
+  function markAuditComplete() {
+    const successMsg = document.getElementById('auditSuccessMsg');
+    successMsg.classList.add('show');
+    
+    // Simulate marking the task as complete in the journey tracker
+    setTimeout(() => {
+      console.log('Profile audit task marked as complete');
+      closeProfileAuditPopup();
+      
+      // Show a toast notification
+      if (window.showToast) {
+        window.showToast('Profile audit implementation completed! ✅', 'success');
+      }
+    }, 1000);
+  }
+  
+  // Make functions globally available
+  window.openProfileAuditPopup = openProfileAuditPopup;
+  window.closeProfileAuditPopup = closeProfileAuditPopup;
+  window.markAuditComplete = markAuditComplete;
+  window.openGammaPresentation = openGammaPresentation;
+  </script>

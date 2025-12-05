@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Journey Tracker - T4LA Admin</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/boxicons/2.1.0/css/boxicons.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/recharts@2.5.0/dist/Recharts.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+        
+        @keyframes flash {
+            0%, 100% {
+                background-color: transparent;
+            }
+            50% {
+                background-color: #fef3c7;
+            }
+        }
+        
+        @keyframes progressGrow {
+            from {
+                width: 0;
+            }
+            to {
+                width: var(--progress-width);
+            }
+        }
+        
+        .toast-notification {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        .row-flash {
+            animation: flash 1s ease-in-out;
+        }
+        
+        .live-indicator {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        .progress-bar-animate {
+            animation: progressGrow 0.8s ease-out;
+        }
+        
+        .month-badge-completed {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+        
+        .month-badge-current {
+            background: linear-gradient(135deg, #4b0d7f 0%, #7c3aed 100%);
+            color: white;
+            animation: pulse 1.5s infinite;
+        }
+        
+        .month-badge-upcoming {
+            background: linear-gradient(135deg, #6b7280 0%, #9ca3af 100%);
+            color: white;
+        }
+        
+        .risk-indicator-high {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+        
+        .risk-indicator-medium {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+        }
+        
+        .risk-indicator-low {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+        
+        .activity-dot-live {
+            box-shadow: 0 0 0 0 rgba(34, 197, 94, 1);
+            animation: pulse-live 2s infinite;
+        }
+        
+        @keyframes pulse-live {
+            0% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+            }
+            
+            70% {
+                transform: scale(1);
+                box-shadow: 0 0 0 10px rgba(34, 197, 94, 0);
+            }
+            
+            100% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+            }
+        }
+        
+        .highlight-change {
+            animation: highlightChange 2s ease-out;
+        }
+        
+        @keyframes highlightChange {
+            0% {
+                background-color: rgba(34, 197, 94, 0.3);
+            }
+            100% {
+                background-color: transparent;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useMemo } = React;
+        const { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } = Recharts;
+
+        const AdminJourneyTracker = () => {
+            const [ambassadors, setAmbassadors] = useState([]);
+            const [previousAmbassadors, setPreviousAmbassadors] = useState([]);
+            const [selectedAmbassador, setSelectedAmbassador] = useState(null);
+            const [loading, setLoading] = useState(true);
+            const [filter, setFilter] = useState('all');
+            const [sortBy, setSortBy] = useState('recent');
+            const [searchQuery, setSearchQuery] = useState('');
+            const [autoRefresh, setAutoRefresh] = useState(true);
+            const [lastUpdate, setLastUpdate] = useState(new Date());
+            const [toasts, setToasts] = useState([]);
+            const [flashingRows, setFlashingRows] = useState(new Set());
+            const [recentActivity, setRecentActivity] = useState([]);
+            const [activeFilter, setActiveFilter] = useState('all');
+            const [viewMode, setViewMode] = useState('list');
+            const [refreshRate, setRefreshRate] = useState(3000);
+            
+            // Track previous data for change detection
+            const prevDataRef = useRef({});
+            const lastUpdateRef = useRef(null);
+
+            // Toast notification system
+            const showToast = (message, type = 'info', icon = 'bx-info-circle') => {
+                const id = Date.now();
+                setToasts(prev => [...prev, { id, message, type, icon }]);
+                setTimeout(() => {
+                    setToasts(prev => prev.filter(t => t.id !== id));
+                }, 5000);
+            };
+
+            // Format time ago
+            const timeAgo = (timestamp) => {
+                if (!timestamp) return 'Never';
+                const seconds = Math.floor((Date.now() - timestamp) / 1000);
+                
+                if (seconds < 60) return 'Just now';
+                if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+                if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+                return `${Math.floor(seconds / 86400)}d ago`;
+            };
+
+            // Check if ambassador is currently active (updated in last 5 minutes)
+            const isActiveNow = (ambassador) => {
+                if (!ambassador.lastUpdated) return false;
+                const fiveMinutesAgo = Date.now() - (5 * 60 * 1000);
+                return ambassador.lastUpdated > fiveMinutesAgo;
+            };
+
+            // Check if ambassador is at risk
+            const isAtRisk = (ambassador) => {
+                if (!ambassador.startDate) return false;
+                const daysSinceStart = Math.floor((Date.now() - ambassador.startDate) / (1000 * 60 * 60 * 24));
+                const expectedProgress = Math.min(100, Math.round((daysSinceStart / 365) * 100));
+                return ambassador.overallProgress < expectedProgress - 20;
+            };
+
+            // Fetch journey summary data with change detection
+            const fetchJourneyData = async () => {
+                try {
+                    const response = await fetch('/admin/api/journey/summary', {
+                        credentials: 'include',
+                        cache: 'no-store',
+                        headers: {
+                            'Cache-Control': 'no-cache',
+                            'Pragma': 'no-cache'
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        const newAmbassadors = data.ambassadors || [];
+                        
+                        // Process and add risk assessment
+                        const processedAmbassadors = newAmbassadors.map(amb => ({
+                            ...amb,
+                            isActive: isActiveNow(amb),
+                            isAtRisk: isAtRisk(amb),
+                            riskLevel: getRiskLevel(amb)
+                        }));
+                        
+                        // Detect changes and show notifications
+                        if (ambassadors.length > 0) {
+                            detectChanges(processedAmbassadors);
+                        }
+                        
+                        setPreviousAmbassadors(ambassadors);
+                        setAmbassadors(processedAmbassadors);
+                        setLastUpdate(new Date());
+                        lastUpdateRef.current = new Date();
+                        
+                        // Update recent activity log
+                        updateRecentActivity(processedAmbassadors);
+                    } else if (response.status === 401) {
+                        window.location.href = '/admin-signin.html';
+                    }
+                } catch (error) {
+                    console.error('Error fetching journey data:', error);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            // Get risk level for ambassador
+            const getRiskLevel = (ambassador) => {
+                if (!ambassador.startDate) return 'low';
+                
+                const daysSinceStart = Math.floor((Date.now() - ambassador.startDate) / (1000 * 60 * 60 * 24));
+                const expectedProgress = Math.min(100, Math.round((daysSinceStart / 365) * 100));
+                const progressDelta = ambassador.overallProgress - expectedProgress;
+                
+                if (progressDelta < -30) return 'high';
+                if (progressDelta < -15) return 'medium';
+                return 'low';
+            };
+
+            // Update recent activity log
+            const updateRecentActivity = (newAmbassadors) => {
+                const newActivities = [];
+                
+                newAmbassadors.forEach(newAmb => {
+                    const oldAmb = ambassadors.find(a => a.ambassadorId === newAmb.ambassadorId);
+                    
+                    if (!oldAmb) {
+                        // New ambassador
+                        newActivities.push({
+                            id: Date.now() + Math.random(),
+                            ambassadorId: newAmb.ambassadorId,
+                            ambassadorName: newAmb.ambassadorName,
+                            type: 'new',
+                            message: `New ambassador joined`,
+                            timestamp: Date.now(),
+                            icon: 'bx-user-plus'
+                        });
+                    } else {
+                        // Check for progress changes
+                        if (newAmb.overallProgress > oldAmb.overallProgress) {
+                            const change = newAmb.overallProgress - oldAmb.overallProgress;
+                            newActivities.push({
+                                id: Date.now() + Math.random(),
+                                ambassadorId: newAmb.ambassadorId,
+                                ambassadorName: newAmb.ambassadorName,
+                                type: 'progress',
+                                message: `Progress increased by ${change}%`,
+                                progress: newAmb.overallProgress,
+                                change: change,
+                                timestamp: Date.now(),
+                                icon: 'bx-trending-up'
+                            });
+                        }
+                        
+                        // Check for task completions
+                        if (newAmb.completedTasks > oldAmb.completedTasks) {
+                            const tasksCompleted = newAmb.completedTasks - oldAmb.completedTasks;
+                            newActivities.push({
+                                id: Date.now() + Math.random(),
+                                ambassadorId: newAmb.ambassadorId,
+                                ambassadorName: newAmb.ambassadorName,
+                                type: 'task',
+                                message: `Completed ${tasksCompleted} task${tasksCompleted > 1 ? 's' : ''}`,
+                                tasks: tasksCompleted,
+                                timestamp: Date.now(),
+                                icon: 'bx-check-circle'
+                            });
+                        }
+                        
+                        // Check for month advancement
+                        if (newAmb.currentMonth > oldAmb.currentMonth) {
+                            newActivities.push({
+                                id: Date.now() + Math.random(),
+                                ambassadorId: newAmb.ambassadorId,
+                                ambassadorName: newAmb.ambassadorName,
+                                type: 'month',
+                                message: `Advanced to Month ${newAmb.currentMonth}`,
+                                month: newAmb.currentMonth,
+                                timestamp: Date.now(),
+                                icon: 'bx-chevrons-right'
+                            });
+                        }
+                    }
+                });
+                
+                if (newActivities.length > 0) {
+                    setRecentActivity(prev => [...newActivities, ...prev.slice(0, 9)]);
+                }
+            };
+
+            // Detect changes between old and new data
+            const detectChanges = (newAmbassadors) => {
+                newAmbassadors.forEach(newAmb => {
+                    const oldAmb = ambassadors.find(a => a.ambassadorId === newAmb.ambassadorId);
+                    
+                    if (!oldAmb) return;
+                    
+                    // Detect progress changes
+                    if (newAmb.overallProgress > oldAmb.overallProgress) {
+                        const change = newAmb.overallProgress - oldAmb.overallProgress;
+                        showToast(
+                            `🎉 ${newAmb.ambassadorName} progressed from ${oldAmb.overallProgress}% to ${newAmb.overallProgress}% (+${change}%)`,
+                            'success',
+                            'bx-trending-up'
+                        );
+                        
+                        // Flash the row
+                        setFlashingRows(prev => new Set(prev).add(newAmb.ambassadorId));
+                        setTimeout(() => {
+                            setFlashingRows(prev => {
+                                const next = new Set(prev);
+                                next.delete(newAmb.ambassadorId);
+                                return next;
+                            });
+                        }, 1000);
+                    }
+                    
+                    // Detect task completions
+                    if (newAmb.completedTasks > oldAmb.completedTasks) {
+                        const tasksCompleted = newAmb.completedTasks - oldAmb.completedTasks;
+                        showToast(
+                            `✅ ${newAmb.ambassadorName} completed ${tasksCompleted} task${tasksCompleted > 1 ? 's' : ''}!`,
+                            'info',
+                            'bx-check-circle'
+                        );
+                    }
+                    
+                    // Detect month advancement
+                    if (newAmb.currentMonth > oldAmb.currentMonth) {
+                        showToast(
+                            `🚀 ${newAmb.ambassadorName} advanced to Month ${newAmb.currentMonth}!`,
+                            'success',
+                            'bx-chevrons-right'
+                        );
+                    }
+                    
+                    // Detect becoming active
+                    if (newAmb.isActive && !oldAmb.isActive) {
+                        showToast(
+                            `🟢 ${newAmb.ambassadorName} is now active!`,
+                            'info',
+                            'bx-circle'
+                        );
+                    }
+                });
+            };
+
+            // Real-time auto-refresh every 3 seconds (configurable)
+            useEffect(() => {
+                fetchJourneyData();
+                
+                if (autoRefresh) {
+                    const interval = setInterval(fetchJourneyData, refreshRate);
+                    return () => clearInterval(interval);
+                }
+            }, [autoRefresh, refreshRate]);
+
+            // Fetch detailed journey for specific ambassador
+            const fetchAmbassadorDetail = async (ambassadorId) => {
+                try {
+                    const response = await fetch(`/admin/api/ambassadors/${ambassadorId}/journey`, {
+                        credentials: 'include'
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        setSelectedAmbassador(data);
+                    }
+                } catch (error) {
+                    console.error('Error fetching ambassador detail:', error);
+                }
+            };
+
+            // Filter and sort ambassadors
+            const getFilteredAmbassadors = () => {
+                let filtered = [...ambassadors];
+
+                // Apply search filter
+                if (searchQuery) {
+                    const query = searchQuery.toLowerCase();
+                    filtered = filtered.filter(amb => 
+                        amb.ambassadorName.toLowerCase().includes(query) ||
+                        amb.ambassadorEmail.toLowerCase().includes(query)
+                    );
+                }
+
+                // Apply status filter
+                if (filter !== 'all') {
+                    if (filter === 'active') {
+                        filtered = filtered.filter(amb => amb.currentMonth <= 12 && amb.overallProgress < 100);
+                    } else if (filter === 'completed') {
+                        filtered = filtered.filter(amb => amb.overallProgress === 100);
+                    } else if (filter === 'at-risk') {
+                        filtered = filtered.filter(amb => amb.isAtRisk);
+                    } else if (filter === 'live') {
+                        filtered = filtered.filter(amb => amb.isActive);
+                    }
+                }
+
+                // Apply active filter
+                if (activeFilter !== 'all') {
+                    if (activeFilter === 'live-now') {
+                        filtered = filtered.filter(amb => amb.isActive);
+                    } else if (activeFilter === 'risk-high') {
+                        filtered = filtered.filter(amb => amb.riskLevel === 'high');
+                    } else if (activeFilter === 'risk-medium') {
+                        filtered = filtered.filter(amb => amb.riskLevel === 'medium');
+                    } else if (activeFilter === 'risk-low') {
+                        filtered = filtered.filter(amb => amb.riskLevel === 'low');
+                    }
+                }
+
+                // Apply sorting
+                filtered.sort((a, b) => {
+                    switch (sortBy) {
+                        case 'progress':
+                            return b.overallProgress - a.overallProgress;
+                        case 'month':
+                            return b.currentMonth - a.currentMonth;
+                        case 'name':
+                            return a.ambassadorName.localeCompare(b.ambassadorName);
+                        case 'recent':
+                            return (b.lastUpdated || 0) - (a.lastUpdated || 0);
+                        case 'tasks':
+                            return b.completedTasks - a.completedTasks;
+                        case 'risk':
+                            const riskOrder = { high: 3, medium: 2, low: 1 };
+                            return riskOrder[b.riskLevel] - riskOrder[a.riskLevel];
+                        default:
+                            return 0;
+                    }
+                });
+
+                return filtered;
+            };
+
+            const filteredAmbassadors = getFilteredAmbassadors();
+
+            // Calculate statistics
+            const stats = useMemo(() => {
+                const total = ambassadors.length;
+                const active = ambassadors.filter(a => a.currentMonth <= 12 && a.overallProgress < 100).length;
+                const completed = ambassadors.filter(a => a.overallProgress === 100).length;
+                const avgProgress = total > 0 
+                    ? Math.round(ambassadors.reduce((sum, a) => sum + a.overallProgress, 0) / total)
+                    : 0;
+                const atRisk = ambassadors.filter(a => a.isAtRisk).length;
+                const liveNow = ambassadors.filter(a => a.isActive).length;
+                const highRisk = ambassadors.filter(a => a.riskLevel === 'high').length;
+                const mediumRisk = ambassadors.filter(a => a.riskLevel === 'medium').length;
+                const lowRisk = ambassadors.filter(a => a.riskLevel === 'low').length;
+                
+                return {
+                    total,
+                    active,
+                    completed,
+                    avgProgress,
+                    atRisk,
+                    liveNow,
+                    highRisk,
+                    mediumRisk,
+                    lowRisk
+                };
+            }, [ambassadors]);
+
+            // Progress distribution data for chart
+            const progressDistribution = [
+                { range: '0-25%', count: ambassadors.filter(a => a.overallProgress < 25).length },
+                { range: '25-50%', count: ambassadors.filter(a => a.overallProgress >= 25 && a.overallProgress < 50).length },
+                { range: '50-75%', count: ambassadors.filter(a => a.overallProgress >= 50 && a.overallProgress < 75).length },
+                { range: '75-100%', count: ambassadors.filter(a => a.overallProgress >= 75).length }
+            ];
+
+            // Risk distribution data for pie chart
+            const riskDistribution = [
+                { name: 'High Risk', value: stats.highRisk, color: '#ef4444' },
+                { name: 'Medium Risk', value: stats.mediumRisk, color: '#f59e0b' },
+                { name: 'Low Risk', value: stats.lowRisk, color: '#10b981' }
+            ];
+
+            const getProgressColor = (progress) => {
+                if (progress >= 75) return 'text-green-600';
+                if (progress >= 50) return 'text-blue-600';
+                if (progress >= 25) return 'text-orange-600';
+                return 'text-red-600';
+            };
+
+            const getProgressBgColor = (progress) => {
+                if (progress >= 75) return 'bg-green-600';
+                if (progress >= 50) return 'bg-blue-600';
+                if (progress >= 25) return 'bg-orange-600';
+                return 'bg-red-600';
+            };
+
+            if (loading) {
+                return (
+                    <div className="flex items-center justify-center h-screen">
+                        <div className="text-center">
+                            <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-purple-600 mx-auto mb-4"></div>
+                            <p className="text-gray-600 text-lg">Loading real-time journey data...</p>
+                            <p className="text-sm text-gray-500 mt-2">Preparing live updates</p>
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    {/* Toast Notifications */}
+                    <div className="fixed top-4 right-4 z-50 space-y-2 max-w-md">
+                        {toasts.map(toast => (
+                            <div
+                                key={toast.id}
+                                className={`toast-notification bg-white rounded-lg shadow-xl p-4 border-l-4 ${
+                                    toast.type === 'success' ? 'border-green-500' : 
+                                    toast.type === 'info' ? 'border-blue-500' : 'border-gray-500'
+                                }`}
+                            >
+                                <div className="flex items-start gap-3">
+                                    <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
+                                        toast.type === 'success' ? 'bg-green-100' : 'bg-blue-100'
+                                    }`}>
+                                        <i className={`bx ${toast.icon} ${
+                                            toast.type === 'success' ? 'text-green-600' : 'text-blue-600'
+                                        } text-lg`}></i>
+                                    </div>
+                                    <div className="flex-1 text-sm text-gray-800">{toast.message}</div>
+                                    <button
+                                        onClick={() => setToasts(prev => prev.filter(t => t.id !== toast.id))}
+                                        className="text-gray-400 hover:text-gray-600"
+                                    >
+                                        <i className="bx bx-x text-xl"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Navigation */}
+                    <nav className="bg-white shadow-lg border-b sticky top-0 z-10">
+                        <div className="container mx-auto px-4">
+                            <div className="flex justify-between items-center h-16">
+                                <div className="flex items-center space-x-4">
+                                    <a href="/admin-dashboard.html" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
+                                        <i className="bx bx-arrow-back text-2xl text-purple-600"></i>
+                                        <span className="text-sm text-gray-600">Back to Dashboard</span>
+                                    </a>
+                                    <div className="w-px h-8 bg-gray-300"></div>
+                                    <div className="flex items-center space-x-2">
+                                        <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-purple-800 rounded-lg"></div>
+                                        <span className="text-xl font-bold text-gray-900">Journey Tracker</span>
+                                    </div>
+                                </div>
+                                <div className="flex items-center space-x-4">
+                                    <div className="flex items-center gap-2 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg px-4 py-2 shadow-sm">
+                                        <div className="w-3 h-3 bg-green-500 rounded-full live-indicator"></div>
+                                        <span className="text-sm font-bold text-green-700">LIVE TRACKING</span>
+                                        <span className="text-xs text-green-600">Updated {timeAgo(lastUpdate)}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-sm text-gray-600">Refresh:</span>
+                                        <select 
+                                            value={refreshRate}
+                                            onChange={(e) => setRefreshRate(Number(e.target.value))}
+                                            className="text-sm border border-gray-300 rounded px-2 py-1"
+                                        >
+                                            <option value={1000}>1 sec</option>
+                                            <option value={3000}>3 sec</option>
+                                            <option value={5000}>5 sec</option>
+                                            <option value={10000}>10 sec</option>
+                                        </select>
+                                    </div>
+                                    <button
+                                        onClick={() => setAutoRefresh(!autoRefresh)}
+                                        className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+                                            autoRefresh 
+                                                ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-md hover:shadow-lg' 
+                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                        }`}
+                                    >
+                                        <i className={`bx bx-refresh ${autoRefresh ? 'bx-spin' : ''} mr-2`}></i>
+                                        {autoRefresh ? 'LIVE' : 'PAUSED'}
+                                    </button>
+                                    <button
+                                        onClick={fetchJourneyData}
+                                        className="px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-800 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-purple-900 transition-all shadow-md hover:shadow-lg"
+                                    >
+                                        <i className="bx bx-refresh mr-2"></i>
+                                        Refresh Now
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </nav>
+
+                    <div className="container mx-auto px-4 py-8">
+                        {/* Header */}
+                        <div className="mb-8">
+                            <h1 className="text-3xl font-bold text-gray-900 mb-2">Real-Time Journey Progress</h1>
+                            <p className="text-gray-600">Monitor ambassador journey completion and identify who needs support</p>
+                        </div>
+
+                        {/* Statistics Cards */}
+                        <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-8 gap-4 mb-8">
+                            <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200 hover:shadow-md transition-all">
+                                <div className="text-xs text-gray-500 uppercase font-semibold mb-1">Total</div>
+                                <div className="text-2xl font-bold text-gray-900">{stats.total}</div>
+                            </div>
+                            <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-4 shadow-sm border border-green-200 hover:shadow-md transition-all">
+                                <div className="text-xs text-green-600 uppercase font-semibold mb-1 flex items-center gap-1">
+                                    <div className="w-2 h-2 bg-green-500 rounded-full live-indicator"></div>
+                                    Live Now
+                                </div>
+                                <div className="text-2xl font-bold text-green-700">{stats.liveNow}</div>
+                            </div>
+                            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4 shadow-sm border border-blue-200 hover:shadow-md transition-all">
+                                <div className="text-xs text-blue-600 uppercase font-semibold mb-1">Active</div>
+                                <div className="text-2xl font-bold text-blue-700">{stats.active}</div>
+                            </div>
+                            <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-4 shadow-sm border border-green-200 hover:shadow-md transition-all">
+                                <div className="text-xs text-green-600 uppercase font-semibold mb-1">Completed</div>
+                                <div className="text-2xl font-bold text-green-700">{stats.completed}</div>
+                            </div>
+                            <div className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl p-4 shadow-sm border border-orange-200 hover:shadow-md transition-all">
+                                <div className="text-xs text-orange-600 uppercase font-semibold mb-1">At Risk</div>
+                                <div className="text-2xl font-bold text-orange-700">{stats.atRisk}</div>
+                            </div>
+                            <div className="bg-gradient-to-br from-purple-50 to-violet-50 rounded-xl p-4 shadow-sm border border-purple-200 hover:shadow-md transition-all">
+                                <div className="text-xs text-purple-600 uppercase font-semibold mb-1">Avg Progress</div>
+                                <div className="text-2xl font-bold text-purple-700">{stats.avgProgress}%</div>
+                            </div>
+                            <div className="bg-gradient-to-br from-red-50 to-rose-50 rounded-xl p-4 shadow-sm border border-red-200 hover:shadow-md transition-all">
+                                <div className="text-xs text-red-600 uppercase font-semibold mb-1">High Risk</div>
+                                <div className="text-2xl font-bold text-red-700">{stats.highRisk}</div>
+                            </div>
+                            <div className="bg-gradient-to-br from-yellow-50 to-amber-50 rounded-xl p-4 shadow-sm border border-yellow-200 hover:shadow-md transition-all">
+                                <div className="text-xs text-yellow-600 uppercase font-semibold mb-1">Medium Risk</div>
+                                <div className="text-2xl font-bold text-yellow-700">{stats.mediumRisk}</div>
+                            </div>
+                        </div>
+
+                        {/* Charts Section */}
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                            {/* Progress Distribution Chart */}
+                            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                                <h3 className="text-lg font-semibold text-gray-900 mb-4">Progress Distribution</h3>
+                                <ResponsiveContainer width="100%" height={250}>
+                                    <BarChart data={progressDistribution}>
+                                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                                        <XAxis dataKey="range" stroke="#6b7280" />
+                                        <YAxis stroke="#6b7280" />
+                                        <Tooltip 
+                                            contentStyle={{ 
+                                                backgroundColor: 'white', 
+                                                border: '1px solid #e5e7eb',
+                                                borderRadius: '8px',
+                                                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                                            }}
+                                        />
+                                        <Bar dataKey="count" fill="#4b0d7f" radius={[4, 4, 0, 0]} />
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            </div>
+
+                            {/* Risk Distribution Pie Chart */}
+                            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                                <h3 className="text-lg font-semibold text-gray-900 mb-4">Risk Distribution</h3>
+                                <ResponsiveContainer width="100%" height={250}>
+                                    <PieChart>
+                                        <Pie
+                                            data={riskDistribution}
+                                            cx="50%"
+                                            cy="50%"
+                                            labelLine={false}
+                                            label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                                            outerRadius={80}
+                                            fill="#8884d8"
+                                            dataKey="value"
+                                        >
+                                            {riskDistribution.map((entry, index) => (
+                                                <Cell key={`cell-${index}`} fill={entry.color} />
+                                            ))}
+                                        </Pie>
+                                        <Tooltip 
+                                            contentStyle={{ 
+                                                backgroundColor: 'white', 
+                                                border: '1px solid #e5e7eb',
+                                                borderRadius: '8px',
+                                                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                                            }}
+                                        />
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            </div>
+                        </div>
+
+                        {/* Recent Activity Sidebar */}
+                        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-8">
+                            <div className="lg:col-span-3">
+                                {/* Filters and Search */}
+                                <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200 mb-6">
+                                    <div className="flex flex-wrap items-center gap-4">
+                                        <div className="flex-1 min-w-[200px]">
+                                            <div className="relative">
+                                                <i className="bx bx-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                                <input
+                                                    type="text"
+                                                    placeholder="Search by name or email..."
+                                                    value={searchQuery}
+                                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-2 flex-wrap">
+                                            <button
+                                                onClick={() => setFilter('all')}
+                                                className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+                                                    filter === 'all' 
+                                                        ? 'bg-gradient-to-r from-purple-600 to-purple-800 text-white shadow-md' 
+                                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                }`}
+                                            >
+                                                All ({ambassadors.length})
+                                            </button>
+                                            <button
+                                                onClick={() => setFilter('live')}
+                                                className={`px-4 py-2 rounded-lg font-semibold transition-all flex items-center gap-2 ${
+                                                    filter === 'live' 
+                                                        ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-md' 
+                                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                }`}
+                                            >
+                                                {filter === 'live' && <div className="w-2 h-2 bg-white rounded-full live-indicator"></div>}
+                                                Live Now ({stats.liveNow})
+                                            </button>
+                                            <button
+                                                onClick={() => setFilter('active')}
+                                                className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+                                                    filter === 'active' 
+                                                        ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-md' 
+                                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                }`}
+                                            >
+                                                Active ({stats.active})
+                                            </button>
+                                            <button
+                                                onClick={() => setFilter('at-risk')}
+                                                className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+                                                    filter === 'at-risk' 
+                                                        ? 'bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-md' 
+                                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                }`}
+                                            >
+                                                At Risk ({stats.atRisk})
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="flex flex-wrap items-center gap-4 mt-4">
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={() => setActiveFilter('all')}
+                                                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                                                    activeFilter === 'all' 
+                                                        ? 'bg-gray-800 text-white' 
+                                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                }`}
+                                            >
+                                                All Risks
+                                            </button>
+                                            <button
+                                                onClick={() => setActiveFilter('risk-high')}
+                                                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                                                    activeFilter === 'risk-high' 
+                                                        ? 'risk-indicator-high' 
+                                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                }`}
+                                            >
+                                                High Risk
+                                            </button>
+                                            <button
+                                                onClick={() => setActiveFilter('risk-medium')}
+                                                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                                                    activeFilter === 'risk-medium' 
+                                                        ? 'risk-indicator-medium' 
+                                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                }`}
+                                            >
+                                                Medium Risk
+                                            </button>
+                                        </div>
+                                        <select
+                                            value={sortBy}
+                                            onChange={(e) => setSortBy(e.target.value)}
+                                            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                        >
+                                            <option value="recent">Sort by Recent Activity</option>
+                                            <option value="progress">Sort by Progress</option>
+                                            <option value="month">Sort by Month</option>
+                                            <option value="tasks">Sort by Tasks</option>
+                                            <option value="risk">Sort by Risk Level</option>
+                                            <option value="name">Sort by Name</option>
+                                        </select>
+                                        <div className="flex gap-2 ml-auto">
+                                            <button
+                                                onClick={() => setViewMode('list')}
+                                                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                                                    viewMode === 'list' 
+                                                        ? 'bg-purple-600 text-white' 
+                                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                }`}
+                                            >
+                                                <i className="bx bx-list-ul"></i>
+                                            </button>
+                                            <button
+                                                onClick={() => setViewMode('grid')}
+                                                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                                                    viewMode === 'grid' 
+                                                        ? 'bg-purple-600 text-white' 
+                                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                }`}
+                                            >
+                                                <i className="bx bx-grid-alt"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Ambassadors Table */}
+                                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full">
+                                            <thead className="bg-gray-50 border-b border-gray-200">
+                                                <tr>
+                                                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                                        Ambassador
+                                                    </th>
+                                                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                                        Current Month
+                                                    </th>
+                                                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                                        Overall Progress
+                                                    </th>
+                                                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                                        Tasks Completed
+                                                    </th>
+                                                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                                        Last Activity
+                                                    </th>
+                                                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                                        Actions
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-gray-200">
+                                                {filteredAmbassadors.map((ambassador) => (
+                                                    <tr 
+                                                        key={ambassador.ambassadorId} 
+                                                        className={`hover:bg-gray-50 transition-all ${
+                                                            flashingRows.has(ambassador.ambassadorId) ? 'row-flash' : ''
+                                                        }`}
+                                                    >
+                                                        <td className="px-6 py-4">
+                                                            <div className="flex items-center gap-2">
+                                                                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                                                                    ambassador.riskLevel === 'high' ? 'bg-red-100' :
+                                                                    ambassador.riskLevel === 'medium' ? 'bg-orange-100' :
+                                                                    'bg-green-100'
+                                                                }`}>
+                                                                    <i className={`bx bx-user text-lg ${
+                                                                        ambassador.riskLevel === 'high' ? 'text-red-600' :
+                                                                        ambassador.riskLevel === 'medium' ? 'text-orange-600' :
+                                                                        'text-green-600'
+                                                                    }`}></i>
+                                                                </div>
+                                                                <div>
+                                                                    <div className="font-semibold text-gray-900 flex items-center gap-2">
+                                                                        {ambassador.ambassadorName}
+                                                                        {ambassador.isActive && (
+                                                                            <span className="px-2 py-0.5 bg-green-100 text-green-700 rounded-full text-xs font-semibold flex items-center gap-1">
+                                                                                <div className="w-1.5 h-1.5 bg-green-500 rounded-full activity-dot-live"></div>
+                                                                                LIVE
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
+                                                                    <div className="text-sm text-gray-600">{ambassador.ambassadorEmail}</div>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-6 py-4">
+                                                            <span className={`px-3 py-1.5 rounded-lg font-bold text-sm ${
+                                                                ambassador.currentMonth === 12 ? 'month-badge-completed' :
+                                                                ambassador.currentMonth >= 9 ? 'month-badge-current' :
+                                                                'month-badge-upcoming'
+                                                            }`}>
+                                                                Month {ambassador.currentMonth}
+                                                            </span>
+                                                        </td>
+                                                        <td className="px-6 py-4">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="flex-1">
+                                                                    <div className="w-full bg-gray-200 rounded-full h-2.5">
+                                                                        <div
+                                                                            className={`h-2.5 rounded-full progress-bar-animate ${getProgressBgColor(ambassador.overallProgress)}`}
+                                                                            style={{ 
+                                                                                width: `${ambassador.overallProgress}%`,
+                                                                                '--progress-width': `${ambassador.overallProgress}%`
+                                                                            }}
+                                                                        ></div>
+                                                                    </div>
+                                                                </div>
+                                                                <span className={`font-bold text-sm ${getProgressColor(ambassador.overallProgress)}`}>
+                                                                    {ambassador.overallProgress}%
+                                                                </span>
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-6 py-4">
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="text-gray-900 font-bold">
+                                                                    {ambassador.completedTasks} / {ambassador.totalTasks}
+                                                                </span>
+                                                                <div className="text-xs text-gray-500">
+                                                                    {ambassador.totalTasks > 0 ? 
+                                                                        Math.round((ambassador.completedTasks / ambassador.totalTasks) * 100) : 0}%
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-6 py-4">
+                                                            <div className="text-sm">
+                                                                <div className="text-gray-900 font-medium">
+                                                                    {timeAgo(ambassador.lastUpdated)}
+                                                                </div>
+                                                                <div className="text-xs text-gray-500">
+                                                                    {ambassador.lastUpdated ? 
+                                                                        new Date(ambassador.lastUpdated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 
+                                                                        'Never'
+                                                                    }
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-6 py-4">
+                                                            <div className="flex gap-2">
+                                                                <button
+                                                                    onClick={() => fetchAmbassadorDetail(ambassador.ambassadorId)}
+                                                                    className="px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-800 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-purple-900 transition-all text-sm shadow-sm hover:shadow"
+                                                                >
+                                                                    <i className="bx bx-detail mr-1"></i>
+                                                                    Details
+                                                                </button>
+                                                                {ambassador.isAtRisk && (
+                                                                    <button className="px-3 py-2 bg-red-100 text-red-700 rounded-lg font-semibold hover:bg-red-200 transition-colors text-sm">
+                                                                        <i className="bx bx-bell mr-1"></i>
+                                                                        Alert
+                                                                    </button>
+                                                                )}
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    {filteredAmbassadors.length === 0 && (
+                                        <div className="text-center py-12">
+                                            <i className="bx bx-search text-6xl text-gray-300 mb-4"></i>
+                                            <p className="text-gray-600 text-lg">No ambassadors found matching your filters</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Recent Activity Sidebar */}
+                            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 h-fit">
+                                <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
+                                <div className="space-y-4">
+                                    {recentActivity.length === 0 ? (
+                                        <div className="text-center py-8">
+                                            <i className="bx bx-time text-4xl text-gray-300 mb-2"></i>
+                                            <p className="text-gray-500">No recent activity</p>
+                                        </div>
+                                    ) : (
+                                        recentActivity.map((activity) => (
+                                            <div key={activity.id} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                                                    activity.type === 'progress' ? 'bg-green-100 text-green-600' :
+                                                    activity.type === 'task' ? 'bg-blue-100 text-blue-600' :
+                                                    activity.type === 'month' ? 'bg-purple-100 text-purple-600' :
+                                                    'bg-gray-100 text-gray-600'
+                                                }`}>
+                                                    <i className={`bx ${activity.icon}`}></i>
+                                                </div>
+                                                <div className="flex-1">
+                                                    <div className="font-medium text-gray-900">{activity.ambassadorName}</div>
+                                                    <div className="text-sm text-gray-600">{activity.message}</div>
+                                                    {activity.progress && (
+                                                        <div className="text-xs text-gray-500 mt-1">
+                                                            Now at {activity.progress}% {activity.change > 0 ? `(+${activity.change}%)` : ''}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className="text-xs text-gray-500">
+                                                    {timeAgo(activity.timestamp)}
+                                                </div>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                                
+                                <div className="mt-6 pt-6 border-t border-gray-200">
+                                    <h4 className="text-sm font-semibold text-gray-900 mb-3">Quick Stats</h4>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div className="bg-green-50 rounded-lg p-3">
+                                            <div className="text-xs text-green-600 font-semibold">Active Now</div>
+                                            <div className="text-lg font-bold text-green-700">{stats.liveNow}</div>
+                                        </div>
+                                        <div className="bg-purple-50 rounded-lg p-3">
+                                            <div className="text-xs text-purple-600 font-semibold">Updates Today</div>
+                                            <div className="text-lg font-bold text-purple-700">
+                                                {ambassadors.filter(a => a.lastUpdated && 
+                                                    new Date(a.lastUpdated).toDateString() === new Date().toDateString()
+                                                ).length}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Detail Modal */}
+                    {selectedAmbassador && (
+                        <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+                            <div className="bg-white rounded-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+                                <div className="p-6 border-b border-gray-200 flex items-center justify-between bg-gradient-to-r from-purple-600 to-purple-800 text-white">
+                                    <div>
+                                        <h2 className="text-2xl font-bold">
+                                            Journey Details
+                                        </h2>
+                                        <p className="text-purple-200 mt-1">{selectedAmbassador.ambassadorId}</p>
+                                    </div>
+                                    <button
+                                        onClick={() => setSelectedAmbassador(null)}
+                                        className="text-white hover:text-purple-200 text-3xl transition-colors"
+                                    >
+                                        ×
+                                    </button>
+                                </div>
+                                
+                                <div className="flex-1 overflow-y-auto p-6">
+                                    {/* Statistics Overview */}
+                                    <div className="grid grid-cols-4 gap-4 mb-6">
+                                        <div className="bg-purple-50 rounded-xl p-4 border border-purple-200">
+                                            <div className="text-sm text-purple-600 font-semibold mb-1">Overall Progress</div>
+                                            <div className="text-3xl font-bold text-purple-700">
+                                                {selectedAmbassador.statistics.overallProgress}%
+                                            </div>
+                                        </div>
+                                        <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
+                                            <div className="text-sm text-blue-600 font-semibold mb-1">Current Month</div>
+                                            <div className="text-3xl font-bold text-blue-700">
+                                                {selectedAmbassador.currentMonth}
+                                            </div>
+                                        </div>
+                                        <div className="bg-green-50 rounded-xl p-4 border border-green-200">
+                                            <div className="text-sm text-green-600 font-semibold mb-1">Tasks Completed</div>
+                                            <div className="text-3xl font-bold text-green-700">
+                                                {selectedAmbassador.statistics.completedCount}/{selectedAmbassador.statistics.totalTasks}
+                                            </div>
+                                        </div>
+                                        <div className="bg-orange-50 rounded-xl p-4 border border-orange-200">
+                                            <div className="text-sm text-orange-600 font-semibold mb-1">Started</div>
+                                            <div className="text-sm font-semibold text-orange-700">
+                                                {new Date(selectedAmbassador.startDate).toLocaleDateString()}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Month-by-Month Progress */}
+                                    <div className="space-y-4">
+                                        {selectedAmbassador.months.map((month) => (
+                                            <div
+                                                key={month.month}
+                                                className={`border-2 rounded-xl p-4 ${
+                                                    month.isCurrentMonth
+                                                        ? 'border-purple-500 bg-purple-50'
+                                                        : month.isCompleted
+                                                        ? 'border-green-500 bg-green-50'
+                                                        : 'border-gray-200 bg-gray-50'
+                                                }`}
+                                            >
+                                                <div className="flex items-center justify-between mb-3">
+                                                    <div>
+                                                        <h4 className="font-bold text-gray-900">
+                                                            Month {month.month}: {month.title}
+                                                        </h4>
+                                                        <p className="text-sm text-gray-600 mt-1">{month.milestone}</p>
+                                                    </div>
+                                                    <span
+                                                        className={`px-3 py-1 rounded-lg text-xs font-bold ${
+                                                            month.isCompleted
+                                                                ? 'bg-green-200 text-green-800'
+                                                                : month.isCurrentMonth
+                                                                ? 'bg-purple-200 text-purple-800'
+                                                                : 'bg-gray-200 text-gray-800'
+                                                        }`}
+                                                    >
+                                                        {month.isCompleted ? '✓ Completed' : month.isCurrentMonth ? '→ Current' : '⏳ Upcoming'}
+                                                    </span>
+                                                </div>
+
+                                                <div className="mb-3">
+                                                    <div className="flex items-center justify-between text-sm mb-1">
+                                                        <span className="text-gray-600">
+                                                            Progress: {month.completedTasks}/{month.totalTasks} tasks
+                                                        </span>
+                                                        <span className="font-semibold">{month.progress}%</span>
+                                                    </div>
+                                                    <div className="w-full bg-gray-200 rounded-full h-2">
+                                                        <div
+                                                            className="bg-purple-600 h-2 rounded-full transition-all"
+                                                            style={{ width: `${month.progress}%` }}
+                                                        ></div>
+                                                    </div>
+                                                </div>
+
+                                                <div className="space-y-2">
+                                                    {month.tasks.map((task) => (
+                                                        <div
+                                                            key={task.id}
+                                                            className={`flex items-start gap-2 text-sm p-2 rounded ${
+                                                                task.completed ? 'bg-green-100 highlight-change' : 'bg-white'
+                                                            }`}
+                                                        >
+                                                            <i
+                                                                className={`bx ${
+                                                                    task.completed ? 'bx-check-circle text-green-600' : 'bx-circle text-gray-400'
+                                                                } text-lg flex-shrink-0`}
+                                                            ></i>
+                                                            <span className={task.completed ? 'text-gray-600 line-through' : 'text-gray-900'}>
+                                                                {task.text}
+                                                                {task.critical && (
+                                                                    <span className="ml-2 px-2 py-0.5 bg-red-100 text-red-700 text-xs rounded font-semibold">
+                                                                        CRITICAL
+                                                                    </span>
+                                                                )}
+                                                            </span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // Render the app
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<AdminJourneyTracker />);
+    </script>
+</body>
+</html>

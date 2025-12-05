@@ -8,21 +8,24 @@
     "dev:server": "nodemon server.js",
     "dev": "concurrently \"npm run dev:css\" \"npm run dev:server\"",
     "build:css": "tailwindcss -i ./src/styles/input.css -o ./public/css/styles.css --minify",
-    "start": "node server.js"
+    "start": "nodemon server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@supabase/supabase-js": "^2.86.0",
     "csv-parser": "^3.2.0",
+    "dotenv": "^17.2.3",
     "express": "^5.1.0",
-    "multer": "^1.4.5-lts.1"
+    "multer": "^1.4.5-lts.1",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.21",
     "concurrently": "^9.2.1",
-    "nodemon": "^3.1.10",
+    "nodemon": "^3.1.11",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.18"
   }

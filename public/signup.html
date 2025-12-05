@@ -1,197 +1,182 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>T4L Ambassador Workspace Sign-Up</title>
-    <link rel="stylesheet" href="css/styles.css" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-      body {
-        font-family: 'Inter', sans-serif;
-      }
-    </style>
-  </head>
 
-  <body class="bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center min-h-screen p-4">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>T4L Ambassador Workspace Sign-Up</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+</head>
 
-    <!-- Main Container -->
-    <div class="flex flex-col lg:flex-row bg-white shadow-2xl rounded-2xl overflow-hidden w-full max-w-[950px] lg:h-[720px] relative z-10">
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center min-h-screen p-4">
 
-      <!-- Left: Form -->
-      <div class="w-full lg:w-1/2 flex flex-col justify-center px-8 sm:px-12 py-10 lg:py-12">
-        <div class="mb-8">
-          <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2 tracking-tight">
-            Create your account
-          </h1>
-          <p class="text-gray-600 text-sm sm:text-base">
-            Join the <span class="font-semibold" style="color:#4b0d7f">T4L Ambassador</span> community
-          </p>
-        </div>
+  <!-- Main Container -->
+  <div
+    class="flex flex-col lg:flex-row bg-white shadow-2xl rounded-2xl overflow-hidden w-full max-w-[950px] lg:h-[720px] relative z-10">
 
-        <!-- Form -->
-        <form class="space-y-5" method="POST" action="/register/ambassador" id="amb-signup-form">
-          <!-- Name -->
-          <div>
-            <label class="text-sm font-semibold text-gray-800 block mb-2">Name</label>
-            <input 
-              type="text" 
-              name="name"
-              placeholder="Your full name" 
-              class="w-full border border-gray-300 rounded-lg px-4 py-3.5 text-gray-900 placeholder-gray-400 focus:ring-2 focus:border-transparent focus:outline-none transition"
-              required
-            />
-          </div>
-
-          <!-- Email -->
-          <div>
-            <label class="text-sm font-semibold text-gray-800 block mb-2">Email Address</label>
-            <input 
-              type="email" 
-              name="email"
-              placeholder="you@company.com" 
-              class="w-full border border-gray-300 rounded-lg px-4 py-3.5 text-gray-900 placeholder-gray-400 focus:ring-2 focus:border-transparent focus:outline-none transition"
-              required
-            />
-          </div>
-
-          <!-- Access Code -->
-          <div>
-            <div class="flex items-center justify-between mb-2">
-              <label class="text-sm font-semibold text-gray-800">Access Code</label>
-              <span class="text-[11px] text-gray-500">Request from T4L admin</span>
-            </div>
-            <input 
-              type="text" 
-              name="accessCode"
-              placeholder="T4LA-XXXX" 
-              class="w-full border border-gray-300 rounded-lg px-4 py-3.5 text-gray-900 placeholder-gray-400 focus:ring-2 focus:border-transparent focus:outline-none transition uppercase"
-              required
-            />
-          </div>
-
-          <!-- Password -->
-          <div>
-            <label class="text-sm font-semibold text-gray-800 block mb-2">Password</label>
-            <input 
-              type="password" 
-              name="password"
-              minlength="8"
-              placeholder="••••••••" 
-              class="w-full border border-gray-300 rounded-lg px-4 py-3.5 text-gray-900 placeholder-gray-400 focus:ring-2 focus:border-transparent focus:outline-none transition"
-              required
-            />
-          </div>
-
-          <!-- Confirm Password -->
-          <div>
-            <label class="text-sm font-semibold text-gray-800 block mb-2">Confirm Password</label>
-            <input 
-              type="password" 
-              name="confirmPassword"
-              minlength="8"
-              placeholder="••••••••" 
-              class="w-full border border-gray-300 rounded-lg px-4 py-3.5 text-gray-900 placeholder-gray-400 focus:ring-2 focus:border-transparent focus:outline-none transition"
-              required
-            />
-            <p id="amb-password-error" class="mt-2 text-sm text-red-600 hidden">Passwords do not match.</p>
-          </div>
-
-          <!-- Terms -->
-          <div class="flex items-start gap-3 text-sm">
-            <input type="checkbox" name="terms" id="amb-terms" class="mt-1 w-4 h-4 rounded border-gray-300 cursor-pointer" required />
-            <label for="amb-terms" class="text-gray-700">I agree to <a href="#" class="font-semibold" style="color:#4b0d7f">Terms & Conditions</a></label>
-          </div>
-
-          <!-- Submit Button -->
-          <button 
-            type="submit" 
-            class="w-full text-white font-semibold py-3.5 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-[1.01] hover:opacity-95"
-            style="background-color:#4b0d7f"
-          >
-            Create Ambassador Account
-          </button>
-        </form>
-
-        <!-- Already have an account -->
-        <div class="mt-2 pt-3 border-t border-gray-200 text-center">
-          <p class="text-sm text-gray-600">
-            Already have an account?
-            <a href="/signin" class="font-semibold transition ml-1" style="color:#4b0d7f">Sign in</a>
-          </p>
-        </div>
+    <!-- Left: Form -->
+    <div class="w-full lg:w-1/2 flex flex-col justify-center px-8 sm:px-12 py-10 lg:py-12">
+      <div class="mb-8">
+        <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2 tracking-tight">
+          Create your account
+        </h1>
+        <p class="text-gray-600 text-sm sm:text-base">
+          Join the <span class="font-semibold" style="color:#4b0d7f">T4L Ambassador</span> community
+        </p>
       </div>
 
-      <!-- Right: Image -->
-      <div class="w-full lg:w-1/2 bg-gradient-to-br from-purple-50 to-purple-100 relative h-64 sm:h-80 lg:h-auto overflow-hidden">
-        <img 
-          src="/images/signin3.jpg" 
-          alt="T4L Ambassador Team" 
-          class="w-full h-full object-cover opacity-90"
-        />
-        <div class="absolute inset-0 bg-gradient-to-br from-purple-600/5 via-transparent to-purple-900/20"></div>
-        <div class="absolute inset-0 flex items-end p-8 sm:p-10">
-          <div class="text-white">
-            <h2 class="text-2xl sm:text-3xl font-bold mb-2 drop-shadow-lg">Join Our Community</h2>
-            <p class="text-sm sm:text-base text-white/90 drop-shadow">Connect, collaborate, and grow with fellow ambassadors</p>
-          </div>
+      <!-- Form -->
+      <form class="space-y-5" method="POST" action="/register/ambassador" id="amb-signup-form">
+        <!-- Name -->
+        <div>
+          <label class="text-sm font-semibold text-gray-800 block mb-2">Name</label>
+          <input type="text" name="name" placeholder="Your full name"
+            class="w-full border border-gray-300 rounded-lg px-4 py-3.5 text-gray-900 placeholder-gray-400 focus:ring-2 focus:border-transparent focus:outline-none transition"
+            required />
         </div>
-      </div>
 
+        <!-- Email -->
+        <div>
+          <label class="text-sm font-semibold text-gray-800 block mb-2">Email Address</label>
+          <input type="email" name="email" placeholder="you@company.com"
+            class="w-full border border-gray-300 rounded-lg px-4 py-3.5 text-gray-900 placeholder-gray-400 focus:ring-2 focus:border-transparent focus:outline-none transition"
+            required />
+        </div>
+
+        <!-- Access Code -->
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <label class="text-sm font-semibold text-gray-800">Access Code</label>
+            <span class="text-[11px] text-gray-500">Request from T4L admin</span>
+          </div>
+          <input type="text" name="access_code" placeholder="T4LA-XXXX"
+            class="w-full border border-gray-300 rounded-lg px-4 py-3.5 text-gray-900 placeholder-gray-400 focus:ring-2 focus:border-transparent focus:outline-none transition uppercase"
+            required />
+        </div>
+
+        <!-- Password -->
+        <div>
+          <label class="text-sm font-semibold text-gray-800 block mb-2">Password</label>
+          <input type="password" name="password" minlength="8" placeholder="••••••••"
+            class="w-full border border-gray-300 rounded-lg px-4 py-3.5 text-gray-900 placeholder-gray-400 focus:ring-2 focus:border-transparent focus:outline-none transition"
+            required />
+        </div>
+
+        <!-- Confirm Password -->
+        <div>
+          <label class="text-sm font-semibold text-gray-800 block mb-2">Confirm Password</label>
+          <input type="password" name="confirmPassword" minlength="8" placeholder="••••••••"
+            class="w-full border border-gray-300 rounded-lg px-4 py-3.5 text-gray-900 placeholder-gray-400 focus:ring-2 focus:border-transparent focus:outline-none transition"
+            required />
+          <p id="amb-password-error" class="mt-2 text-sm text-red-600 hidden">Passwords do not match.</p>
+        </div>
+
+        <!-- Terms -->
+        <div class="flex items-start gap-3 text-sm">
+          <input type="checkbox" name="terms" id="amb-terms" class="mt-1 w-4 h-4 rounded border-gray-300 cursor-pointer"
+            required />
+          <label for="amb-terms" class="text-gray-700">I agree to <a href="#" class="font-semibold"
+              style="color:#4b0d7f">Terms & Conditions</a></label>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit"
+          class="w-full text-white font-semibold py-3.5 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-[1.01] hover:opacity-95"
+          style="background-color:#4b0d7f">
+          Create Ambassador Account
+        </button>
+      </form>
+
+      <!-- Already have an account -->
+      <div class="mt-2 pt-3 border-t border-gray-200 text-center">
+        <p class="text-sm text-gray-600">
+          Already have an account?
+          <a href="/signin" class="font-semibold transition ml-1" style="color:#4b0d7f">Sign in</a>
+        </p>
+      </div>
     </div>
 
-    <!-- Gradient Blobs -->
-    <div class="fixed -top-20 -right-20 
+    <!-- Right: Image -->
+    <div
+      class="w-full lg:w-1/2 bg-gradient-to-br from-purple-50 to-purple-100 relative h-64 sm:h-80 lg:h-auto overflow-hidden">
+      <img src="/images/signin3.jpg" alt="T4L Ambassador Team" class="w-full h-full object-cover opacity-90" />
+      <div class="absolute inset-0 bg-gradient-to-br from-purple-600/5 via-transparent to-purple-900/20"></div>
+      <div class="absolute inset-0 flex items-end p-8 sm:p-10">
+        <div class="text-white">
+          <h2 class="text-2xl sm:text-3xl font-bold mb-2 drop-shadow-lg">Join Our Community</h2>
+          <p class="text-sm sm:text-base text-white/90 drop-shadow">Connect, collaborate, and grow with fellow
+            ambassadors</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Gradient Blobs -->
+  <div class="fixed -top-20 -right-20 
       w-64 sm:w-72 md:w-96 h-64 sm:h-72 md:h-96 
       bg-gradient-to-tr from-purple-300 to-purple-500 
       opacity-30 blur-3xl rounded-full z-0"></div>
-    <div class="fixed -bottom-24 -left-24 
+  <div class="fixed -bottom-24 -left-24 
       w-64 sm:w-72 md:w-[28rem] h-64 sm:h-72 md:h-[28rem] 
       bg-gradient-to-tr from-yellow-200 to-yellow-400 
       opacity-30 blur-3xl rounded-full z-0"></div>
 
-    <script>
-      (function() {
-        const form = document.getElementById('amb-signup-form');
-        const errorEl = document.getElementById('amb-password-error');
-        form.addEventListener('submit', function(e) {
-          const pwd = form.querySelector('input[name="password"]').value;
-          const confirm = form.querySelector('input[name="confirmPassword"]').value;
-          const terms = form.querySelector('input[name="terms"]').checked;
-          let valid = true;
-          if (pwd !== confirm) {
-            errorEl.classList.remove('hidden');
-            valid = false;
-          } else {
-            errorEl.classList.add('hidden');
-          }
-          if (!terms) {
-            valid = false;
-          }
-          if (!valid) {
-            e.preventDefault();
-          } else {
-            // Store fields for signin autofill with timestamp for security
-            try {
-              const email = form.querySelector('input[name="email"]').value || '';
-              const accessCode = form.querySelector('input[name="accessCode"]').value || '';
-              const password = form.querySelector('input[name="password"]').value || '';
-              const timestamp = Date.now();
-              const data = {
-                email: email,
-                accessCode: accessCode,
-                password: password,
-                timestamp: timestamp
-              };
-              localStorage.setItem('autoPopulateEmail', JSON.stringify(data));
-            } catch (_) {}
-          }
-        });
-      })();
-    </script>
-  </body>
-  </html>
+  <script>
+    (function () {
+      const form = document.getElementById('amb-signup-form');
+      const errorEl = document.getElementById('amb-password-error');
+      form.addEventListener('submit', function (e) {
+        const pwd = form.querySelector('input[name="password"]').value;
+        const confirm = form.querySelector('input[name="confirmPassword"]').value;
+        const terms = form.querySelector('input[name="terms"]').checked;
+        let valid = true;
+        if (pwd !== confirm) {
+          errorEl.classList.remove('hidden');
+          valid = false;
+        } else {
+          errorEl.classList.add('hidden');
+        }
+        if (!terms) {
+          valid = false;
+        }
+        if (!valid) {
+          e.preventDefault();
+        } else {
+          // Store fields for signin autofill with timestamp for security
+          try {
+            const email = form.querySelector('input[name="email"]').value || '';
+            const access_code = form.querySelector('input[name="access_code"]').value || '';
+            const password = form.querySelector('input[name="password"]').value || '';
+            const name = form.querySelector('input[name="name"]').value || '';
+            const data = {
+              email: email,
+              access_code: access_code,
+              password: password,
+              name: name,
+            };
+            fetch('/register/ambassador', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(data)
+            })
+            // localStorage.setItem('autoPopulateEmail', JSON.stringify(data));
+          } catch (_) { }
+        }
+      });
+    })();
+  </script>
+</body>
 
-
+</html>

@@ -141,5 +141,33 @@
     },
     "startDate": 1763546685551,
     "lastUpdated": 1763550372033
+  },
+  "amb_da4d55d4d37ce4d1": {
+    "currentMonth": 1,
+    "completedTasks": {
+      "1-post_3x": false
+    },
+    "startDate": 1763662185355,
+    "lastUpdated": 1763662188397
+  },
+  "amb_e095bacb30a4e8d2": {
+    "currentMonth": 1,
+    "completedTasks": {
+      "1-linkedin_course": false
+    },
+    "startDate": 1764249137495,
+    "monthStartDates": {
+      "1": 1764249137495
+    },
+    "lastUpdated": 1764249167676
+  },
+  "amb_d34f33077953fff8": {
+    "currentMonth": 1,
+    "completedTasks": {},
+    "startDate": 1764705153319,
+    "monthStartDates": {
+      "1": 1764705153319
+    },
+    "lastUpdated": 1764705153319
   }
 }

@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Impact Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lucide/1.28.0/font/lucide.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            indigo: {
+                                50: '#eef2ff',
+                                100: '#e0e7ff',
+                                500: '#6366f1',
+                                600: '#4f46e5',
+                                700: '#4338ca',
+                            }
+                        },
+                        accent: {
+                            gold: {
+                                600: '#d97706',
+                            },
+                            600: '#dc2626',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center">
+                    <h1 class="text-2xl font-bold text-gray-900">Impact Dashboard</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button onclick="openModal('enhancedImpactModal')" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                        Log Impact
+                    </button>
+                    <button onclick="openModal('bulkUploadModal')" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                        Bulk Upload
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Stats Section -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <div class="flex items-center">
+                    <div class="bg-blue-100 p-3 rounded-lg">
+                        <i data-lucide="target" class="w-6 h-6 text-blue-600"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Total Points</p>
+                        <p class="text-2xl font-bold text-gray-900">1,250</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <div class="flex items-center">
+                    <div class="bg-green-100 p-3 rounded-lg">
+                        <i data-lucide="users" class="w-6 h-6 text-green-600"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">People Impacted</p>
+                        <p class="text-2xl font-bold text-gray-900">850</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <div class="flex items-center">
+                    <div class="bg-purple-100 p-3 rounded-lg">
+                        <i data-lucide="clock" class="w-6 h-6 text-purple-600"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Hours Contributed</p>
+                        <p class="text-2xl font-bold text-gray-900">45.5</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activities -->
+        <div class="bg-white rounded-lg shadow-sm">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">Recent Impact Activities</h2>
+            </div>
+            <div class="p-6">
+                <div class="text-center text-gray-500 py-8">
+                    No activities logged yet. 
+                    <button onclick="openModal('enhancedImpactModal')" class="text-blue-600 hover:text-blue-700 font-medium ml-1">
+                        Log your first impact!
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Privacy Footer -->
+    <footer class="bg-gray-50 border-t border-gray-200 py-3 sticky bottom-0 left-0 right-0 z-10 shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row items-center justify-center space-y-2 md:space-y-0 md:space-x-4 text-sm">
+                <div class="flex items-center text-gray-700">
+                    <i data-lucide="shield" class="w-4 h-4 text-blue-600 mr-2"></i>
+                    <span class="font-medium">ESG data appears in public aggregate • Business data remains private to Transformation Leader</span>
+                </div>
+                <div class="hidden md:block h-5 w-px bg-gray-300"></div>
+                <div class="flex items-center text-gray-600">
+                    <i data-lucide="info" class="w-4 h-4 text-orange-500 mr-2"></i>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Enhanced Impact Log Modal -->
+    <div id="enhancedImpactModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden p-4">
+        <div class="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden">
+            <!-- Modal Header -->
+            <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="sparkles" class="w-6 h-6"></i>
+                        <h3 class="text-lg font-semibold">Log Your Impact</h3>
+                    </div>
+                    <button onclick="closeModal('enhancedImpactModal')" class="text-white hover:text-gray-200">
+                        <i data-lucide="x" class="w-6 h-6"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
+                <div class="space-y-6">
+                    <!-- Category Selection -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-3">Impact Category</label>
+                        <div class="flex space-x-2 mb-4">
+                            <button class="flex-1 bg-green-100 text-green-800 px-4 py-2 rounded-full font-medium">
+                                🌍 ESG Impact
+                            </button>
+                            <button class="flex-1 bg-blue-100 text-blue-800 px-4 py-2 rounded-full font-medium">
+                                💼 Business Impact
+                            </button>
+                        </div>
+                        
+                        <!-- Activity Type -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Activity Type</label>
+                            <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option>Social: Community engagement & volunteering</option>
+                                <option>Education: Training & capacity building</option>
+                                <option>Environmental: Sustainability initiatives</option>
+                            </select>
+                            <p class="text-sm text-gray-500 mt-1">Select the type of ESG activity you performed</p>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                        <textarea 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                            rows="4" 
+                            placeholder="Describe your impact activity in detail...">
+                        </textarea>
+                        <p class="text-sm text-gray-500 mt-1">Provide specific details about what you did and the outcomes achieved</p>
+                    </div>
+
+                    <!-- Date -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                            <i data-lucide="calendar-days" class="w-4 h-4 mr-2"></i>
+                            Date
+                        </label>
+                        <input type="date" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <p class="text-sm text-gray-500 mt-1">You can backdate entries to any date since 2020</p>
+                    </div>
+
+                    <!-- Metrics Grid -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-3">Impact Metrics</label>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm text-gray-700 mb-2 flex items-center">
+                                    <i data-lucide="clock" class="w-4 h-4 mr-2"></i>
+                                    Hours Contributed
+                                </label>
+                                <input type="number" step="0.01" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="0.00">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-700 mb-2 flex items-center">
+                                    <i data-lucide="users" class="w-4 h-4 mr-2"></i>
+                                    People Impacted
+                                </label>
+                                <input type="number" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Impact Preview - Corrected -->
+                    <div class="bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg border-2 border-blue-200 p-4">
+                        <h4 class="font-bold text-blue-800 text-lg mb-3">Impact Calculation Preview</h4>
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center space-x-2">
+                                    <i data-lucide="target" class="w-4 h-4 text-blue-600"></i>
+                                    <span class="text-sm">Points Earned:</span>
+                                </div>
+                                <span class="font-bold text-blue-600">500 pts</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center space-x-2">
+                                    <i data-lucide="trending-up" class="w-4 h-4 text-purple-600"></i>
+                                    <span class="text-sm">Social Capital Points:</span>
+                                </div>
+                                <span class="font-bold text-purple-600">250 SCP</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="border-t border-gray-200 px-6 py-4 flex justify-end space-x-3">
+                <button onclick="closeModal('enhancedImpactModal')" class="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors">
+                    Cancel
+                </button>
+                <button class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                    Submit Impact
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Upload Modal -->
+    <div id="bulkUploadModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden p-4">
+        <div class="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-hidden">
+            <!-- Modal Header -->
+            <div class="bg-blue-600 text-white px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="file-spreadsheet" class="w-6 h-6"></i>
+                        <h3 class="text-lg font-semibold">Bulk Upload Impact Activities</h3>
+                    </div>
+                    <button onclick="closeModal('bulkUploadModal')" class="text-white hover:text-gray-200">
+                        <i data-lucide="x" class="w-6 h-6"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
+                <div class="space-y-6">
+                    <!-- Instructions -->
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div class="flex items-start space-x-3">
+                            <i data-lucide="info" class="w-5 h-5 text-blue-600 mt-0.5"></i>
+                            <p class="text-sm text-blue-800">
+                                Upload a CSV file to log impact for multiple volunteers. Each row will be verified at Tier 2 (Partner Verified) and automatically create accounts for new email addresses.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Template Download -->
+                    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <h4 class="font-bold text-gray-900">CSV Format</h4>
+                            <button class="border border-blue-600 text-blue-600 px-3 py-1 rounded-lg hover:bg-blue-50 transition-colors flex items-center space-x-2">
+                                <i data-lucide="download" class="w-4 h-4"></i>
+                                <span>Download Template</span>
+                            </button>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-2">Required columns:</p>
+                        <div class="flex flex-wrap gap-2 mb-3">
+                            <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-mono">email</span>
+                            <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-mono">full_name</span>
+                            <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-mono">hours</span>
+                            <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-mono">date</span>
+                            <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-mono">description</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-2">Optional columns:</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs font-mono">beneficiaries</span>
+                            <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs font-mono">category_group</span>
+                            <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs font-mono">activity_type</span>
+                        </div>
+                    </div>
+
+                    <!-- File Upload -->
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                        <input type="file" id="csv-upload" accept=".csv" class="hidden">
+                        <label for="csv-upload" class="cursor-pointer">
+                            <div class="flex flex-col items-center space-y-3">
+                                <i data-lucide="upload" class="w-8 h-8 text-gray-400"></i>
+                                <p class="text-gray-600">Click to select CSV file</p>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="border-t border-gray-200 px-6 py-4 flex justify-end space-x-3">
+                <button onclick="closeModal('bulkUploadModal')" class="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors">
+                    Cancel
+                </button>
+                <button class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                    Upload CSV
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Modal functions
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+
+        // Close modal when clicking outside
+        document.addEventListener('click', function(event) {
+            if (event.target.classList.contains('fixed')) {
+                event.target.classList.add('hidden');
+            }
+        });
+
+        // Initialize Lucide icons
+        document.addEventListener('DOMContentLoaded', function() {
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>

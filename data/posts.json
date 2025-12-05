@@ -299,5 +299,24 @@
     "comments": 0,
     "views": 0,
     "spotsAvailable": 5
+  },
+  {
+    "id": "post_8b2549715b25b286",
+    "postType": "speaking",
+    "title": "Speaking fluently",
+    "description": "Speaking fluentlySpeaking fluentlySpeaking fluentlySpeaking fluentlySpeaking fluentlySpeaking fluentlySpeaking fluentlySpeaking fluentlySpeaking fluentlySpeaking fluentlySpeaking fluentlySpeaking fluentlySpeaking fluentlySpeaking fluentlySpeaking fluentlySpeaking fluentlySpeaking fluentlySpeaking fluentlySpeaking fluentlySpeaking fluentlySpeaking fluentlySpeaking fluentlySpeaking fluentlySpeaking fluentlySpeaking fluentlySpeaking fluentlySpeaking fluentlySpeaking fluentlySpeaking fluentlySpeaking fluentlySpeaking fluentlySpeaking fluentlySpeaking fluentlySpeaking fluently",
+    "format": "in-person",
+    "location": "Austin, Texas",
+    "deadline": "2025-11-29",
+    "liftPillars": [
+      "Leading Self"
+    ],
+    "partnerId": "par_686098ecdeb7cd2f",
+    "partnerName": "Test Partners Inc",
+    "createdAt": 1764337142161,
+    "likes": 0,
+    "comments": 0,
+    "views": 0,
+    "spotsAvailable": 5
   }
 ]
