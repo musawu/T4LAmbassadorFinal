@@ -3,6 +3,9 @@
 // ============================================
 require('dotenv').config();
 const { createClient } = require('@supabase/supabase-js');
+const { v4: uuidv4 } = require("uuid");
+let uuid = uuidv4();
+
 
 const supabaseUrl =
   process.env.SUPABASE_URL || 'https://vcfsjwqxfcpzqzcjabol.supabase.co';
@@ -402,6 +405,10 @@ async function getArticles(filters = {}) {
   }
 }
 
+
+
+
+
 async function getArticleById(id) {
   try {
     const { data, error } = await supabase
@@ -424,35 +431,61 @@ async function getArticleById(id) {
 
 async function createArticle(articleData) {
   try {
+    // Use ambassador_id from articleData
+    const ambassadorId = articleData.ambassador_id;
+    
+    console.log("Creating article with ambassador_id:", ambassadorId);
+    
+    if (!ambassadorId) {
+      throw new Error('ambassador_id is required');
+    }
+
+    // Generate UUID for the article
+    const articleId = uuidv4();
+    
+    const insertData = {
+      article_id: articleId,
+      title: articleData.title,
+      content: articleData.content,
+      excerpt: articleData.excerpt || articleData.title.substring(0, 100) + '...',
+      category: articleData.category || 'general',
+      status: articleData.status || 'draft',
+      ambassador_id: ambassadorId,
+      author_id: ambassadorId, // ✅ Set author_id same as ambassador_id
+      views: 0,
+      likes: 0,
+    };
+
+    console.log("Inserting article with data:", {
+      article_id: insertData.article_id,
+      title: insertData.title.substring(0, 50),
+      ambassador_id: insertData.ambassador_id,
+      author_id: insertData.author_id,
+      status: insertData.status
+    });
+
     const { data, error } = await supabase
       .from('articles')
-      .insert([
-        {
-          title: articleData.title,
-          content: articleData.content,
-          excerpt:
-            articleData.excerpt || articleData.title.substring(0, 100) + '...',
-          category: articleData.category || 'general',
-          status: articleData.status || 'draft',
-          author_id: articleData.author_id || articleData.author,
-          views: 0,
-          likes: 0,
-        },
-      ])
+      .insert([insertData])
       .select()
       .single();
 
     if (error) {
-      console.error('Error creating article:', error);
+      console.error('Supabase error creating article:', error);
       throw error;
     }
 
+    console.log("Article created successfully:", data.article_id);
     return data;
   } catch (error) {
     console.error('createArticle error:', error);
     throw error;
   }
 }
+
+
+
+
 
 async function updateArticle(id, updates) {
   try {
