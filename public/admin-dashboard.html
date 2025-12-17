@@ -432,10 +432,12 @@
                     <option value="inactive">Inactive</option>
                     <option value="pending">Pending</option>
                 </select>
-                <button id="addNewBtn" class="px-6 py-2 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 flex items-center">
+                <!-- Updated Add New button -->
+                <a href="/admin-add-user.html" 
+                class="px-6 py-2 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 flex items-center">
                     <i class="bx bx-plus mr-2"></i>
-                    Add New
-                </button>
+                    Add New User
+                </a>
             </div>
         </div>
 
@@ -749,83 +751,111 @@
 
         let pollingInterval = null;
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            loadAdminInfo();
-            fetchStats();
-            fetchList();
-            bindEvents();
-            setupTabsWithPolling(); // Use enhanced version
-        });
-
-        // Load admin info
-        async function loadAdminInfo() {
-          try {
-            const response = await fetch('/api/me', {
-              credentials: 'include'
-            });
-            
-            if (!response.ok) {
-              if (response.status === 401) {
-                window.location.href = '/admin-signin.html';
-                return;
-              }
-              throw new Error('Failed to load admin info');
-            }
-            
-            const data = await response.json();
-            
-            // Verify this is an admin
-            if (data.role !== 'admin') {
-              window.location.href = '/admin-signin.html';
-              return;
-            }
-            
-            document.getElementById('adminEmail').textContent = data.email;
-            
-          } catch (error) {
-            console.error('Error loading admin info:', error);
-            window.location.href = '/admin-signin.html';
-          }
+        // ============================================
+        // HELPER FUNCTIONS - DEFINED FIRST
+        // ============================================
+        
+        function showLoading(show) {
+            elements.loadingState.style.display = show ? 'flex' : 'none';
+            elements.listBody.style.display = show ? 'none' : 'table-row-group';
         }
- 
-        // Fetch dashboard statistics
-        async function fetchStats() {
-            try {
-                const [ambassadorsRes, articlesRes, journeyRes] = await Promise.allSettled([
-                    fetch('/admin/api/ambassadors?limit=1000', { credentials: 'include' }),
-                    fetch('/admin/api/articles', { credentials: 'include' }),
-                    fetch('/admin/api/journey/summary', { credentials: 'include' })
-                ]);
-                
-                // Ambassadors stats
-                if (ambassadorsRes.status === 'fulfilled' && ambassadorsRes.value.ok) {
-                    const data = await ambassadorsRes.value.json();
-                    const total = data.ambassadors.length;
-                    const active = data.ambassadors.filter(a => a.status === 'active').length;
-                    
-                    document.getElementById('totalAmbassadors').textContent = total;
-                    document.getElementById('activeAmbassadors').textContent = active;
+
+        function showToast(message, isError = false) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast bg-white rounded-lg shadow-lg p-4 max-w-sm flex items-center space-x-3 ${
+                isError ? 'border-l-4 border-red-500' : 'border-l-4 border-green-500'
+            }`;
+            
+            toast.innerHTML = `
+                <i class="bx ${isError ? 'bx-error text-red-500' : 'bx-check-circle text-green-500'} text-xl"></i>
+                <span class="text-gray-800 flex-1">${message}</span>
+                <button onclick="this.parentElement.remove()" class="text-gray-400 hover:text-gray-600">
+                    <i class="bx bx-x"></i>
+                </button>
+            `;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                if (toast.parentElement) {
+                    toast.remove();
                 }
-                
-                // Articles stats
-                if (articlesRes.status === 'fulfilled' && articlesRes.value.ok) {
-                    const data = await articlesRes.value.json();
-                    document.getElementById('totalArticles').textContent = data.articles ? data.articles.length : (data.items ? data.items.length : 0);
-                }
-                
-                // Journey stats
-                if (journeyRes.status === 'fulfilled' && journeyRes.value.ok) {
-                    const data = await journeyRes.value.json();
-                    const avgProgress = data.ambassadors.length > 0 
-                        ? Math.round(data.ambassadors.reduce((sum, a) => sum + a.overallProgress, 0) / data.ambassadors.length)
-                        : 0;
-                    document.getElementById('avgProgress').textContent = `${avgProgress}%`;
-                }
-                
-            } catch (error) {
-                console.error('Error fetching stats:', error);
+            }, 5000);
+        }
+
+        function updateTableHeaders(headers) {
+            const thead = document.getElementById('tableHeaders');
+            thead.innerHTML = headers.map(header => 
+                `<th class="px-4 py-3 font-semibold">${header}</th>`
+            ).join('') + '<th class="px-4 py-3 font-semibold text-right">Actions</th>';
+        }
+
+        function renderEmptyState() {
+            elements.listBody.innerHTML = '';
+            elements.emptyState.classList.remove('hidden');
+            elements.paginationContainer.classList.add('hidden');
+        }
+
+        function renderPagination() {
+            if (state.total <= state.limit || state.tab !== 'ambassadors') {
+                elements.paginationContainer.classList.add('hidden');
+                return;
             }
+            
+            const start = ((state.page - 1) * state.limit) + 1;
+            const end = Math.min(state.page * state.limit, state.total);
+            const totalPages = Math.ceil(state.total / state.limit);
+            
+            elements.pageStart.textContent = start;
+            elements.pageEnd.textContent = end;
+            elements.totalItems.textContent = state.total;
+            
+            elements.prevPage.disabled = state.page === 1;
+            elements.nextPage.disabled = state.page === totalPages;
+            
+            elements.paginationContainer.classList.remove('hidden');
+        }
+
+        function badgeClass(status) {
+          const s = String(status || '').toLowerCase();
+          if (s === 'active' || s === 'approved') return 'border-green-300 text-green-700 bg-green-50';
+          if (s === 'pending') return 'border-yellow-300 text-yellow-700 bg-yellow-50';
+          if (s === 'needs_update') return 'border-orange-300 text-orange-700 bg-orange-50';
+          if (s === 'published') return 'border-blue-300 text-blue-700 bg-blue-50';
+          if (s === 'rejected' || s === 'inactive') return 'border-red-300 text-red-700 bg-red-50';
+          return 'border-gray-300 text-gray-700 bg-gray-50';
+        }
+
+        function setActiveArticleFilter(activeId) {
+          const filterIds = ['filterAll', 'filterPending', 'filterNeedsUpdate', 'filterApproved', 'filterPublished', 'filterRejected'];
+          filterIds.forEach(id => {
+            const btn = document.getElementById(id);
+            if (!btn) return;
+            if (id === activeId) {
+              btn.className = 'px-4 py-2 rounded-xl text-sm font-semibold text-white';
+              btn.style.backgroundColor = '#4b0d7f';
+            } else {
+              btn.className = 'px-4 py-2 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-100';
+              btn.style.backgroundColor = '';
+            }
+          });
+        }
+
+        function escapeHtml(text) {
+          const div = document.createElement('div');
+          div.textContent = text;
+          return div.innerHTML;
+        }
+
+        function statusBadgeClass(status) {
+          const s = String(status || '').toLowerCase();
+          if (s === 'approved') return 'bg-green-50 text-green-700 border border-green-200';
+          if (s === 'rejected') return 'bg-red-50 text-red-700 border border-red-200';
+          if (s === 'published') return 'bg-blue-50 text-blue-700 border border-blue-200';
+          if (s === 'pending') return 'bg-yellow-50 text-yellow-700 border border-yellow-200';
+          if (s === 'needs_update') return 'bg-orange-50 text-orange-700 border border-orange-200';
+          return 'bg-gray-50 text-gray-700 border border-gray-200';
         }
 
         // ============================================
@@ -868,7 +898,78 @@
           writeLsArticles(all);
         }
 
-        // Fetch list based on current tab
+        // ============================================
+        // FETCH FUNCTIONS
+        // ============================================
+
+        async function loadAdminInfo() {
+          try {
+            const response = await fetch('/api/me', {
+              credentials: 'include'
+            });
+            
+            if (!response.ok) {
+              if (response.status === 401) {
+                window.location.href = '/admin-signin.html';
+                return;
+              }
+              throw new Error('Failed to load admin info');
+            }
+            
+            const data = await response.json();
+            
+            // Verify this is an admin
+            if (data.role !== 'admin') {
+              window.location.href = '/admin-signin.html';
+              return;
+            }
+            
+            document.getElementById('adminEmail').textContent = data.email;
+            
+          } catch (error) {
+            console.error('Error loading admin info:', error);
+            window.location.href = '/admin-signin.html';
+          }
+        }
+ 
+        async function fetchStats() {
+            try {
+                const [ambassadorsRes, articlesRes, journeyRes] = await Promise.allSettled([
+                    fetch('/admin/api/ambassadors?limit=1000', { credentials: 'include' }),
+                    fetch('/admin/api/articles', { credentials: 'include' }),
+                    fetch('/admin/api/journey/summary', { credentials: 'include' })
+                ]);
+                
+                // Ambassadors stats
+                if (ambassadorsRes.status === 'fulfilled' && ambassadorsRes.value.ok) {
+                    const data = await ambassadorsRes.value.json();
+                    const total = data.ambassadors.length;
+                    const active = data.ambassadors.filter(a => a.status === 'active').length;
+                    
+                    document.getElementById('totalAmbassadors').textContent = total;
+                    document.getElementById('activeAmbassadors').textContent = active;
+                }
+                
+                // Articles stats
+                if (articlesRes.status === 'fulfilled' && articlesRes.value.ok) {
+                    const data = await articlesRes.value.json();
+                    document.getElementById('totalArticles').textContent = data.articles ? data.articles.length : (data.items ? data.items.length : 0);
+                }
+                
+                // Journey stats
+                if (journeyRes.status === 'fulfilled' && journeyRes.value.ok) {
+                    const data = await journeyRes.value.json();
+                    const avgProgress = data.ambassadors.length > 0 
+                        ? Math.round(data.ambassadors.reduce((sum, a) => sum + a.overallProgress, 0) / data.ambassadors.length)
+                        : 0;
+                    document.getElementById('avgProgress').textContent = `${avgProgress}%`;
+                }
+                
+            } catch (error) {
+                console.error('Error fetching stats:', error);
+            }
+        }
+
         async function fetchList() {
             showLoading(true);
             
@@ -966,7 +1067,10 @@
             }
         }
 
-        // Render ambassadors list
+        // ============================================
+        // RENDER FUNCTIONS
+        // ============================================
+
         function renderAmbassadorsList() {
             updateTableHeaders([
                 'Name', 'Email', 'Access Code', 'Status', 'Join Date', 'Actions'
@@ -990,7 +1094,7 @@
                 tr.innerHTML = `
                     <td class="px-4 py-3 text-sm text-gray-900">${item.name}</td>
                     <td class="px-4 py-3 text-sm text-gray-700">${item.email}</td>
-                    <td class="px-4 py-3 text-sm text-gray-700 font-mono">${item.accessCode}</td>
+                    <td class="px-4 py-3 text-sm text-gray-700 font-mono">${item.access_code}</td>
                     <td class="px-4 py-3 text-sm">
                         <span class="status-badge ${statusClass}">${item.status}</span>
                     </td>
@@ -1020,7 +1124,6 @@
             bindRowActions();
         }
 
-        // Render partners list
         function renderPartnersList() {
             updateTableHeaders([
                 'Name', 'Company', 'Email', 'Access Code', 'Status', 'Actions'
@@ -1068,9 +1171,6 @@
             bindRowActions();
         }
 
-        // ============================================
-        // RENDER ARTICLES LIST - ENHANCED VERSION
-        // ============================================
         function renderArticlesList() {
             updateTableHeaders([
                 'Title', 'Author', 'Company', 'Status', 'Date', 'Actions'
@@ -1088,6 +1188,7 @@
                 const tr = document.createElement('tr');
                 tr.className = 'border-b border-gray-100 hover:bg-gray-50';
                 
+                const articleId = item.article_id || item.id;
                 const title = item.title || '-';
                 const author = item.authorNameRole || '-';
                 const date = item.createdAt ? new Date(item.createdAt).toLocaleDateString() : '-';
@@ -1106,12 +1207,12 @@
                     <td class="px-4 py-3 text-sm text-right space-x-2">
                         <button class="px-3 py-1.5 rounded-lg border border-gray-300 hover:bg-gray-50 font-semibold" 
                                 data-action="reviewArticle" 
-                                data-id="${item.id}">
+                                data-id="${articleId}">
                             View Details
                         </button>
                         <button class="px-3 py-1.5 rounded-lg border border-red-300 text-red-700 hover:bg-red-50 font-semibold" 
                                 data-action="delete" 
-                                data-id="${item.id}">
+                                data-id="${articleId}">
                             Delete
                         </button>
                     </td>
@@ -1122,263 +1223,6 @@
             elements.emptyState.classList.add('hidden');
             bindRowActions();
         }
-
-        function badgeClass(status) {
-          const s = String(status || '').toLowerCase();
-          if (s === 'active' || s === 'approved') return 'border-green-300 text-green-700 bg-green-50';
-          if (s === 'pending') return 'border-yellow-300 text-yellow-700 bg-yellow-50';
-          if (s === 'needs_update') return 'border-orange-300 text-orange-700 bg-orange-50';
-          if (s === 'published') return 'border-blue-300 text-blue-700 bg-blue-50';
-          if (s === 'rejected' || s === 'inactive') return 'border-red-300 text-red-700 bg-red-50';
-          return 'border-gray-300 text-gray-700 bg-gray-50';
-        }
-
-        function setActiveArticleFilter(activeId) {
-          const filterIds = ['filterAll', 'filterPending', 'filterNeedsUpdate', 'filterApproved', 'filterPublished', 'filterRejected'];
-          filterIds.forEach(id => {
-            const btn = document.getElementById(id);
-            if (!btn) return;
-            if (id === activeId) {
-              btn.className = 'px-4 py-2 rounded-xl text-sm font-semibold text-white';
-              btn.style.backgroundColor = '#4b0d7f';
-            } else {
-              btn.className = 'px-4 py-2 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-100';
-              btn.style.backgroundColor = '';
-            }
-          });
-        }
-
-        // ============================================
-        // REVIEW MODAL FOR ARTICLES - ENHANCED VERSION
-        // ============================================
-        function openReviewModal(id) {
-          fetch(`/admin/api/articles/${id}`, { credentials: 'include' })
-            .then(r => { if (!r.ok) throw new Error('load'); return r.json(); })
-            .then(article => {
-              try { upsertLsArticle(article); } catch (_) {}
-              state.reviewing = { id, article };
-              renderReviewModal(article);
-              const modal = document.getElementById('reviewModal');
-              modal.classList.remove('hidden');
-              modal.classList.add('flex');
-              
-              bindReviewModalEvents();
-            })
-            .catch(() => {
-              const article = findLsArticleById(id);
-              if (!article) { showToast('Failed to load article details', true); return; }
-              state.reviewing = { id, article };
-              renderReviewModal(article);
-              const modal = document.getElementById('reviewModal');
-              modal.classList.remove('hidden');
-              modal.classList.add('flex');
-              
-              bindReviewModalEvents();
-            });
-        }
-
-        function closeReviewModal() {
-          const modal = document.getElementById('reviewModal');
-          modal.classList.add('hidden');
-          modal.classList.remove('flex');
-          state.reviewing = null;
-        }
-
-        function statusBadgeClass(status) {
-          const s = String(status || '').toLowerCase();
-          if (s === 'approved') return 'bg-green-50 text-green-700 border border-green-200';
-          if (s === 'rejected') return 'bg-red-50 text-red-700 border border-red-200';
-          if (s === 'published') return 'bg-blue-50 text-blue-700 border border-blue-200';
-          if (s === 'pending') return 'bg-yellow-50 text-yellow-700 border border-yellow-200';
-          if (s === 'needs_update') return 'bg-orange-50 text-orange-700 border border-orange-200';
-          return 'bg-gray-50 text-gray-700 border border-gray-200';
-        }
-
-        function renderReviewModal(article) {
-          const dateStr = article.createdAt ? new Date(article.createdAt).toLocaleString() : '-';
-          
-          document.getElementById('reviewTitle').textContent = article.title || '-';
-          document.getElementById('reviewAuthor').textContent = article.authorNameRole || '-';
-          document.getElementById('reviewCompany').textContent = article.companyDescription || '-';
-          document.getElementById('reviewDate').textContent = dateStr;
-          
-          const statusEl = document.getElementById('reviewStatus');
-          statusEl.textContent = (article.status || '').toLowerCase();
-          statusEl.className = `px-2 py-1 rounded-lg text-xs font-semibold ${statusBadgeClass(article.status)}`;
-          
-          const content = document.getElementById('reviewArticleHtml');
-          content.innerHTML = article.contentHtml || '<p class="text-gray-500">No content available</p>';
-          
-          document.getElementById('previousFeedback').innerHTML = '<div class="text-sm text-gray-500 text-center py-4">Loading feedback...</div>';
-          document.getElementById('notifMessage').value = '';
-          
-          const statusSelect = document.getElementById('articleStatusSelect');
-          if (statusSelect) {
-            statusSelect.value = String(article.status || 'pending').toLowerCase();
-          }
-          
-          loadPreviousFeedback(article.id);
-        }
-        
-        function loadPreviousFeedback(articleId) {
-          fetch(`/admin/api/articles/${articleId}/notifications`, { credentials: 'include' })
-            .then(r => { if (!r.ok) throw new Error('load'); return r.json(); })
-            .then(data => {
-              const feedbackContainer = document.getElementById('previousFeedback');
-              const notifications = data.items || [];
-              
-              if (notifications.length === 0) {
-                feedbackContainer.innerHTML = '<div class="text-sm text-gray-500 text-center py-4">No previous feedback</div>';
-                return;
-              }
-              
-              feedbackContainer.innerHTML = notifications.map(notif => {
-                const date = new Date(notif.createdAt || Date.now()).toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'short',
-                  day: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit'
-                });
-                
-                const isRequestChange = String(notif.type || '').toLowerCase() === 'needs_update';
-                
-                return `
-                  <div class="border-l-4 ${isRequestChange ? 'border-orange-500' : 'border-purple-500'} bg-gray-50 rounded p-3">
-                    <div class="flex items-start justify-between mb-2">
-                      <div class="flex items-center gap-2">
-                        <span class="text-xs font-semibold text-gray-700">${escapeHtml(notif.adminName || 'Admin')}</span>
-                        ${isRequestChange ? '<span class="text-xs px-2 py-0.5 bg-orange-100 text-orange-700 rounded">Request Change</span>' : ''}
-                      </div>
-                      <span class="text-xs text-gray-500">${date}</span>
-                    </div>
-                    <p class="text-sm text-gray-700 whitespace-pre-wrap">${escapeHtml(notif.message || 'No message')}</p>
-                  </div>
-                `;
-              }).join('');
-            })
-            .catch(() => {
-              document.getElementById('previousFeedback').innerHTML = '<div class="text-sm text-gray-500 text-center py-4">Failed to load feedback</div>';
-            });
-        }
-        
-        function escapeHtml(text) {
-          const div = document.createElement('div');
-          div.textContent = text;
-          return div.innerHTML;
-        }
-
-        function updateArticleStatus(newStatus) {
-          if (!state.reviewing) return;
-          const id = state.reviewing.id;
-          fetch(`/admin/api/articles/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: newStatus }), credentials: 'include' })
-            .then(r => { if (!r.ok) throw new Error('save'); return r.json(); })
-            .then(({ article }) => {
-              try { upsertLsArticle(article); } catch (_) {}
-              showToast(`Status updated to ${article.status}`);
-              const idx = state.items.findIndex(it => String(it.id) === String(id));
-              if (idx >= 0) { state.items[idx].status = article.status; renderArticlesList(); }
-              renderReviewModal(article);
-              bindReviewModalEvents();
-            })
-            .catch(() => { showToast('Failed to update status', true); });
-        }
-
-        function requestChanges() {
-          if (!state.reviewing) {
-            showToast('No article selected', true);
-            return;
-          }
-          
-          const id = state.reviewing.id;
-          const messageInput = document.getElementById('notifMessage');
-          const message = messageInput ? messageInput.value.trim() : '';
-          
-          if (!message) {
-            showToast('Please provide feedback message', true);
-            return;
-          }
-          
-          fetch('/admin/api/notifications', { 
-            method: 'POST', 
-            headers: { 'Content-Type': 'application/json' }, 
-            body: JSON.stringify({ articleId: id, type: 'needs_update', message }), 
-            credentials: 'include' 
-          })
-            .then(r => { 
-              if (!r.ok) throw new Error('notify'); 
-              return r.json(); 
-            })
-            .then((data) => { 
-              showToast('Change request sent to ambassador');
-              if (messageInput) messageInput.value = '';
-              
-              loadPreviousFeedback(id);
-              fetch(`/admin/api/articles/${id}`, { credentials: 'include' })
-                .then(r => r.json())
-                .then(article => {
-                  state.reviewing.article = article;
-                  renderReviewModal(article);
-                  const idx = state.items.findIndex(it => String(it.id) === String(id));
-                  if (idx >= 0) { state.items[idx].status = article.status; renderArticlesList(); }
-                  
-                  bindReviewModalEvents();
-                })
-                .catch(() => {});
-            })
-            .catch((err) => { 
-              console.error('Error:', err);
-              showToast('Failed to send change request', true); 
-            });
-        }
-
-        function bindReviewModalEvents() {
-          const btnRequestChange = document.getElementById('btnRequestChange');
-          const btnUpdateStatus = document.getElementById('btnUpdateStatus');
-          const closeReview = document.getElementById('closeReview');
-          
-          if (btnRequestChange) {
-            const newBtn = btnRequestChange.cloneNode(true);
-            btnRequestChange.parentNode.replaceChild(newBtn, btnRequestChange);
-            
-            newBtn.addEventListener('click', (e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              requestChanges();
-            });
-          }
-          
-          if (btnUpdateStatus) {
-            const newBtn = btnUpdateStatus.cloneNode(true);
-            btnUpdateStatus.parentNode.replaceChild(newBtn, btnUpdateStatus);
-            
-            newBtn.addEventListener('click', (e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              if (!state.reviewing) return;
-              const statusSelect = document.getElementById('articleStatusSelect');
-              const newStatus = statusSelect ? statusSelect.value : null;
-              if (newStatus) {
-                updateArticleStatus(newStatus);
-              }
-            });
-          }
-          
-          if (closeReview) {
-            const newBtn = closeReview.cloneNode(true);
-            closeReview.parentNode.replaceChild(newBtn, closeReview);
-            
-            newBtn.addEventListener('click', (e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              closeReviewModal();
-            });
-          }
-        }
-
-        // ============================================
-        // ENHANCED JOURNEY PROGRESS WITH REAL-TIME TRACKING
-        // ============================================
 
         function renderJourneyList() {
             updateJourneyTableHeaders();
@@ -1461,7 +1305,23 @@
             updateLastRefreshIndicator();
         }
 
-        // Start real-time polling when Journey tab is active
+        function updateJourneyTableHeaders() {
+            const headers = document.getElementById('tableHeaders');
+            if (!headers) return;
+            headers.innerHTML = `
+                <th class="px-4 py-3 font-semibold">Ambassador</th>
+                <th class="px-4 py-3 font-semibold">Email</th>
+                <th class="px-4 py-3 font-semibold">Overall Progress</th>
+                <th class="px-4 py-3 font-semibold">Current Month</th>
+                <th class="px-4 py-3 font-semibold">Tasks</th>
+                <th class="px-4 py-3 font-semibold text-right">Actions</th>
+            `;
+        }
+
+        // ============================================
+        // REAL-TIME JOURNEY TRACKING FUNCTIONS
+        // ============================================
+
         function startJourneyPolling() {
             if (pollingInterval) {
                 clearInterval(pollingInterval);
@@ -1481,7 +1341,6 @@
             console.log('✅ Real-time journey tracking started');
         }
 
-        // Stop polling when leaving Journey tab
         function stopJourneyPolling() {
             if (pollingInterval) {
                 clearInterval(pollingInterval);
@@ -1492,7 +1351,6 @@
             console.log('⏸ Real-time journey tracking paused');
         }
 
-        // Fetch journey updates without full page reload
         async function fetchJourneyUpdates() {
             try {
                 const response = await fetch('/admin/api/journey/summary', { 
@@ -1546,7 +1404,6 @@
             }
         }
 
-        // Update a single journey row with smooth animation
         function updateJourneyRow(oldItem, newItem) {
             const row = document.getElementById(`journey-row-${newItem.ambassadorId}`);
             if (!row) return;
@@ -1601,7 +1458,6 @@
             }
         }
 
-        // Show toast notification for progress updates
         function showProgressUpdateToast(ambassadorName, oldProgress, newProgress) {
             const change = newProgress - oldProgress;
             if (change <= 0) return;
@@ -1636,7 +1492,6 @@
             }, 5000);
         }
 
-        // Add real-time indicator to the UI
         function addRealtimeIndicator() {
             // Remove existing indicator if present
             removeRealtimeIndicator();
@@ -1655,7 +1510,6 @@
             document.body.appendChild(indicator);
         }
 
-        // Remove real-time indicator
         function removeRealtimeIndicator() {
             const existing = document.getElementById('realtime-indicator');
             if (existing) {
@@ -1663,7 +1517,6 @@
             }
         }
 
-        // Update last refresh timestamp
         function updateLastRefreshIndicator() {
             const refreshSpan = document.getElementById('last-refresh');
             if (!refreshSpan || !REALTIME_CONFIG.lastUpdate) return;
@@ -1678,17 +1531,249 @@
             }
         }
 
-        function updateJourneyTableHeaders() {
-            const headers = document.getElementById('tableHeaders');
-            if (!headers) return;
-            headers.innerHTML = `
-                <th class="px-4 py-3 font-semibold">Ambassador</th>
-                <th class="px-4 py-3 font-semibold">Email</th>
-                <th class="px-4 py-3 font-semibold">Overall Progress</th>
-                <th class="px-4 py-3 font-semibold">Current Month</th>
-                <th class="px-4 py-3 font-semibold">Tasks</th>
-                <th class="px-4 py-3 font-semibold text-right">Actions</th>
+        // ============================================
+        // MODAL FUNCTIONS
+        // ============================================
+
+        function openReviewModal(id) {
+            const modal = document.getElementById('reviewModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            // Show loading in modal
+            document.getElementById('reviewContent').innerHTML = `
+                <div class="flex items-center justify-center p-12">
+                    <div class="loading-spinner"></div>
+                    <span class="ml-3 text-gray-600">Loading article...</span>
+                </div>
             `;
+            
+            // Fetch article data
+            fetch(`/admin/api/articles/${id}`, { credentials: 'include' })
+                .then(r => { 
+                    if (!r.ok) throw new Error('load'); 
+                    return r.json(); 
+                })
+                .then(article => {
+                    try { upsertLsArticle(article); } catch (_) {}
+                    state.reviewing = { id, article };
+                    renderReviewModal(article);
+                })
+                .catch(() => {
+                    const article = findLsArticleById(id);
+                    if (!article) { 
+                        showToast('Failed to load article details', true); 
+                        closeReviewModal();
+                        return; 
+                    }
+                    state.reviewing = { id, article };
+                    renderReviewModal(article);
+                });
+        }
+
+        function closeReviewModal() {
+          const modal = document.getElementById('reviewModal');
+          modal.classList.add('hidden');
+          modal.classList.remove('flex');
+          state.reviewing = null;
+        }
+
+        function renderReviewModal(article) {
+            const dateStr = article.createdAt ? new Date(article.createdAt).toLocaleString() : '-';
+            
+            document.getElementById('reviewTitle').textContent = article.title || '-';
+            document.getElementById('reviewAuthor').textContent = article.authorNameRole || '-';
+            document.getElementById('reviewCompany').textContent = article.companyDescription || '-';
+            document.getElementById('reviewDate').textContent = dateStr;
+            
+            const statusEl = document.getElementById('reviewStatus');
+            statusEl.textContent = (article.status || '').toLowerCase();
+            statusEl.className = `px-2 py-1 rounded-lg text-xs font-semibold ${statusBadgeClass(article.status)}`;
+            
+            const content = document.getElementById('reviewArticleHtml');
+            content.innerHTML = article.contentHtml || '<p class="text-gray-500">No content available</p>';
+            
+            document.getElementById('previousFeedback').innerHTML = '<div class="text-sm text-gray-500 text-center py-4">Loading feedback...</div>';
+            document.getElementById('notifMessage').value = '';
+            
+            const statusSelect = document.getElementById('articleStatusSelect');
+            if (statusSelect) {
+                statusSelect.value = String(article.status || 'pending').toLowerCase();
+            }
+            
+            loadPreviousFeedback(article.id);
+        }
+
+        function bindReviewModalEvents() {
+            const btnRequestChange = document.getElementById('btnRequestChange');
+            const btnUpdateStatus = document.getElementById('btnUpdateStatus');
+            const closeReview = document.getElementById('closeReview');
+            
+            if (btnRequestChange) {
+                btnRequestChange.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    requestChanges();
+                });
+            }
+            
+            if (btnUpdateStatus) {
+                btnUpdateStatus.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (!state.reviewing) return;
+                    const statusSelect = document.getElementById('articleStatusSelect');
+                    const newStatus = statusSelect ? statusSelect.value : null;
+                    if (newStatus) {
+                        updateArticleStatus(newStatus);
+                    }
+                });
+            }
+            
+            if (closeReview) {
+                closeReview.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    closeReviewModal();
+                });
+            }
+        }
+
+        function loadPreviousFeedback(articleId) {
+          fetch(`/admin/api/articles/${articleId}/notifications`, { credentials: 'include' })
+            .then(r => { if (!r.ok) throw new Error('load'); return r.json(); })
+            .then(data => {
+              const feedbackContainer = document.getElementById('previousFeedback');
+              const notifications = data.items || [];
+              
+              if (notifications.length === 0) {
+                feedbackContainer.innerHTML = '<div class="text-sm text-gray-500 text-center py-4">No previous feedback</div>';
+                return;
+              }
+              
+              feedbackContainer.innerHTML = notifications.map(notif => {
+                const date = new Date(notif.createdAt || Date.now()).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                });
+                
+                const isRequestChange = String(notif.type || '').toLowerCase() === 'needs_update';
+                
+                return `
+                  <div class="border-l-4 ${isRequestChange ? 'border-orange-500' : 'border-purple-500'} bg-gray-50 rounded p-3">
+                    <div class="flex items-start justify-between mb-2">
+                      <div class="flex items-center gap-2">
+                        <span class="text-xs font-semibold text-gray-700">${escapeHtml(notif.adminName || 'Admin')}</span>
+                        ${isRequestChange ? '<span class="text-xs px-2 py-0.5 bg-orange-100 text-orange-700 rounded">Request Change</span>' : ''}
+                      </div>
+                      <span class="text-xs text-gray-500">${date}</span>
+                    </div>
+                    <p class="text-sm text-gray-700 whitespace-pre-wrap">${escapeHtml(notif.message || 'No message')}</p>
+                  </div>
+                `;
+              }).join('');
+            })
+            .catch(() => {
+              document.getElementById('previousFeedback').innerHTML = '<div class="text-sm text-gray-500 text-center py-4">Failed to load feedback</div>';
+            });
+        }
+
+        function updateArticleStatus(newStatus) {
+            if (!state.reviewing) return Promise.reject(new Error('No article'));
+            
+            const id = state.reviewing.id;
+            
+            return fetch(`/admin/api/articles/${id}`, { 
+                method: 'PATCH', 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify({ status: newStatus }), 
+                credentials: 'include' 
+            })
+            .then(r => { 
+                if (!r.ok) throw new Error('save'); 
+                return r.json(); 
+            })
+            .then(({ article }) => {
+                try { upsertLsArticle(article); } catch (_) {}
+                showToast(`Status updated to ${article.status}`);
+                
+                // Update the items list
+                const idx = state.items.findIndex(it => String(it.id) === String(id));
+                if (idx >= 0) { 
+                    state.items[idx].status = article.status; 
+                    renderArticlesList(); 
+                }
+                
+                // Update the modal without re-binding events
+                state.reviewing.article = article;
+                
+                // Just update the UI elements
+                const statusEl = document.getElementById('reviewStatus');
+                if (statusEl) {
+                    statusEl.textContent = (article.status || '').toLowerCase();
+                    statusEl.className = `px-2 py-1 rounded-lg text-xs font-semibold ${statusBadgeClass(article.status)}`;
+                }
+                
+                const statusSelect = document.getElementById('articleStatusSelect');
+                if (statusSelect) {
+                    statusSelect.value = String(article.status || 'pending').toLowerCase();
+                }
+                
+                return article;
+            })
+            .catch((err) => { 
+                showToast('Failed to update status', true);
+                throw err;
+            });
+        }
+
+        function requestChanges() {
+            if (!state.reviewing) {
+                showToast('No article selected', true);
+                return Promise.reject(new Error('No article'));
+            }
+            
+            const id = state.reviewing.id;
+            const messageInput = document.getElementById('notifMessage');
+            const message = messageInput ? messageInput.value.trim() : '';
+            
+            if (!message) {
+                showToast('Please provide feedback message', true);
+                return Promise.reject(new Error('No message'));
+            }
+            
+            return fetch('/admin/api/notifications', { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify({ 
+                    articleId: id, 
+                    type: 'needs_update', 
+                    message 
+                }), 
+                credentials: 'include' 
+            })
+            .then(r => { 
+                if (!r.ok) throw new Error('notify'); 
+                return r.json(); 
+            })
+            .then(() => { 
+                showToast('Change request sent to ambassador');
+                if (messageInput) messageInput.value = '';
+                
+                // Reload feedback
+                loadPreviousFeedback(id);
+                
+                // Update article status to 'needs_update'
+                return updateArticleStatus('needs_update');
+            })
+            .catch((err) => { 
+                console.error('Error:', err);
+                showToast('Failed to send change request', true);
+                throw err;
+            });
         }
 
         function openJourneyDetail(ambassadorId) {
@@ -1777,93 +1862,171 @@
             }).join('');
         }
 
-        // Enhanced tab switching with polling control
-        function setupTabsWithPolling() {
-            const tabs = {
-                ambassadors: document.getElementById('tabAmbassadors'),
-                partners: document.getElementById('tabPartners'),
-                articles: document.getElementById('tabArticles'),
-                journey: document.getElementById('tabJourney')
-            };
-            
-            Object.entries(tabs).forEach(([tabName, tabElement]) => {
-                tabElement.addEventListener('click', () => {
-                    // Stop polling when leaving journey tab
-                    if (state.tab === 'journey' && tabName !== 'journey') {
-                        stopJourneyPolling();
+        async function openProfileAudit(id) {
+            try {
+                const response = await fetch(`/admin/api/ambassadors/${id}`, { credentials: 'include' });
+                if (!response.ok) throw new Error('Failed to load profile');
+                
+                const data = await response.json();
+                const content = document.getElementById('profileAuditContent');
+                
+                let html = `
+                    <div class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="font-semibold text-gray-900 mb-2">Basic Information</h4>
+                                <div class="space-y-3">
+                                    <div>
+                                        <span class="text-sm text-gray-500">Name:</span>
+                                        <p class="font-medium">${data.name || 'Not provided'}</p>
+                                    </div>
+                                    <div>
+                                        <span class="text-sm text-gray-500">Email:</span>
+                                        <p class="font-medium">${data.email}</p>
+                                    </div>
+                                    <div>
+                                        <span class="text-sm text-gray-500">Access Code:</span>
+                                        <p class="font-mono font-medium">${data.access_code}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h4 class="font-semibold text-gray-900 mb-2">Account Status</h4>
+                                <div class="space-y-3">
+                                    <div>
+                                        <span class="text-sm text-gray-500">Status:</span>
+                                        <span class="status-badge status-${data.status}">${data.status}</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-sm text-gray-500">Join Date:</span>
+                                        <p class="font-medium">${new Date(data.joinDate).toLocaleDateString()}</p>
+                                    </div>
+                                    <div>
+                                        <span class="text-sm text-gray-500">Last Login:</span>
+                                        <p class="font-medium">${data.lastLogin ? new Date(data.lastLogin).toLocaleString() : 'Never'}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                `;
+                
+                if (data.profile && data.profile.completed) {
+                    html += `
+                        <div>
+                            <h4 class="font-semibold text-gray-900 mb-2">Profile Details</h4>
+                            <div class="bg-gray-50 rounded-lg p-4">
+                                <pre class="text-sm whitespace-pre-wrap">${JSON.stringify(data.profile.data, null, 2)}</pre>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    html += `
+                        <div class="text-center py-8">
+                            <i class="bx bx-user-x text-4xl text-gray-300 mb-2"></i>
+                            <p class="text-gray-500">Profile not completed yet</p>
+                        </div>
+                    `;
+                }
+                
+                html += '</div>';
+                content.innerHTML = html;
+                
+                const modal = document.getElementById('profileAuditModal');
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                showToast('Failed to load profile', true);
+            }
+        }
+
+        function closeProfileAudit() {
+            const modal = document.getElementById('profileAuditModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function openEditModal(id) {
+            // Implement edit functionality
+            showToast('Edit functionality coming soon');
+        }
+
+        function openDeleteModal(id) {
+            state.currentItemId = id;
+            const modal = document.getElementById('deleteModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeDeleteModal() {
+            const modal = document.getElementById('deleteModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            state.currentItemId = null;
+        }
+
+        async function confirmDelete() {
+            try {
+                let url = '';
+                if (state.tab === 'ambassadors') {
+                    url = `/admin/api/ambassadors/${state.currentItemId}`;
+                } else if (state.tab === 'partners') {
+                    url = `/admin/api/partners/${state.currentItemId}`;
+                } else if (state.tab === 'articles') {
+                    url = `/admin/api/articles/${state.currentItemId}`;
+                    const response = await fetch(url, {
+                        method: 'DELETE',
+                        credentials: 'include'
+                    });
+                    
+                    if (!response.ok) {
+                        const error = await response.json();
+                        throw new Error(error.error || 'Failed to delete');
                     }
                     
-                    state.tab = tabName;
-                    state.page = 1;
-                    state.search = '';
-                    state.status = 'all';
-                    state.articleStatusFilter = '';
-                    
-                    // Update UI
-                    Object.entries(tabs).forEach(([name, element]) => {
-                        if (name === tabName) {
-                            element.className = 'px-4 py-2 rounded-xl text-sm font-semibold text-white';
-                            element.style.backgroundColor = '#4b0d7f';
-                        } else {
-                            element.className = 'px-4 py-2 rounded-xl text-sm font-semibold text-gray-700';
-                            element.style.backgroundColor = '';
-                        }
-                    });
-                    
-                    fetchList().then(() => {
-                        // Start polling after loading journey data
-                        if (tabName === 'journey') {
-                            startJourneyPolling();
-                        }
-                    });
+                    deleteLsArticle(state.currentItemId);
+                    closeDeleteModal();
+                    showToast('Article deleted successfully!');
+                    fetchList();
                     fetchStats();
+                    return;
+                } else {
+                    return;
+                }
+                
+                const response = await fetch(url, {
+                    method: 'DELETE',
+                    credentials: 'include'
                 });
-            });
-        }
-
-        // Update table headers
-        function updateTableHeaders(headers) {
-            const thead = document.getElementById('tableHeaders');
-            thead.innerHTML = headers.map(header => 
-                `<th class="px-4 py-3 font-semibold">${header}</th>`
-            ).join('') + '<th class="px-4 py-3 font-semibold text-right">Actions</th>';
-        }
-
-        // Render empty state
-        function renderEmptyState() {
-            elements.listBody.innerHTML = '';
-            elements.emptyState.classList.remove('hidden');
-            elements.paginationContainer.classList.add('hidden');
-        }
-
-        // Show loading state
-        function showLoading(show) {
-            elements.loadingState.style.display = show ? 'flex' : 'none';
-            elements.listBody.style.display = show ? 'none' : 'table-row-group';
-        }
-
-        // Render pagination
-        function renderPagination() {
-            if (state.total <= state.limit || state.tab !== 'ambassadors') {
-                elements.paginationContainer.classList.add('hidden');
-                return;
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to delete');
+                }
+                
+                closeDeleteModal();
+                showToast('Item deleted successfully!');
+                fetchList();
+                fetchStats();
+                
+            } catch (error) {
+                console.error('Error deleting:', error);
+                showToast(error.message || 'Failed to delete', true);
             }
-            
-            const start = ((state.page - 1) * state.limit) + 1;
-            const end = Math.min(state.page * state.limit, state.total);
-            const totalPages = Math.ceil(state.total / state.limit);
-            
-            elements.pageStart.textContent = start;
-            elements.pageEnd.textContent = end;
-            elements.totalItems.textContent = state.total;
-            
-            elements.prevPage.disabled = state.page === 1;
-            elements.nextPage.disabled = state.page === totalPages;
-            
-            elements.paginationContainer.classList.remove('hidden');
         }
 
-        // Bind row actions
+        function closeModal() {
+            const modal = document.getElementById('ambassadorModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        // ============================================
+        // BIND ROW ACTIONS
+        // ============================================
+
         function bindRowActions() {
             const tbody = elements.listBody;
             tbody.addEventListener('click', (e) => {
@@ -1890,14 +2053,14 @@
                     case 'delete':
                         openDeleteModal(id);
                         break;
-                    case 'preview':
-                        previewArticle(id);
-                        break;
                 }
             });
         }
 
-        // Bind events
+        // ============================================
+        // BIND EVENTS
+        // ============================================
+
         function bindEvents() {
             let searchTimeout;
             elements.searchInput.addEventListener('input', (e) => {
@@ -1972,24 +2135,6 @@
                     fetchList();
                 }
             });
-            
-            elements.addNewBtn.addEventListener('click', () => {
-                if (state.tab === 'ambassadors') {
-                    openAddAmbassadorModal();
-                } else if (state.tab === 'partners') {
-                    openAddPartnerModal();
-                } else if (state.tab === 'articles') {
-                    openAddArticleModal();
-                }
-            });
-            
-            const ambassadorForm = document.getElementById('ambassadorForm');
-            if (ambassadorForm) {
-                ambassadorForm.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    await saveAmbassador();
-                });
-            }
 
             // Journey detail modal close button
             document.getElementById('closeJourneyDetail').addEventListener('click', () => {
@@ -1999,310 +2144,64 @@
             });
         }
 
-        function openAddAmbassadorModal() {
-            const modal = document.getElementById('ambassadorModal');
-            const title = document.getElementById('modalTitle');
-            const form = document.getElementById('ambassadorForm');
+        // ============================================
+        // ✅ CRITICAL FIX: TAB SETUP FUNCTION DEFINED BEFORE USE
+        // ============================================
+        function setupTabsWithPolling() {
+            const tabs = {
+                ambassadors: document.getElementById('tabAmbassadors'),
+                partners: document.getElementById('tabPartners'),
+                articles: document.getElementById('tabArticles'),
+                journey: document.getElementById('tabJourney')
+            };
             
-            title.textContent = 'Add Ambassador';
-            form.reset();
-            document.getElementById('ambassadorId').value = '';
-            document.getElementById('status').value = 'active';
-            
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-        }
-
-        async function openEditModal(id) {
-            try {
-                let url = '';
-                if (state.tab === 'ambassadors') {
-                    url = `/admin/api/ambassadors/${id}`;
-                } else if (state.tab === 'partners') {
-                    url = `/admin/api/partners/${id}`;
-                } else {
-                    return;
-                }
-                
-                const response = await fetch(url, { credentials: 'include' });
-                if (!response.ok) throw new Error('Failed to load item');
-                
-                const data = await response.json();
-                const item = state.tab === 'ambassadors' ? data : data.partner;
-                
-                const modal = document.getElementById('ambassadorModal');
-                const title = document.getElementById('modalTitle');
-                const form = document.getElementById('ambassadorForm');
-                
-                title.textContent = `Edit ${state.tab === 'ambassadors' ? 'Ambassador' : 'Partner'}`;
-                form.reset();
-                
-                if (state.tab === 'ambassadors') {
-                    document.getElementById('ambassadorId').value = item.id;
-                    document.getElementById('name').value = item.name || '';
-                    document.getElementById('email').value = item.email || '';
-                    document.getElementById('accessCode').value = item.accessCode || '';
-                    document.getElementById('status').value = item.status || 'active';
-                } else if (state.tab === 'partners') {
-                    document.getElementById('ambassadorId').value = item.id;
-                    document.getElementById('name').value = item.name || '';
-                    document.getElementById('email').value = item.email || '';
-                    document.getElementById('accessCode').value = item.accessCode || '';
-                    document.getElementById('status').value = item.status || 'active';
-                }
-                
-                modal.classList.remove('hidden');
-                modal.classList.add('flex');
-                
-            } catch (error) {
-                console.error('Error opening edit modal:', error);
-                showToast('Failed to load item details', true);
-            }
-        }
-
-        async function saveAmbassador() {
-            try {
-                const id = document.getElementById('ambassadorId').value;
-                const name = document.getElementById('name').value;
-                const email = document.getElementById('email').value;
-                const accessCode = document.getElementById('accessCode').value;
-                const status = document.getElementById('status').value;
-                
-                let url = '';
-                let method = '';
-                
-                if (id) {
-                    url = `/admin/api/${state.tab}/${id}`;
-                    method = 'PUT';
-                } else {
-                    url = `/admin/api/${state.tab}`;
-                    method = 'POST';
-                }
-                
-                const response = await fetch(url, {
-                    method: method,
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    credentials: 'include',
-                    body: JSON.stringify({
-                        name: name,
-                        email: email,
-                        accessCode: accessCode,
-                        status: status,
-                        company: state.tab === 'partners' ? document.getElementById('company')?.value || '' : undefined
-                    })
-                });
-                
-                if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.error || 'Failed to save');
-                }
-                
-                closeModal();
-                showToast(`${state.tab === 'ambassadors' ? 'Ambassador' : 'Partner'} saved successfully!`);
-                fetchList();
-                fetchStats();
-                
-            } catch (error) {
-                console.error('Error saving:', error);
-                showToast(error.message || 'Failed to save', true);
-            }
-        }
-
-        async function openProfileAudit(id) {
-            try {
-                const response = await fetch(`/admin/api/ambassadors/${id}`, { credentials: 'include' });
-                if (!response.ok) throw new Error('Failed to load profile');
-                
-                const data = await response.json();
-                const content = document.getElementById('profileAuditContent');
-                
-                let html = `
-                    <div class="space-y-6">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <h4 class="font-semibold text-gray-900 mb-2">Basic Information</h4>
-                                <div class="space-y-3">
-                                    <div>
-                                        <span class="text-sm text-gray-500">Name:</span>
-                                        <p class="font-medium">${data.name || 'Not provided'}</p>
-                                    </div>
-                                    <div>
-                                        <span class="text-sm text-gray-500">Email:</span>
-                                        <p class="font-medium">${data.email}</p>
-                                    </div>
-                                    <div>
-                                        <span class="text-sm text-gray-500">Access Code:</span>
-                                        <p class="font-mono font-medium">${data.accessCode}</p>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div>
-                                <h4 class="font-semibold text-gray-900 mb-2">Account Status</h4>
-                                <div class="space-y-3">
-                                    <div>
-                                        <span class="text-sm text-gray-500">Status:</span>
-                                        <span class="status-badge status-${data.status}">${data.status}</span>
-                                    </div>
-                                    <div>
-                                        <span class="text-sm text-gray-500">Join Date:</span>
-                                        <p class="font-medium">${new Date(data.joinDate).toLocaleDateString()}</p>
-                                    </div>
-                                    <div>
-                                        <span class="text-sm text-gray-500">Last Login:</span>
-                                        <p class="font-medium">${data.lastLogin ? new Date(data.lastLogin).toLocaleString() : 'Never'}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                `;
-                
-                if (data.profile && data.profile.completed) {
-                    html += `
-                        <div>
-                            <h4 class="font-semibold text-gray-900 mb-2">Profile Details</h4>
-                            <div class="bg-gray-50 rounded-lg p-4">
-                                <pre class="text-sm whitespace-pre-wrap">${JSON.stringify(data.profile.data, null, 2)}</pre>
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    html += `
-                        <div class="text-center py-8">
-                            <i class="bx bx-user-x text-4xl text-gray-300 mb-2"></i>
-                            <p class="text-gray-500">Profile not completed yet</p>
-                        </div>
-                    `;
-                }
-                
-                html += '</div>';
-                content.innerHTML = html;
-                
-                const modal = document.getElementById('profileAuditModal');
-                modal.classList.remove('hidden');
-                modal.classList.add('flex');
-                
-            } catch (error) {
-                console.error('Error loading profile:', error);
-                showToast('Failed to load profile', true);
-            }
-        }
-
-        function closeProfileAudit() {
-            const modal = document.getElementById('profileAuditModal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-        }
-
-        function openDeleteModal(id) {
-            state.currentItemId = id;
-            const modal = document.getElementById('deleteModal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-        }
-
-        function closeDeleteModal() {
-            const modal = document.getElementById('deleteModal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-            state.currentItemId = null;
-        }
-
-        async function confirmDelete() {
-            try {
-                let url = '';
-                if (state.tab === 'ambassadors') {
-                    url = `/admin/api/ambassadors/${state.currentItemId}`;
-                } else if (state.tab === 'partners') {
-                    url = `/admin/api/partners/${state.currentItemId}`;
-                } else if (state.tab === 'articles') {
-                    url = `/admin/api/articles/${state.currentItemId}`;
-                    const response = await fetch(url, {
-                        method: 'DELETE',
-                        credentials: 'include'
-                    });
-                    
-                    if (!response.ok) {
-                        const error = await response.json();
-                        throw new Error(error.error || 'Failed to delete');
+            Object.entries(tabs).forEach(([tabName, tabElement]) => {
+                tabElement.addEventListener('click', () => {
+                    // Stop polling when leaving journey tab
+                    if (state.tab === 'journey' && tabName !== 'journey') {
+                        stopJourneyPolling();
                     }
                     
-                    deleteLsArticle(state.currentItemId);
-                    closeDeleteModal();
-                    showToast('Article deleted successfully!');
-                    fetchList();
+                    state.tab = tabName;
+                    state.page = 1;
+                    state.search = '';
+                    state.status = 'all';
+                    state.articleStatusFilter = '';
+                    
+                    // Show/hide article status filters
+                    const articleStatusFilters = document.getElementById('articleStatusFilters');
+                    if (tabName === 'articles') {
+                        articleStatusFilters.style.display = 'flex';
+                        setActiveArticleFilter('filterAll');
+                    } else {
+                        articleStatusFilters.style.display = 'none';
+                    }
+                    
+                    // Update UI
+                    Object.entries(tabs).forEach(([name, element]) => {
+                        if (name === tabName) {
+                            element.className = 'px-4 py-2 rounded-xl text-sm font-semibold text-white';
+                            element.style.backgroundColor = '#4b0d7f';
+                        } else {
+                            element.className = 'px-4 py-2 rounded-xl text-sm font-semibold text-gray-700';
+                            element.style.backgroundColor = '';
+                        }
+                    });
+                    
+                    fetchList().then(() => {
+                        // Start polling after loading journey data
+                        if (tabName === 'journey') {
+                            startJourneyPolling();
+                        }
+                    });
                     fetchStats();
-                    return;
-                } else {
-                    return;
-                }
-                
-                const response = await fetch(url, {
-                    method: 'DELETE',
-                    credentials: 'include'
                 });
-                
-                if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.error || 'Failed to delete');
-                }
-                
-                closeDeleteModal();
-                showToast('Item deleted successfully!');
-                fetchList();
-                fetchStats();
-                
-            } catch (error) {
-                console.error('Error deleting:', error);
-                showToast(error.message || 'Failed to delete', true);
-            }
+            });
         }
 
-        function closeModal() {
-            const modal = document.getElementById('ambassadorModal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-        }
-
-        function previewArticle(id) {
-            showToast('Article preview coming soon!');
-        }
-
-        function openAddArticleModal() {
-            showToast('Add article functionality coming soon!');
-        }
-
-        function openAddPartnerModal() {
-            openAddAmbassadorModal();
-            document.getElementById('modalTitle').textContent = 'Add Partner';
-        }
-
-        function showToast(message, isError = false) {
-            const container = document.getElementById('toastContainer');
-            const toast = document.createElement('div');
-            toast.className = `toast bg-white rounded-lg shadow-lg p-4 max-w-sm flex items-center space-x-3 ${
-                isError ? 'border-l-4 border-red-500' : 'border-l-4 border-green-500'
-            }`;
-            
-            toast.innerHTML = `
-                <i class="bx ${isError ? 'bx-error text-red-500' : 'bx-check-circle text-green-500'} text-xl"></i>
-                <span class="text-gray-800 flex-1">${message}</span>
-                <button onclick="this.parentElement.remove()" class="text-gray-400 hover:text-gray-600">
-                    <i class="bx bx-x"></i>
-                </button>
-            `;
-            
-            container.appendChild(toast);
-            
-            setTimeout(() => {
-                if (toast.parentElement) {
-                    toast.remove();
-                }
-            }, 5000);
-        }
-
+        // ============================================
+        // LOGOUT FUNCTION
+        // ============================================
         async function logout() {
             try {
                 const response = await fetch('/api/logout', {
@@ -2318,6 +2217,18 @@
                 window.location.href = '/admin-signin.html';
             }
         }
+
+        // ============================================
+        // INITIALIZE - NOW AFTER ALL FUNCTIONS ARE DEFINED
+        // ============================================
+        document.addEventListener('DOMContentLoaded', () => {
+            loadAdminInfo();
+            fetchStats();
+            fetchList();
+            bindEvents();
+            bindReviewModalEvents();
+            setupTabsWithPolling(); // ✅ NOW THIS WORKS!
+        });
 
         // Add CSS for animations
         const style = document.createElement('style');
@@ -2352,12 +2263,14 @@
         `;
         document.head.appendChild(style);
 
+        // Expose functions to window
         window.closeModal = closeModal;
         window.closeDeleteModal = closeDeleteModal;
         window.confirmDelete = confirmDelete;
         window.closeProfileAudit = closeProfileAudit;
         window.logout = logout;
         window.showToast = showToast;
+        window.closeReviewModal = closeReviewModal;
     </script>
 </body>
 </html>

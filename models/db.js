@@ -268,14 +268,14 @@ async function createUser(userData, role = 'ambassador') {
     } else if (role === 'partner') {
       roleTable = 'partners';
       normalizer = normalizePartnerData;
-      roleInsert = {
-        user_id: newUser.user_id,
-        organization_name: userData.organization_name || userData.organizationName || '',
-        contact_person: userData.contact_person || userData.contactName || '',
-        phone_number: userData.phone_number || userData.phoneNumber || null,
-        location: userData.location || null,
-        partner_type: userData.partner_type || userData.partnerType || null,
-      };
+    roleInsert = {
+      user_id: newUser.user_id,
+      organization_name: userData.organization_name || userData.organizationName || '',
+      contact_person: userData.contact_person || userData.contactName || '',  // <-- THIS IS CORRECT
+      phone_number: userData.phone_number || userData.phoneNumber || null,
+      location: userData.location || null,
+      partner_type: userData.partner_type || userData.partnerType || null,
+    };
     } else if (role === 'admin') {
       roleTable = 'admins';
       normalizer = normalizeAdminData;

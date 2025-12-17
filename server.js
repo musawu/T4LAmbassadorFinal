@@ -8,8 +8,237 @@ const JOURNEY_MONTHS = require("./journey-db.js");
 const app = express();
 const { v4: uuidv4 } = require("uuid");
 
-// Import database functions
-// Import database functions - UPDATE THIS SECTION
+// ========== MAILSLURP EMAIL SERVICE ==========
+const { MailSlurp } = require('mailslurp-client');
+
+class EmailService {
+  constructor() {
+    if (!process.env.MAILSLURP_API_KEY) {
+      console.warn('⚠️  MailSlurp API key missing - emails disabled');
+      this.client = null;
+      return;
+    }
+    
+    try {
+      this.client = new MailSlurp({
+        apiKey: process.env.MAILSLURP_API_KEY
+      });
+      console.log('✅ MailSlurp email service initialized');
+    } catch (error) {
+      console.error('❌ MailSlurp init failed:', error.message);
+      this.client = null;
+    }
+  }
+
+  // Send ambassador welcome email
+  async sendAmbassadorWelcome(ambassadorData) {
+      console.log('=== AMBASSADOR EMAIL START ===');
+      console.log('To:', ambassadorData.email);
+      console.log('Name:', ambassadorData.name);
+      console.log('Code:', ambassadorData.access_code);
+    if (!this.client) {
+      console.log('⚠️  MailSlurp not available - skipping email');
+      return { success: false, error: 'Email service not configured' };
+    }
+
+    try {
+      // Create a sender inbox
+      const inbox = await this.client.createInbox();
+      
+      // Send to the actual ambassador email
+        const email = await this.client.sendEmail(inbox.id, {
+          to: [ambassadorData.email],  // Ambassador's email
+          subject: `🎉 Welcome ${ambassadorData.name} to T4LA Ambassador Program!`,
+          body: this.createAmbassadorEmailBody(ambassadorData),
+          isHTML: true
+       });
+      
+
+      console.log(`✅ Ambassador email sent to ${ambassadorData.email}`);
+      console.log(`📧 View email: https://app.mailslurp.com/inboxes/${inbox.id}`);
+      
+      return {
+        success: true,
+        emailId: email.id,
+        inboxId: inbox.id,
+        viewUrl: `https://app.mailslurp.com/inboxes/${inbox.id}`
+      };
+    } catch (error) {
+      console.error(`❌ Failed to send ambassador email:`, error.message);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Send partner welcome email
+  async sendPartnerWelcome(partnerData) {
+      console.log('=== PARTNER EMAIL START ===');
+      console.log('To:', partnerData.email);
+      console.log('Name:', partnerData.name);
+      console.log('Company:', partnerData.company);
+      console.log('Code:', partnerData.access_code);
+    if (!this.client) {
+      console.log('⚠️  MailSlurp not available - skipping email');
+      return { success: false, error: 'Email service not configured' };
+    }
+
+    try {
+      const inbox = await this.client.createInbox();
+      
+      const email = await this.client.sendEmail(inbox.id, {
+        to: [partnerData.email],  // Partner's email
+        subject: `🤝 Welcome ${partnerData.name} to T4LA Partner Network!`,
+        body: this.createPartnerEmailBody(partnerData),
+        isHTML: true
+      });
+
+      console.log(`✅ Partner email sent to ${partnerData.email}`);
+      console.log(`📧 View email: https://app.mailslurp.com/inboxes/${inbox.id}`);
+      
+      return {
+        success: true,
+        emailId: email.id,
+        inboxId: inbox.id,
+        viewUrl: `https://app.mailslurp.com/inboxes/${inbox.id}`
+      };
+    } catch (error) {
+      console.error(`❌ Failed to send partner email:`, error.message);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // HTML email templates
+  createAmbassadorEmailBody(data) {
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333; }
+          .header { background: linear-gradient(135deg, #4b0d7f 0%, #7c3aed 100%); color: white; padding: 30px; text-align: center; }
+          .content { padding: 30px; background: #f9fafb; }
+          .credentials { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #7c3aed; }
+          .code { font-size: 18px; font-weight: bold; color: #7c3aed; background: #f3e8ff; padding: 8px 12px; border-radius: 4px; }
+          .button { display: inline-block; padding: 12px 30px; background: #4b0d7f; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; }
+          .footer { text-align: center; padding: 20px; color: #6b7280; font-size: 12px; border-top: 1px solid #e5e7eb; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>Welcome to T4LA!</h1>
+          <p>Your Ambassador Account is Ready</p>
+        </div>
+        
+        <div class="content">
+          <h2>Hello ${data.name},</h2>
+          <p>Your ambassador account has been created successfully!</p>
+          
+          <div class="credentials">
+            <h3>Your Login Credentials:</h3>
+            <p><strong>Email:</strong> ${data.email}</p>
+            <p><strong>Access Code:</strong> <span class="code">${data.access_code}</span></p>
+            <p><strong>Default Password:</strong> welcome123</p>
+            <p><em>Please change your password after first login</em></p>
+          </div>
+          
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${process.env.APP_URL || 'http://localhost:3000'}/signin" class="button">
+              Sign In Now →
+            </a>
+          </div>
+          
+          <p>If you have any questions, reply to this email.</p>
+        </div>
+        
+        <div class="footer">
+          <p>© ${new Date().getFullYear()} T4LA Platform. All rights reserved.</p>
+          <p>This is an automated email. Please do not reply to this message.</p>
+        </div>
+      </body>
+      </html>
+    `;
+  }
+
+  createPartnerEmailBody(data) {
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333; }
+          .header { background: linear-gradient(135deg, #4F46E5 0%, #6366F1 100%); color: white; padding: 30px; text-align: center; }
+          .content { padding: 30px; background: #f9fafb; }
+          .credentials { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #4F46E5; }
+          .code { font-size: 18px; font-weight: bold; color: #4F46E5; background: #e0e7ff; padding: 8px 12px; border-radius: 4px; }
+          .button { display: inline-block; padding: 12px 30px; background: #4F46E5; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; }
+          .footer { text-align: center; padding: 20px; color: #6b7280; font-size: 12px; border-top: 1px solid #e5e7eb; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>Welcome to T4LA Partner Network!</h1>
+          ${data.company ? `<p>Welcome from ${data.company}</p>` : ''}
+        </div>
+        
+        <div class="content">
+          <h2>Hello ${data.name},</h2>
+          <p>Your partner account has been created successfully!</p>
+          
+          <div class="credentials">
+            <h3>Your Partner Login:</h3>
+            <p><strong>Email:</strong> ${data.email}</p>
+            <p><strong>Partner Access Code:</strong> <span class="code">${data.access_code}</span></p>
+            <p><strong>Default Password:</strong> welcome123</p>
+            <p><em>Please change your password after first login</em></p>
+          </div>
+          
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${process.env.APP_URL || 'http://localhost:3000'}/partner-signin" class="button">
+              Access Partner Dashboard →
+            </a>
+          </div>
+          
+          <p>If you need assistance, reply to this email.</p>
+        </div>
+        
+        <div class="footer">
+          <p>© ${new Date().getFullYear()} T4LA Platform. All rights reserved.</p>
+          <p>This is an automated email. Please do not reply to this message.</p>
+        </div>
+      </body>
+      </html>
+    `;
+  }
+}
+
+// Initialize the email service
+const emailService = new EmailService();
+
+// ========== TEST ENDPOINT ==========
+app.get('/api/test-mailslurp', async (req, res) => {
+  try {
+    const testData = {
+      name: 'Test Ambassador',
+      email: process.env.EMAIL_USER || 'test@example.com',
+      access_code: 'TEST123'
+    };
+    
+    const result = await emailService.sendAmbassadorWelcome(testData);
+    
+    res.json({
+      success: true,
+      message: 'Test email sent via MailSlurp',
+      result: result,
+      note: 'Check MailSlurp dashboard to see the email'
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      error: error.message,
+      note: 'Make sure MAILSLURP_API_KEY is set in .env'
+    });
+  }
+});
+
 const {
   supabase,
   getUserByEmail,
@@ -48,11 +277,11 @@ const {
 // ============================================
 // NOTIFICATION HELPER FUNCTION
 // ============================================
-async function createNotification(recipientId, recipientType, notificationType, title, message, link = null, applicationId = null, requestId = null) {
+async function createNotification(recipientId, recipientType, notificationType, title, message, link = null, applicationId = null, requestId = null, articleId = null) {
   try {
     console.log('📬 Creating notification for:', recipientId, '- Type:', notificationType);
     
-    // FOR PRESENTATION: SIMPLY CREATE WITHOUT VALIDATION
+    // 🚨 IMPORTANT: Prepare data with all reference IDs null by default
     const notificationData = {
       notification_id: uuidv4(),
       recipient_id: recipientId,
@@ -63,14 +292,32 @@ async function createNotification(recipientId, recipientType, notificationType, 
       link: link,
       read: false,
       created_at: new Date().toISOString(),
-      application_id: null,  // 🚨 FORCE TO NULL FOR SERVICE REQUESTS
-      request_id: requestId || null
+      application_id: null,
+      request_id: null,
+      article_id: null
     };
-
+    
+    // 🚨 CRITICAL: Set ONLY ONE reference ID based on what's provided
+    // This ensures the database constraint is satisfied
+    if (applicationId) {
+      notificationData.application_id = applicationId;
+      // Leave request_id and article_id as null
+    } else if (requestId) {
+      notificationData.request_id = requestId;
+      // Leave application_id and article_id as null
+    } else if (articleId) {
+      notificationData.article_id = articleId;
+      // Leave application_id and request_id as null
+    } else {
+      // If no reference ID is provided, this might violate the constraint
+      console.log('⚠️ Warning: No reference ID provided for notification');
+    }
+    
     console.log('📝 Notification data:', {
       type: notificationType,
-      hasApplicationId: !!applicationId,
-      hasRequestId: !!requestId
+      hasApplicationId: !!notificationData.application_id,
+      hasRequestId: !!notificationData.request_id,
+      hasArticleId: !!notificationData.article_id
     });
 
     // Try to create notification
@@ -81,15 +328,16 @@ async function createNotification(recipientId, recipientType, notificationType, 
       .single();
 
     if (error) {
-      console.log('⚠️ Notification failed (but continuing):', error.message);
-      return null; // Don't crash the request
+      console.log('⚠️ Notification failed:', error.message);
+      console.log('📋 Failed notification data:', notificationData);
+      return null;
     }
 
     console.log('✅ Notification created successfully');
     return data;
   } catch (error) {
-    console.log('⚠️ Notification error (but continuing):', error.message);
-    return null; // Don't crash the request
+    console.log('⚠️ Notification error:', error.message);
+    return null;
   }
 }
 
@@ -3813,15 +4061,18 @@ app.get(
   async (req, res) => {
     try {
       const ambassador = await getUserById(req.params.id, "ambassador");
+      
       if (!ambassador) {
         return res.status(404).json({ error: "Ambassador not found" });
       }
 
+      console.log('📤 Sending ambassador data with access_code:', ambassador.access_code);
+
       return res.json({
         id: ambassador.id,
-        name: ambassador.first_name || ambassador.name,
+        name: ambassador.first_name || ambassador.name || 'Ambassador',
         email: ambassador.email,
-        access_code: ambassador.access_code,
+        access_code: ambassador.access_code,  // ✅ THIS SHOULD NOW WORK!
         status: ambassador.status,
         joinDate: ambassador.created_at,
         lastLogin: ambassador.last_login,
@@ -3837,25 +4088,58 @@ app.get(
   }
 );
 
+app.get('/admin/api/articles/:id/notifications', requireAuth, requireRole('admin'), async (req, res) => {
+  try {
+    const articleId = req.params.id;
+    
+    console.log('📬 Fetching notifications for article:', articleId);
+
+    // Get all notifications related to this article
+    const { data: notifications, error } = await supabase
+      .from('notifications')
+      .select('*')
+      .eq('article_id', articleId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching article notifications:', error);
+      throw error;
+    }
+
+    console.log('✅ Found', notifications?.length || 0, 'notifications');
+
+    return res.json({
+      items: notifications || [],
+      total: notifications?.length || 0
+    });
+  } catch (error) {
+    console.error('❌ Error fetching article notifications:', error);
+    return res.status(500).json({ 
+      error: 'Failed to fetch notifications',
+      details: error.message 
+    });
+  }
+});
+
 app.post(
   "/admin/api/ambassadors",
   requireAuth,
   requireRole("admin"),
   async (req, res) => {
     try {
-      const { name, email, access_code } = req.body;
+      console.log("📝 Creating ambassador:", req.body);
+      
+      const { first_name, email, access_code } = req.body;  // CHANGED: name → first_name
 
-      if (!name || !email || !access_code) {
-        return res
-          .status(400)
-          .json({ error: "Name, email, and access code are required" });
+      if (!first_name || !email || !access_code) {  // CHANGED: name → first_name
+        return res.status(400).json({ error: "Name, email, and access code are required" });
       }
 
-      // Check if email already exists
-      const existingUser = await getUserByEmail(
-        email.toLowerCase(),
-        "ambassador"
-      );
+      const emailLower = email.toLowerCase().trim();
+      const accessCodeUpper = access_code.toUpperCase().trim();
+
+      // Check if email exists
+      const existingUser = await getUserByEmail(emailLower, "ambassador");
       if (existingUser) {
         return res.status(400).json({ error: "Email already registered" });
       }
@@ -3864,37 +4148,72 @@ app.post(
       const hashedPassword = hashPassword("welcome123", salt);
 
       const userData = {
-        first_name: name,
-        email: email.toLowerCase(),
-        access_code: access_code.toUpperCase(),
+        first_name: first_name,  // CHANGED: name → first_name
+        email: emailLower,
+        access_code: accessCodeUpper,
         password_hash: hashedPassword,
-        salt,
+        salt: salt,
         status: "active",
       };
 
+      console.log("💾 Saving ambassador to database:", userData);
+      
       const newAmbassador = await createUser(userData, "ambassador");
 
       // Initialize journey progress
-      await upsertJourneyProgress(newAmbassador.id, {
+      await upsertJourneyProgress(newAmbassador.ambassador_id || newAmbassador.id, {
         current_month: 1,
         completed_tasks: {},
         start_date: new Date().toISOString(),
         month_start_dates: { 1: new Date().toISOString() },
       });
 
+      console.log("✅ Ambassador created in database:", newAmbassador);
+
+      // ========== SEND WELCOME EMAIL ==========
+      console.log("📧 Sending welcome email...");
+      const emailResult = await emailService.sendAmbassadorWelcome({
+        name: newAmbassador.first_name || first_name,
+        email: newAmbassador.email,
+        access_code: newAmbassador.access_code
+      });
+
+      if (!emailResult.success) {
+        console.warn('⚠️  Ambassador created but email failed:', emailResult.error);
+        return res.json({
+          success: true,
+          ambassador: {
+            id: newAmbassador.ambassador_id || newAmbassador.id,
+            name: newAmbassador.first_name,
+            email: newAmbassador.email,
+            access_code: newAmbassador.access_code,
+            status: newAmbassador.status,
+          },
+          emailSent: false,
+          message: "✅ Ambassador added! (Email failed to send)"
+        });
+      }
+
+      console.log("🎉 Ambassador creation COMPLETE with email");
+
       return res.json({
         success: true,
         ambassador: {
-          id: newAmbassador.id,
+          id: newAmbassador.ambassador_id || newAmbassador.id,
           name: newAmbassador.first_name,
           email: newAmbassador.email,
           access_code: newAmbassador.access_code,
           status: newAmbassador.status,
         },
+        emailSent: true,
+        message: "✅ Ambassador added! Welcome email sent with access code."
       });
     } catch (error) {
-      console.error("Error creating ambassador:", error);
-      return res.status(500).json({ error: "Internal server error" });
+      console.error("❌ Error creating ambassador:", error);
+      return res.status(500).json({ 
+        error: "Failed to create ambassador",
+        details: error.message 
+      });
     }
   }
 );
@@ -4007,16 +4326,19 @@ app.post(
   requireRole("admin"),
   async (req, res) => {
     try {
-      const { name, email, company, access_code } = req.body;
+      console.log("📝 Creating partner:", req.body);
+      
+      const { contact_person, organization_name, email, access_code } = req.body;  // CHANGED
 
-      if (!name || !email || !access_code) {
-        return res
-          .status(400)
-          .json({ error: "Name, email, and access code are required" });
+      if (!contact_person || !email || !access_code) {  // CHANGED: name → contact_person
+        return res.status(400).json({ error: "Contact person, email, and access code are required" });
       }
 
-      // Check if email already exists
-      const existingUser = await getUserByEmail(email.toLowerCase(), "partner");
+      const emailLower = email.toLowerCase().trim();
+      const accessCodeUpper = access_code.toUpperCase().trim();
+
+      // Check if email exists
+      const existingUser = await getUserByEmail(emailLower, "partner");
       if (existingUser) {
         return res.status(400).json({ error: "Email already registered" });
       }
@@ -4025,34 +4347,201 @@ app.post(
       const hashedPassword = hashPassword("welcome123", salt);
 
       const userData = {
-        contact_name: name,
-        organization_name: company || "",
-        email: email.toLowerCase(),
-        access_code: access_code.toUpperCase(),
+        contact_person: contact_person,          // CHANGED: contact_name → contact_person
+        organization_name: organization_name || "",  // CHANGED: company → organization_name
+        email: emailLower,
+        access_code: accessCodeUpper,
         password_hash: hashedPassword,
-        salt,
+        salt: salt,
         status: "approved",
       };
 
+      console.log("💾 Saving partner to database:", userData);
+      
       const newPartner = await createUser(userData, "partner");
+
+      console.log("✅ Partner created in database:", newPartner);
+
+      // ========== SEND WELCOME EMAIL ==========
+      console.log("📧 Sending welcome email...");
+      const emailResult = await emailService.sendPartnerWelcome({
+        name: newPartner.contact_person || contact_person,
+        email: newPartner.email,
+        company: newPartner.organization_name || organization_name,
+        access_code: newPartner.access_code
+      });
+
+      if (!emailResult.success) {
+        console.warn('⚠️  Partner created but email failed:', emailResult.error);
+        return res.json({
+          success: true,
+          partner: {
+            id: newPartner.partner_id || newPartner.id,
+            name: newPartner.contact_person || contact_person,
+            email: newPartner.email,
+            company: newPartner.organization_name,
+            access_code: newPartner.access_code,
+            status: newPartner.status,
+          },
+          emailSent: false,
+          message: "✅ Partner added! (Email failed to send)"
+        });
+      }
+
+      console.log("🎉 Partner creation COMPLETE with email");
 
       return res.json({
         success: true,
         partner: {
-          id: newPartner.id,
-          name: newPartner.contact_name,
+          id: newPartner.partner_id || newPartner.id,
+          name: newPartner.contact_person || contact_person,
           email: newPartner.email,
           company: newPartner.organization_name,
           access_code: newPartner.access_code,
           status: newPartner.status,
         },
+        emailSent: true,
+        message: "✅ Partner added! Welcome email sent with access code."
       });
     } catch (error) {
-      console.error("Error creating partner:", error);
-      return res.status(500).json({ error: "Internal server error" });
+      console.error("❌ Error creating partner:", error);
+      return res.status(500).json({ 
+        error: "Failed to create partner",
+        details: error.message 
+      });
     }
   }
 );
+
+
+// ============================================
+// ADMIN: Generate Unique Access Codes
+// ============================================
+
+// Helper function to generate and verify unique code
+async function generateUniqueCode(prefix, maxAttempts = 10) {
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    // Generate random 4-digit code
+    const randomNum = Math.floor(1000 + Math.random() * 9000);
+    const code = `${prefix}-${randomNum}`;
+    
+    // Check if code exists in database
+    const { data: existingUsers, error } = await supabase
+      .from('users')
+      .select('user_id')
+      .eq('access_code', code)
+      .limit(1);
+    
+    if (error) {
+      console.error('Error checking code uniqueness:', error);
+      throw error;
+    }
+    
+    // If no existing user found, code is unique
+    if (!existingUsers || existingUsers.length === 0) {
+      console.log(`✅ Generated unique code: ${code} (attempt ${attempt + 1})`);
+      return code;
+    }
+    
+    console.log(`⚠️ Code ${code} already exists, trying again...`);
+  }
+  
+  // If we couldn't generate a unique code after max attempts
+  throw new Error('Failed to generate unique code after multiple attempts');
+}
+
+// Generate unique ambassador code
+app.post(
+  '/api/admin/generate-code/ambassador',
+  requireAuth,
+  requireRole('admin'),
+  async (req, res) => {
+    try {
+      console.log('🔑 Generating unique ambassador code...');
+      
+      const code = await generateUniqueCode('T4LA');
+      
+      return res.json({
+        success: true,
+        code: code,
+        message: 'Unique code generated successfully'
+      });
+    } catch (error) {
+      console.error('❌ Error generating ambassador code:', error);
+      return res.status(500).json({
+        error: 'Failed to generate code',
+        details: error.message
+      });
+    }
+  }
+);
+
+// Generate unique partner code
+app.post(
+  '/api/admin/generate-code/partner',
+  requireAuth,
+  requireRole('admin'),
+  async (req, res) => {
+    try {
+      console.log('🔑 Generating unique partner code...');
+      
+      const code = await generateUniqueCode('T4LP');
+      
+      return res.json({
+        success: true,
+        code: code,
+        message: 'Unique code generated successfully'
+      });
+    } catch (error) {
+      console.error('❌ Error generating partner code:', error);
+      return res.status(500).json({
+        error: 'Failed to generate code',
+        details: error.message
+      });
+    }
+  }
+);
+
+// ============================================
+// ADMIN: Verify code uniqueness (optional check)
+// ============================================
+app.post(
+  '/api/admin/verify-code',
+  requireAuth,
+  requireRole('admin'),
+  async (req, res) => {
+    try {
+      const { code } = req.body;
+      
+      if (!code) {
+        return res.status(400).json({ error: 'Code is required' });
+      }
+      
+      const { data: existingUsers, error } = await supabase
+        .from('users')
+        .select('user_id, email, user_type')
+        .eq('access_code', code.toUpperCase())
+        .limit(1);
+      
+      if (error) throw error;
+      
+      const isUnique = !existingUsers || existingUsers.length === 0;
+      
+      return res.json({
+        unique: isUnique,
+        code: code.toUpperCase(),
+        existingUser: isUnique ? null : {
+          type: existingUsers[0].user_type,
+          email: existingUsers[0].email
+        }
+      });
+    } catch (error) {
+      console.error('Error verifying code:', error);
+      return res.status(500).json({ error: 'Failed to verify code' });
+    }
+  }
+);
+
 
 // ------------------------
 // Articles APIs
@@ -4101,7 +4590,7 @@ app.get('/admin/api/articles/:id', requireAuth, requireRole('admin'), async (req
 
     const article = articles[0];
 
-    // Get ambassador info separately
+    // Get ambassador info
     let ambassadorName = 'Unknown';
     let ambassadorEmail = '-';
     
@@ -4123,8 +4612,8 @@ app.get('/admin/api/articles/:id', requireAuth, requireRole('admin'), async (req
       id: article.article_id,
       article_id: article.article_id,
       title: article.title,
-      content: article.content, // FULL HTML
-      contentHtml: article.content, // FULL HTML
+      content: article.content,
+      contentHtml: article.content,
       excerpt: article.excerpt,
       byline: article.author_name || article.author_role || ambassadorName,
       authorNameRole: article.author_name || article.author_role || ambassadorName,
@@ -4618,6 +5107,87 @@ app.post(
     }
   }
 );
+app.post('/admin/api/notifications', requireAuth, requireRole('admin'), async (req, res) => {
+  try {
+    const { articleId, type, message } = req.body;
+    const adminUserId = req.auth.userId;
+
+    console.log('📤 Creating notification:', { articleId, type });
+
+    // Get article to find the ambassador
+    const { data: article, error: articleError } = await supabase
+      .from('articles')
+      .select('ambassador_id')
+      .eq('article_id', articleId)
+      .single();
+
+    if (articleError || !article) {
+      return res.status(404).json({ error: 'Article not found' });
+    }
+
+    // Get ambassador's user_id
+    const { data: ambassador } = await supabase
+      .from('ambassadors')
+      .select('user_id, first_name, last_name, email')
+      .eq('ambassador_id', article.ambassador_id)
+      .single();
+
+    if (!ambassador) {
+      return res.status(404).json({ error: 'Ambassador not found' });
+    }
+
+    // Get admin info
+    const admin = await getUserById(adminUserId, 'admin');
+    const adminName = admin ? (admin.first_name || admin.name || 'Admin') : 'Admin';
+
+    // Create notification
+    const notificationData = {
+      notification_id: uuidv4(),
+      recipient_id: ambassador.user_id,  // ✅ Use ambassador's user_id
+      recipient_type: 'ambassador',
+      type: type || 'article_feedback',
+      title: type === 'needs_update' ? '📝 Article Update Requested' : '💬 Article Feedback',
+      message: message,
+      link: `/article-progress.html`,
+      article_id: articleId,
+      read: false,
+      created_at: new Date().toISOString()
+    };
+
+    const { data: notification, error } = await supabase
+      .from('notifications')
+      .insert([notificationData])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating notification:', error);
+      throw error;
+    }
+
+    // Update article status if needed
+    if (type === 'needs_update') {
+      await supabase
+        .from('articles')
+        .update({ status: 'needs_update' })
+        .eq('article_id', articleId);
+    }
+
+    console.log('✅ Notification created successfully');
+
+    return res.json({
+      success: true,
+      notification,
+      message: 'Notification sent successfully'
+    });
+  } catch (error) {
+    console.error('❌ Error creating notification:', error);
+    return res.status(500).json({ 
+      error: 'Failed to send notification',
+      details: error.message 
+    });
+  }
+});
 
 app.patch(
   "/api/ambassador/articles/:id",

@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Users - T4LA Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/boxicons/2.1.0/css/boxicons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .modal-overlay {
+            background: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.2s ease;
+        }
+        
+        .modal-content {
+            animation: slideUp 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .status-active {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-inactive {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+        
+        .status-pending {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .status-approved {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        
+        .generate-code-btn {
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: linear-gradient(to right, #4caf50, #2e7d32);
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        
+        .generate-code-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+        }
+        
+        .generate-code-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .access-code-input {
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .copy-code-btn {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .copy-code-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .help-text {
+            display: block;
+            margin-top: 8px;
+            font-size: 12px;
+            color: #666;
+            transition: all 0.3s ease;
+        }
+        
+        .code-display-slide {
+            animation: slideDown 0.3s ease forwards;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+                height: 0;
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+                height: auto;
+            }
+        }
+        
+        .btn-disappear {
+            animation: fadeOut 0.2s ease forwards;
+        }
+        
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: scale(1);
+            }
+            to {
+                opacity: 0;
+                transform: scale(0.95);
+                height: 0;
+                margin: 0;
+                padding: 0;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg border-b">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-purple-600 rounded-lg"></div>
+                    <span class="text-xl font-bold text-gray-900">T4LA Admin</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="/admin-dashboard.html" class="text-gray-600 hover:text-gray-900">
+                        ← Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-4xl mx-auto">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">Add New Users</h1>
+            <p class="text-gray-600 mb-8">Create ambassador or partner accounts with unique access codes</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+                <!-- Add Ambassador Card -->
+                <div class="bg-gradient-to-br from-purple-50 to-white rounded-2xl border border-purple-100 p-8 shadow-lg hover:shadow-xl transition-all">
+                    <div class="w-16 h-16 bg-purple-100 rounded-xl flex items-center justify-center mb-6">
+                        <i class="bx bx-user-plus text-3xl text-purple-600"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-3">Add Ambassador</h3>
+                    <p class="text-gray-600 mb-6">Create a new ambassador account for content creators and community builders.</p>
+                    <button id="addAmbassadorBtn" 
+                            class="w-full px-6 py-4 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-purple-800 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-3">
+                        <i class="bx bx-user-plus text-xl"></i>
+                        Add New Ambassador
+                    </button>
+                </div>
+                
+                <!-- Add Partner Card -->
+                <div class="bg-gradient-to-br from-indigo-50 to-white rounded-2xl border border-indigo-100 p-8 shadow-lg hover:shadow-xl transition-all">
+                    <div class="w-16 h-16 bg-indigo-100 rounded-xl flex items-center justify-center mb-6">
+                        <i class="bx bx-building text-3xl text-indigo-600"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-3">Add Partner</h3>
+                    <p class="text-gray-600 mb-6">Create a new partner account for organizations and businesses.</p>
+                    <button id="addPartnerBtn" 
+                            class="w-full px-6 py-4 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-xl font-semibold hover:from-indigo-700 hover:to-indigo-800 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-3">
+                        <i class="bx bx-building text-xl"></i>
+                        Add New Partner
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Recent Additions -->
+            <div class="bg-white rounded-2xl border border-gray-200 p-6">
+                <h2 class="text-xl font-bold text-gray-900 mb-6">Recently Added Users</h2>
+                <div id="recentUsers" class="space-y-4">
+                    <div class="text-center py-12 text-gray-500">
+                        <i class="bx bx-user text-4xl mb-3 opacity-50"></i>
+                        <p>No users added yet</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Ambassador Modal -->
+    <div id="ambassadorModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4 z-50 modal-overlay">
+        <div class="bg-white rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden modal-content max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b border-gray-200 bg-gradient-to-r from-purple-600 to-purple-700">
+                <h3 class="text-2xl font-bold text-white">Add New Ambassador</h3>
+                <p class="text-purple-100 text-sm mt-1">Create a new ambassador account</p>
+            </div>
+            
+            <form id="ambassadorForm" class="p-6 space-y-6">
+                <!-- Success/Error Messages -->
+                <div id="ambassadorSuccess" class="p-4 bg-green-50 border border-green-200 rounded-lg hidden">
+                    <p class="text-green-700 font-semibold"></p>
+                </div>
+                
+                <div id="ambassadorError" class="p-4 bg-red-50 border border-red-200 rounded-lg hidden">
+                    <p class="text-red-700 font-semibold"></p>
+                </div>
+                
+                <!-- Full Name -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        Full Name *
+                    </label>
+                    <input type="text" id="ambName" name="name"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                           placeholder="Enter full name" required>
+                    <p id="ambNameError" class="mt-1 text-sm text-red-600 hidden"></p>
+                </div>
+                
+                <!-- Email Address -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        Email Address *
+                    </label>
+                    <input type="email" id="ambEmail" name="email"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                           placeholder="ambassador@example.com" required>
+                    <p id="ambEmailError" class="mt-1 text-sm text-red-600 hidden"></p>
+                </div>
+                
+                <!-- Access Code Generator -->
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-key mr-2"></i> Access Code *
+                    </label>
+                    
+                    <!-- Generate Button -->
+                    <button
+                        type="button"
+                        class="generate-code-btn"
+                        onclick="generateAmbassadorCode()"
+                        id="ambassador-generate-btn"
+                    >
+                        <i class="fas fa-random"></i> Generate Unique Access Code
+                    </button>
+                    
+                    <!-- Code Display (Initially Hidden) -->
+                    <div class="access-code-input" id="ambassador-code-display" style="display: none; margin-top: 10px;">
+                        <input
+                            type="text"
+                            id="ambAccessCode"
+                            name="access_code"
+                            placeholder="T4LA-XXXX"
+                            required
+                            readonly
+                            class="w-full px-4 py-3 border-2 border-green-500 rounded-lg font-mono text-lg font-bold focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                            style="background: #e8f5e9; color: #2e7d32;"
+                        />
+                        <button
+                            type="button"
+                            class="copy-code-btn px-4 py-3 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 transition-all"
+                            onclick="copyAmbassadorCode()"
+                        >
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                    
+                    <!-- Status Message -->
+                    <small class="help-text" id="access-code-status">
+                        Click "Generate" to create a database-verified unique code
+                    </small>
+                    <p id="ambCodeError" class="mt-1 text-sm text-red-600 hidden"></p>
+                </div>
+                
+                <!-- Status -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        Status
+                    </label>
+                    <select id="ambStatus" name="status"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all">
+                        <option value="active">Free</option>
+                        <option value="inactive">Paid</option>
+
+                    </select>
+                </div>
+                
+                <!-- Form Actions -->
+                <div class="flex justify-end gap-3 pt-4">
+                    <button type="button" id="cancelAmbassador"
+                            class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-all">
+                        Cancel
+                    </button>
+                    <button type="submit" id="saveAmbassador"
+                            class="px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-purple-800 transition-all shadow-lg hover:shadow-xl">
+                        <span id="ambSubmitText">Add Ambassador</span>
+                        <span id="ambLoading" class="hidden">
+                            <i class="bx bx-loader-alt animate-spin"></i> Adding...
+                        </span>
+                    </button>
+                </div>
+            </form>
+            
+            <!-- Info Box -->
+            <div class="mx-6 mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div class="flex items-start gap-3">
+                    <i class="bx bx-info-circle text-blue-600 text-xl mt-0.5"></i>
+                    <div>
+                        <h4 class="text-sm font-semibold text-blue-900">How it works</h4>
+                        <ul class="text-sm text-blue-700 mt-2 space-y-1">
+                            <li>• Click "Generate" to create a unique code (verified against database)</li>
+                            <li>• An email will be sent with the access code</li>
+                            <li>• Default password is "welcome123"</li>
+                            <li>• Ambassadors can reset password after first login</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Partner Modal -->
+    <div id="partnerModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4 z-50 modal-overlay">
+        <div class="bg-white rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden modal-content max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b border-gray-200 bg-gradient-to-r from-indigo-600 to-indigo-700">
+                <h3 class="text-2xl font-bold text-white">Add New Partner</h3>
+                <p class="text-indigo-100 text-sm mt-1">Create a new partner organization account</p>
+            </div>
+            
+            <form id="partnerForm" class="p-6 space-y-6">
+                <!-- Success/Error Messages -->
+                <div id="partnerSuccess" class="p-4 bg-green-50 border border-green-200 rounded-lg hidden">
+                    <p class="text-green-700 font-semibold"></p>
+                </div>
+                
+                <div id="partnerError" class="p-4 bg-red-50 border border-red-200 rounded-lg hidden">
+                    <p class="text-red-700 font-semibold"></p>
+                </div>
+                
+                <!-- Contact Name -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        Contact Person Name *
+                    </label>
+                    <input type="text" id="parName" name="name"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                           placeholder="Enter contact person's name" required>
+                    <p id="parNameError" class="mt-1 text-sm text-red-600 hidden"></p>
+                </div>
+                
+                <!-- Organization Name -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        Organization Name
+                        <span class="text-gray-400 font-normal ml-1">(Optional)</span>
+                    </label>
+                    <input type="text" id="parCompany" name="company"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                           placeholder="Company or organization name">
+                </div>
+                
+                <!-- Email Address -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        Email Address *
+                    </label>
+                    <input type="email" id="parEmail" name="email"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                           placeholder="partner@company.com" required>
+                    <p id="parEmailError" class="mt-1 text-sm text-red-600 hidden"></p>
+                </div>
+                
+                <!-- Access Code Generator -->
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-key mr-2"></i> Partner Access Code *
+                    </label>
+                    
+                    <!-- Generate Button -->
+                    <button
+                        type="button"
+                        class="generate-code-btn"
+                        onclick="generatePartnerCode()"
+                        id="partner-generate-btn"
+                        style="background: linear-gradient(to right, #4f46e5, #7c3aed);"
+                    >
+                        <i class="fas fa-random"></i> Generate Unique Partner Code
+                    </button>
+                    
+                    <!-- Code Display (Initially Hidden) -->
+                    <div class="access-code-input" id="partner-code-display" style="display: none; margin-top: 10px;">
+                        <input
+                            type="text"
+                            id="parAccessCode"
+                            name="access_code"
+                            placeholder="T4LP-XXXX"
+                            required
+                            readonly
+                            class="w-full px-4 py-3 border-2 border-indigo-500 rounded-lg font-mono text-lg font-bold focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                            style="background: #e8f4fd; color: #1e40af;"
+                        />
+                        <button
+                            type="button"
+                            class="copy-code-btn px-4 py-3 bg-indigo-500 text-white rounded-lg font-semibold hover:bg-indigo-600 transition-all"
+                            onclick="copyPartnerCode()"
+                        >
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                    
+                    <!-- Status Message -->
+                    <small class="help-text" id="partner-access-code-status">
+                        Click "Generate" to create a database-verified unique code
+                    </small>
+                    <p id="parCodeError" class="mt-1 text-sm text-red-600 hidden"></p>
+                    
+                    <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-3 mt-3">
+                        <p class="text-xs text-indigo-700">
+                            <strong>Note:</strong> Partner codes start with "T4LP-" to distinguish them from ambassador codes
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Status -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        Status
+                    </label>
+                    <select id="parStatus" name="status"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
+                        <option value="approved">Approved</option>
+                        <option value="pending">Pending</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                    <p class="text-xs text-gray-500 mt-2">
+                        Partners are typically created as "Approved" by default
+                    </p>
+                </div>
+                
+                <!-- Form Actions -->
+                <div class="flex justify-end gap-3 pt-4">
+                    <button type="button" id="cancelPartner"
+                            class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-all">
+                        Cancel
+                    </button>
+                    <button type="submit" id="savePartner"
+                            class="px-6 py-3 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-lg font-semibold hover:from-indigo-700 hover:to-indigo-800 transition-all shadow-lg hover:shadow-xl">
+                        <span id="parSubmitText">Add Partner</span>
+                        <span id="parLoading" class="hidden">
+                            <i class="bx bx-loader-alt animate-spin"></i> Adding...
+                        </span>
+                    </button>
+                </div>
+            </form>
+            
+            <!-- Info Box -->
+            <div class="mx-6 mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div class="flex items-start gap-3">
+                    <i class="bx bx-info-circle text-blue-600 text-xl mt-0.5"></i>
+                    <div>
+                        <h4 class="text-sm font-semibold text-blue-900">Partner vs Ambassador</h4>
+                        <ul class="text-sm text-blue-700 mt-2 space-y-1">
+                            <li>• <strong>Ambassadors:</strong> Use codes starting with "T4LA-"</li>
+                            <li>• <strong>Partners:</strong> Use codes starting with "T4LP-"</li>
+                            <li>• Partners can post opportunities for ambassadors</li>
+                            <li>• Default password is "welcome123" for both</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="fixed top-4 right-4 z-50 space-y-2"></div>
+
+    <script>
+        // State management
+        let recentUsers = [];
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAuth();
+            bindEvents();
+            loadRecentUsers();
+        });
+        
+        // Check authentication
+        async function checkAuth() {
+            try {
+                const response = await fetch('/api/me', { credentials: 'include' });
+                if (!response.ok) {
+                    window.location.href = '/admin-signin.html';
+                    return false;
+                }
+                
+                const user = await response.json();
+                if (user.role !== 'admin') {
+                    window.location.href = '/admin-signin.html';
+                    return false;
+                }
+                
+                return true;
+            } catch (error) {
+                window.location.href = '/admin-signin.html';
+                return false;
+            }
+        }
+        
+        // Load recent users
+        async function loadRecentUsers() {
+            try {
+                // Load ambassadors
+                const ambResponse = await fetch('/admin/api/ambassadors?limit=5', { credentials: 'include' });
+                if (ambResponse.ok) {
+                    const data = await ambResponse.json();
+                    const recentAmb = data.ambassadors?.slice(0, 5).map(a => ({
+                        id: a.id,
+                        name: a.name,
+                        email: a.email,
+                        role: 'ambassador',
+                        status: a.status,
+                        date: a.joinDate
+                    })) || [];
+                    recentUsers = [...recentAmb];
+                }
+                
+                // Load partners
+                const parResponse = await fetch('/admin/api/partners', { credentials: 'include' });
+                if (parResponse.ok) {
+                    const data = await parResponse.json();
+                    const recentPar = data.partners?.slice(0, 5).map(p => ({
+                        id: p.id,
+                        name: p.name,
+                        email: p.email,
+                        role: 'partner',
+                        status: p.status,
+                        date: p.created_at
+                    })) || [];
+                    recentUsers = [...recentUsers, ...recentPar];
+                }
+                
+                // Sort by date (newest first) and render
+                recentUsers.sort((a, b) => new Date(b.date) - new Date(a.date));
+                renderRecentUsers();
+            } catch (error) {
+                console.error('Error loading recent users:', error);
+            }
+        }
+        
+        // Render recent users
+        function renderRecentUsers() {
+            const container = document.getElementById('recentUsers');
+            if (!container) return;
+            
+            if (recentUsers.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 text-gray-500">
+                        <i class="bx bx-user text-4xl mb-3 opacity-50"></i>
+                        <p>No users added yet</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = recentUsers.map(user => `
+                <div class="flex items-center justify-between p-4 border border-gray-200 rounded-xl hover:bg-gray-50 transition-all">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full flex items-center justify-center ${
+                            user.role === 'ambassador' ? 'bg-purple-100 text-purple-600' : 'bg-indigo-100 text-indigo-600'
+                        }">
+                            <i class="bx ${
+                                user.role === 'ambassador' ? 'bx-user' : 'bx-building'
+                            }"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-900">${user.name}</h4>
+                            <p class="text-sm text-gray-600">${user.email}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span class="status-badge status-${user.status}">${user.status}</span>
+                        <p class="text-xs text-gray-500 mt-1">${formatDate(user.date)}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Format date
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+        
+        // Bind events
+        function bindEvents() {
+            // Open modals
+            document.getElementById('addAmbassadorBtn').addEventListener('click', () => {
+                openAmbassadorModal();
+            });
+            
+            document.getElementById('addPartnerBtn').addEventListener('click', () => {
+                openPartnerModal();
+            });
+            
+            // Close modals
+            document.getElementById('cancelAmbassador').addEventListener('click', closeAmbassadorModal);
+            document.getElementById('cancelPartner').addEventListener('click', closePartnerModal);
+            
+            // Form submissions
+            document.getElementById('ambassadorForm').addEventListener('submit', saveAmbassador);
+            document.getElementById('partnerForm').addEventListener('submit', savePartner);
+            
+            // Close modals on overlay click
+            document.querySelectorAll('.modal-overlay').forEach(overlay => {
+                overlay.addEventListener('click', (e) => {
+                    if (e.target === overlay) {
+                        closeAllModals();
+                    }
+                });
+            });
+        }
+        
+        // Modal functions
+        function openAmbassadorModal() {
+            resetAmbassadorForm();
+            document.getElementById('ambassadorModal').classList.remove('hidden');
+            document.getElementById('ambassadorModal').classList.add('flex');
+        }
+        
+        function closeAmbassadorModal() {
+            document.getElementById('ambassadorModal').classList.add('hidden');
+            document.getElementById('ambassadorModal').classList.remove('flex');
+        }
+        
+        function openPartnerModal() {
+            resetPartnerForm();
+            document.getElementById('partnerModal').classList.remove('hidden');
+            document.getElementById('partnerModal').classList.add('flex');
+        }
+        
+        function closePartnerModal() {
+            document.getElementById('partnerModal').classList.add('hidden');
+            document.getElementById('partnerModal').classList.remove('flex');
+        }
+        
+        function closeAllModals() {
+            closeAmbassadorModal();
+            closePartnerModal();
+        }
+        
+        // Form reset functions
+        function resetAmbassadorForm() {
+            document.getElementById('ambassadorForm').reset();
+            
+            // Reset access code section
+            const codeDisplay = document.getElementById('ambassador-code-display');
+            const generateBtn = document.getElementById('ambassador-generate-btn');
+            const statusText = document.getElementById('access-code-status');
+            
+            if (codeDisplay) {
+                codeDisplay.style.display = 'none';
+            }
+            
+            if (generateBtn) {
+                generateBtn.style.display = 'block';
+                generateBtn.disabled = false;
+                generateBtn.innerHTML = '<i class="fas fa-random"></i> Generate Unique Access Code';
+            }
+            
+            if (statusText) {
+                statusText.innerHTML = 'Click "Generate" to create a database-verified unique code';
+                statusText.style.color = '#666';
+            }
+            
+            hideAmbassadorErrors();
+            hideAmbassadorMessages();
+        }
+        
+        function resetPartnerForm() {
+            document.getElementById('partnerForm').reset();
+            
+            // Reset access code section
+            const codeDisplay = document.getElementById('partner-code-display');
+            const generateBtn = document.getElementById('partner-generate-btn');
+            const statusText = document.getElementById('partner-access-code-status');
+            
+            if (codeDisplay) {
+                codeDisplay.style.display = 'none';
+            }
+            
+            if (generateBtn) {
+                generateBtn.style.display = 'block';
+                generateBtn.disabled = false;
+                generateBtn.innerHTML = '<i class="fas fa-random"></i> Generate Unique Partner Code';
+            }
+            
+            if (statusText) {
+                statusText.innerHTML = 'Click "Generate" to create a database-verified unique code';
+                statusText.style.color = '#666';
+            }
+            
+            hidePartnerErrors();
+            hidePartnerMessages();
+        }
+        
+        // Error handling
+        function hideAmbassadorErrors() {
+            document.getElementById('ambNameError').classList.add('hidden');
+            document.getElementById('ambEmailError').classList.add('hidden');
+            document.getElementById('ambCodeError').classList.add('hidden');
+        }
+        
+        function hidePartnerErrors() {
+            document.getElementById('parNameError').classList.add('hidden');
+            document.getElementById('parEmailError').classList.add('hidden');
+            document.getElementById('parCodeError').classList.add('hidden');
+        }
+        
+        function hideAmbassadorMessages() {
+            document.getElementById('ambassadorSuccess').classList.add('hidden');
+            document.getElementById('ambassadorError').classList.add('hidden');
+        }
+        
+        function hidePartnerMessages() {
+            document.getElementById('partnerSuccess').classList.add('hidden');
+            document.getElementById('partnerError').classList.add('hidden');
+        }
+        
+        // ============================================
+        // ✅ BACKEND-POWERED CODE GENERATION
+        // ============================================
+        
+        // Generate Ambassador Access Code
+        async function generateAmbassadorCode() {
+            const generateBtn = document.getElementById('ambassador-generate-btn');
+            const statusText = document.getElementById('access-code-status');
+            
+            try {
+                // Show loading state
+                generateBtn.disabled = true;
+                generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating unique code...';
+                
+                // ✅ Call backend to generate unique code
+                const response = await fetch('/api/admin/generate-code/ambassador', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to generate code');
+                }
+                
+                const data = await response.json();
+                const newCode = data.code;
+                
+                console.log('✅ Generated unique code:', newCode);
+                
+                // Get elements
+                const codeInput = document.getElementById('ambAccessCode');
+                const codeDisplay = document.getElementById('ambassador-code-display');
+                
+                // Set the code value
+                codeInput.value = newCode;
+                
+                // Hide generate button with animation
+                generateBtn.classList.add('btn-disappear');
+                
+                // After animation, hide button and show code display
+                setTimeout(() => {
+                    generateBtn.style.display = 'none';
+                    generateBtn.classList.remove('btn-disappear');
+                    
+                    // Show code display with animation
+                    codeDisplay.style.display = 'flex';
+                    codeDisplay.classList.add('code-display-slide');
+                    
+                    // Update status message
+                    if (statusText) {
+                        statusText.innerHTML = `<i class="fas fa-check-circle" style="color: #4caf50; margin-right: 5px;"></i> Generated unique code: <strong>${newCode}</strong> (verified against database)`;
+                        statusText.style.color = '#4caf50';
+                    }
+                    
+                    // Clear any previous error
+                    document.getElementById('ambCodeError').classList.add('hidden');
+                }, 200);
+                
+            } catch (error) {
+                console.error('❌ Error generating code:', error);
+                statusText.innerHTML = '<i class="fas fa-exclamation-circle" style="color: #ef4444; margin-right: 5px;"></i> Failed to generate code. Please try again.';
+                statusText.style.color = '#ef4444';
+                
+                // Restore button
+                generateBtn.disabled = false;
+                generateBtn.innerHTML = '<i class="fas fa-random"></i> Generate Unique Access Code';
+            }
+        }
+        
+        // Copy Ambassador Code to Clipboard
+        function copyAmbassadorCode() {
+            const codeInput = document.getElementById('ambAccessCode');
+            const copyBtn = document.querySelector('#ambassador-code-display .copy-code-btn');
+            const statusText = document.getElementById('access-code-status');
+            
+            // Copy to clipboard
+            navigator.clipboard.writeText(codeInput.value).then(() => {
+                // Change button to show success
+                const originalHTML = copyBtn.innerHTML;
+                copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                copyBtn.style.background = '#2e7d32';
+                
+                // Update status message
+                if (statusText) {
+                    statusText.innerHTML = `<i class="fas fa-check-double" style="color: #2e7d32; margin-right: 5px;"></i> Code copied to clipboard: <strong>${codeInput.value}</strong>`;
+                }
+                
+                // Reset button after 2 seconds
+                setTimeout(() => {
+                    copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy';
+                    copyBtn.style.background = '#4caf50';
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                alert('Failed to copy code. Please copy it manually.');
+            });
+        }
+        
+        // Generate Partner Access Code
+        async function generatePartnerCode() {
+            const generateBtn = document.getElementById('partner-generate-btn');
+            const statusText = document.getElementById('partner-access-code-status');
+            
+            try {
+                // Show loading state
+                generateBtn.disabled = true;
+                generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating unique code...';
+                
+                // ✅ Call backend to generate unique code
+                const response = await fetch('/api/admin/generate-code/partner', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to generate code');
+                }
+                
+                const data = await response.json();
+                const newCode = data.code;
+                
+                console.log('✅ Generated unique code:', newCode);
+                
+                // Get elements
+                const codeInput = document.getElementById('parAccessCode');
+                const codeDisplay = document.getElementById('partner-code-display');
+                
+                // Set the code value
+                codeInput.value = newCode;
+                
+                // Hide generate button with animation
+                generateBtn.classList.add('btn-disappear');
+                
+                // After animation, hide button and show code display
+                setTimeout(() => {
+                    generateBtn.style.display = 'none';
+                    generateBtn.classList.remove('btn-disappear');
+                    
+                    // Show code display with animation
+                    codeDisplay.style.display = 'flex';
+                    codeDisplay.classList.add('code-display-slide');
+                    
+                    // Update status message
+                    if (statusText) {
+                        statusText.innerHTML = `<i class="fas fa-check-circle" style="color: #3b82f6; margin-right: 5px;"></i> Generated unique code: <strong>${newCode}</strong> (verified against database)`;
+                        statusText.style.color = '#3b82f6';
+                    }
+                    
+                    // Clear any previous error
+                    document.getElementById('parCodeError').classList.add('hidden');
+                }, 200);
+                
+            } catch (error) {
+                console.error('❌ Error generating code:', error);
+                statusText.innerHTML = '<i class="fas fa-exclamation-circle" style="color: #ef4444; margin-right: 5px;"></i> Failed to generate code. Please try again.';
+                statusText.style.color = '#ef4444';
+                
+                // Restore button
+                generateBtn.disabled = false;
+                generateBtn.innerHTML = '<i class="fas fa-random"></i> Generate Unique Partner Code';
+            }
+        }
+        
+        // Copy Partner Code to Clipboard
+        function copyPartnerCode() {
+            const codeInput = document.getElementById('parAccessCode');
+            const copyBtn = document.querySelector('#partner-code-display .copy-code-btn');
+            const statusText = document.getElementById('partner-access-code-status');
+            
+            // Copy to clipboard
+            navigator.clipboard.writeText(codeInput.value).then(() => {
+                // Change button to show success
+                const originalHTML = copyBtn.innerHTML;
+                copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                copyBtn.style.background = '#1e40af';
+                
+                // Update status message
+                if (statusText) {
+                    statusText.innerHTML = `<i class="fas fa-check-double" style="color: #1e40af; margin-right: 5px;"></i> Code copied to clipboard: <strong>${codeInput.value}</strong>`;
+                }
+                
+                // Reset button after 2 seconds
+                setTimeout(() => {
+                    copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy';
+                    copyBtn.style.background = '#3b82f6';
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                alert('Failed to copy code. Please copy it manually.');
+            });
+        }
+        
+        // Validation
+        function validateAmbassadorForm() {
+            let isValid = true;
+            hideAmbassadorErrors();
+            
+            const name = document.getElementById('ambName').value.trim();
+            if (!name) {
+                document.getElementById('ambNameError').textContent = 'Name is required';
+                document.getElementById('ambNameError').classList.remove('hidden');
+                isValid = false;
+            }
+            
+            const email = document.getElementById('ambEmail').value.trim();
+            if (!email) {
+                document.getElementById('ambEmailError').textContent = 'Email is required';
+                document.getElementById('ambEmailError').classList.remove('hidden');
+                isValid = false;
+            } else if (!/\S+@\S+\.\S+/.test(email)) {
+                document.getElementById('ambEmailError').textContent = 'Please enter a valid email';
+                document.getElementById('ambEmailError').classList.remove('hidden');
+                isValid = false;
+            }
+            
+            const accessCode = document.getElementById('ambAccessCode').value.trim();
+            if (!accessCode) {
+                document.getElementById('ambCodeError').textContent = 'Please generate an access code';
+                document.getElementById('ambCodeError').classList.remove('hidden');
+                isValid = false;
+            }
+            
+            return isValid;
+        }
+        
+        function validatePartnerForm() {
+            let isValid = true;
+            hidePartnerErrors();
+            
+            const name = document.getElementById('parName').value.trim();
+            if (!name) {
+                document.getElementById('parNameError').textContent = 'Contact name is required';
+                document.getElementById('parNameError').classList.remove('hidden');
+                isValid = false;
+            }
+            
+            const email = document.getElementById('parEmail').value.trim();
+            if (!email) {
+                document.getElementById('parEmailError').textContent = 'Email is required';
+                document.getElementById('parEmailError').classList.remove('hidden');
+                isValid = false;
+            } else if (!/\S+@\S+\.\S+/.test(email)) {
+                document.getElementById('parEmailError').textContent = 'Please enter a valid email';
+                document.getElementById('parEmailError').classList.remove('hidden');
+                isValid = false;
+            }
+            
+            const accessCode = document.getElementById('parAccessCode').value.trim();
+            if (!accessCode) {
+                document.getElementById('parCodeError').textContent = 'Please generate an access code';
+                document.getElementById('parCodeError').classList.remove('hidden');
+                isValid = false;
+            }
+            
+            return isValid;
+        }
+        
+        // Save ambassador
+        async function saveAmbassador(e) {
+            e.preventDefault();
+            
+            if (!validateAmbassadorForm()) {
+                return;
+            }
+            
+            hideAmbassadorMessages();
+            
+            // Show loading
+            const submitBtn = document.getElementById('saveAmbassador');
+            const submitText = document.getElementById('ambSubmitText');
+            const loading = document.getElementById('ambLoading');
+            
+            submitText.classList.add('hidden');
+            loading.classList.remove('hidden');
+            submitBtn.disabled = true;
+            
+            try {
+                const formData = {
+                    first_name: document.getElementById('ambName').value.trim(),
+                    email: document.getElementById('ambEmail').value.trim(),
+                    access_code: document.getElementById('ambAccessCode').value.trim(),
+                    status: document.getElementById('ambStatus').value
+                };
+                
+                console.log('Saving ambassador:', formData);
+                
+                const response = await fetch('/admin/api/ambassadors', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to save ambassador');
+                }
+                
+                // Show success
+                const successMsg = document.getElementById('ambassadorSuccess');
+                successMsg.querySelector('p').textContent = '✅ Ambassador added successfully with unique access code!';
+                successMsg.classList.remove('hidden');
+                
+                // Add to recent users
+                recentUsers.unshift({
+                    id: data.ambassador.id,
+                    name: data.ambassador.name,
+                    email: data.ambassador.email,
+                    role: 'ambassador',
+                    status: data.ambassador.status,
+                    date: new Date().toISOString()
+                });
+                renderRecentUsers();
+                
+                // Reset form after delay
+                setTimeout(() => {
+                    resetAmbassadorForm();
+                    closeAmbassadorModal();
+                    submitText.classList.remove('hidden');
+                    loading.classList.add('hidden');
+                    submitBtn.disabled = false;
+                }, 2000);
+                
+            } catch (error) {
+                console.error('Error saving ambassador:', error);
+                
+                // Show error
+                const errorMsg = document.getElementById('ambassadorError');
+                errorMsg.querySelector('p').textContent = error.message || 'Failed to add ambassador';
+                errorMsg.classList.remove('hidden');
+                
+                // Restore button
+                submitText.classList.remove('hidden');
+                loading.classList.add('hidden');
+                submitBtn.disabled = false;
+            }
+        }
+        
+        // Save partner
+        async function savePartner(e) {
+            e.preventDefault();
+            
+            if (!validatePartnerForm()) {
+                return;
+            }
+            
+            hidePartnerMessages();
+            
+            // Show loading
+            const submitBtn = document.getElementById('savePartner');
+            const submitText = document.getElementById('parSubmitText');
+            const loading = document.getElementById('parLoading');
+            
+            submitText.classList.add('hidden');
+            loading.classList.remove('hidden');
+            submitBtn.disabled = true;
+            
+            try {
+                const formData = {
+                    contact_person: document.getElementById('parName').value.trim(),
+                    organization_name: document.getElementById('parCompany').value.trim(),
+                    email: document.getElementById('parEmail').value.trim(),
+                    access_code: document.getElementById('parAccessCode').value.trim(),
+                    status: document.getElementById('parStatus').value
+                };
+                
+                console.log('Saving partner:', formData);
+                
+                const response = await fetch('/admin/api/partners', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to save partner');
+                }
+                
+                // Show success
+                const successMsg = document.getElementById('partnerSuccess');
+                successMsg.querySelector('p').textContent = '✅ Partner added successfully with unique access code!';
+                successMsg.classList.remove('hidden');
+                
+                // Add to recent users
+                recentUsers.unshift({
+                    id: data.partner.id,
+                    name: data.partner.name,
+                    email: data.partner.email,
+                    role: 'partner',
+                    status: data.partner.status,
+                    date: new Date().toISOString()
+                });
+                renderRecentUsers();
+                
+                // Reset form after delay
+                setTimeout(() => {
+                    resetPartnerForm();
+                    closePartnerModal();
+                    submitText.classList.remove('hidden');
+                    loading.classList.add('hidden');
+                    submitBtn.disabled = false;
+                }, 2000);
+                
+            } catch (error) {
+                console.error('Error saving partner:', error);
+                
+                // Show error
+                const errorMsg = document.getElementById('partnerError');
+                errorMsg.querySelector('p').textContent = error.message || 'Failed to add partner';
+                errorMsg.classList.remove('hidden');
+                
+                // Restore button
+                submitText.classList.remove('hidden');
+                loading.classList.add('hidden');
+                submitBtn.disabled = false;
+            }
+        }
+        
+        // Expose functions to window
+        window.openAmbassadorModal = openAmbassadorModal;
+        window.openPartnerModal = openPartnerModal;
+        window.closeAllModals = closeAllModals;
+    </script>
+</body>
+</html>

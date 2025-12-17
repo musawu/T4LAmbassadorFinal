@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Professional Profile Setup</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    .blob {
+      position: absolute;
+      border-radius: 9999px;
+      filter: blur(100px);
+      z-index: 0;
+    }
+  </style>
+</head>
+
+<body class="min-h-screen bg-[#f9fafb] flex items-center justify-center relative overflow-hidden">
+
+  <!-- Background Blobs -->
+  <div class="blob w-96 h-96 bg-gradient-to-br from-[#c4b5fd] to-[#4b0d7f] opacity-25 top-[-80px] right-[-80px]"></div>
+  <div class="blob w-96 h-96 bg-gradient-to-br from-[#fde68a] to-[#facc15] opacity-25 bottom-[-80px] left-[-80px]"></div>
+
+  <!-- Card -->
+  <div class="relative z-10 w-full max-w-xl bg-white border border-gray-200 rounded-[28px] shadow-xl p-10">
+
+    <!-- Title -->
+    <h1 class="text-2xl font-bold text-[#111827] mb-3">
+      Welcome to Your Professional Profile Setup!
+    </h1>
+
+    <!-- Description -->
+    <p class="text-sm text-[#374151] mb-2">
+      This information helps partners understand your skills, experience, and working style.
+      A complete profile increases your chances of being matched with relevant opportunities.
+    </p>
+
+    <p class="text-sm text-[#6b7280] mb-6">
+      Estimated time: <strong>10–15 minutes</strong>
+    </p>
+
+    <!-- FORM -->
+    <form id="profileForm" class="space-y-6">
+
+      <!-- Professional Headline -->
+      <div>
+        <label class="block text-sm font-medium text-[#1f2937] mb-1">
+          Professional Headline
+        </label>
+        <input
+          type="text"
+          name="headline"
+          required
+          placeholder="e.g. Software Engineer | AI Researcher | Community Lead"
+          class="w-full rounded-xl border border-gray-300 px-4 py-3 text-[#1f2937]
+                 focus:outline-none focus:ring-2 focus:ring-[#4b0d7f]"
+        />
+      </div>
+
+      <!-- About Section -->
+      <div>
+        <label class="block text-sm font-medium text-[#1f2937] mb-1">
+          Professional Summary
+        </label>
+
+        <textarea
+          id="about"
+          name="about"
+          rows="8"
+          required
+          placeholder="Describe your background, skills, experience, values, and how you like to work..."
+          class="w-full rounded-xl border border-gray-300 px-4 py-3 text-[#1f2937] resize-none
+                 focus:outline-none focus:ring-2 focus:ring-[#4b0d7f]"
+        ></textarea>
+
+        <!-- Word Counter -->
+        <p id="wordCount" class="text-xs text-[#6b7280] mt-1">
+          0 / 250 words minimum
+        </p>
+      </div>
+
+      <!-- Submit Button -->
+      <button
+        type="submit"
+        class="w-full bg-[#4b0d7f] hover:bg-[#4b0d9f] text-white font-medium
+               rounded-xl py-3 transition"
+      >
+        Save & Continue
+      </button>
+
+    </form>
+  </div>
+
+  <!-- Logic -->
+  <script>
+    const textarea = document.getElementById("about");
+    const wordCountEl = document.getElementById("wordCount");
+    const form = document.getElementById("profileForm");
+
+    function countWords(text) {
+      return text.trim().split(/\s+/).filter(word => word.length > 0).length;
+    }
+
+    textarea.addEventListener("input", () => {
+      const words = countWords(textarea.value);
+      wordCountEl.textContent = `${words} / 250 words minimum`;
+      wordCountEl.classList.toggle("text-red-600", words < 250);
+      wordCountEl.classList.toggle("text-green-600", words >= 250);
+    });
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const words = countWords(textarea.value);
+      if (words < 250) {
+        alert("Please write at least 250 words in your professional summary.");
+        return;
+      }
+
+      const data = {
+        headline: form.headline.value,
+        about: textarea.value
+      };
+
+      // Save locally or replace with API call
+      localStorage.setItem("professionalProfile", JSON.stringify(data));
+
+      // Redirect
+      window.location.href = "/home.html";
+    });
+  </script>
+
+</body>
+</html>
