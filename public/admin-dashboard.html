@@ -348,6 +348,42 @@
             display: none;
         }
         
+        /* NEW: Enhanced stat card styles */
+        .stat-card-gradient {
+            background: linear-gradient(135deg, rgba(75, 13, 127, 0.05) 0%, rgba(124, 58, 237, 0.05) 100%);
+        }
+        
+        .pulse-icon {
+            animation: pulse-subtle 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse-subtle {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.8;
+                transform: scale(1.05);
+            }
+        }
+        
+        /* Notification Badge Pulse Animation */
+        @keyframes pulse-badge {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+            }
+            50% {
+                transform: scale(1.1);
+                box-shadow: 0 0 0 4px rgba(239, 68, 68, 0);
+            }
+        }
+        
+        .notification-badge-pulse {
+            animation: pulse-badge 2s infinite;
+        }
+        
         @media (max-width: 768px) {
             .stat-grid {
                 grid-template-columns: 1fr;
@@ -360,8 +396,6 @@
     </style>
 </head>
 <body class="bg-gray-50">
-    <!-- Global Notification Script -->
-    <script src="/js/notifications.js"></script>
     <!-- Navigation -->
     <nav class="bg-white shadow-lg border-b">
         <div class="container mx-auto px-4">
@@ -371,6 +405,42 @@
                     <span class="text-xl font-bold text-gray-900">T4LA Admin</span>
                 </div>
                 <div class="flex items-center space-x-4">
+                    <!-- Notification Bell -->
+                    <div class="relative">
+                        <button 
+                            id="notificationBell" 
+                            onclick="toggleNotificationDropdown()"
+                            class="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-all">
+                            <i class="bx bx-bell text-2xl"></i>
+                            <span 
+                                id="notificationBadge" 
+                                class="absolute top-0 right-0 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full hidden">
+                                0
+                            </span>
+                        </button>
+                        
+                        <!-- Notification Dropdown -->
+                        <div 
+                            id="notificationDropdown" 
+                            class="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 hidden z-50"
+                            style="max-height: 500px; overflow-y: auto;">
+                            <div class="p-4 border-b border-gray-200 flex items-center justify-between">
+                                <h3 class="font-semibold text-gray-900">Notifications</h3>
+                                <button 
+                                    onclick="markAllNotificationsRead()"
+                                    class="text-xs text-purple-600 hover:text-purple-700 font-medium">
+                                    Mark all read
+                                </button>
+                            </div>
+                            <div id="notificationList" class="divide-y divide-gray-100">
+                                <div class="p-8 text-center text-gray-500">
+                                    <i class="bx bx-bell-off text-4xl mb-2"></i>
+                                    <p>No notifications</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <div class="text-sm text-gray-600 hidden md:block" id="adminEmail">admin@test.com</div>
                     <button onclick="logout()" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200">
                         Logout
@@ -388,8 +458,9 @@
             <p class="text-gray-600">Manage ambassadors, partners, articles, and track journey progress</p>
         </div>
 
-        <!-- Stats Overview -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8" id="statsContainer">
+        <!-- Stats Overview - 6 CARDS IN ONE LINE -->
+        <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-8" id="statsContainer">
+            <!-- Card 1: Total Ambassadors -->
             <div class="stat-card bg-white rounded-xl p-6 shadow-sm border">
                 <div class="flex items-center justify-between">
                     <div>
@@ -402,6 +473,7 @@
                 </div>
             </div>
             
+            <!-- Card 2: Active Ambassadors -->
             <div class="stat-card bg-white rounded-xl p-6 shadow-sm border">
                 <div class="flex items-center justify-between">
                     <div>
@@ -414,6 +486,7 @@
                 </div>
             </div>
             
+            <!-- Card 3: Total Articles -->
             <div class="stat-card bg-white rounded-xl p-6 shadow-sm border">
                 <div class="flex items-center justify-between">
                     <div>
@@ -426,14 +499,28 @@
                 </div>
             </div>
             
+            <!-- Card 5: Articles Pending Approval -->
             <div class="stat-card bg-white rounded-xl p-6 shadow-sm border">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm text-gray-500">Avg. Journey Progress</p>
-                        <p class="text-3xl font-bold text-gray-900 mt-1" id="avgProgress">0%</p>
+                        <p class="text-sm text-gray-500">Articles Pending Approval</p>
+                        <p class="text-3xl font-bold text-gray-900 mt-1" id="pendingArticles">0</p>
                     </div>
-                    <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                        <i class="bx bx-trending-up text-2xl text-orange-600"></i>
+                    <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                        <i class="bx bx-time-five text-2xl text-yellow-600"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Card 6: LinkedIn Ready -->
+            <div class="stat-card bg-white rounded-xl p-6 shadow-sm border">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500">LinkedIn Ready</p>
+                        <p class="text-3xl font-bold text-gray-900 mt-1" id="linkedinReady">0</p>
+                    </div>
+                    <div class="w-12 h-12 bg-cyan-100 rounded-lg flex items-center justify-center">
+                        <i class="bx bxl-linkedin-square text-2xl text-cyan-600"></i>
                     </div>
                 </div>
             </div>
@@ -495,7 +582,7 @@
           <button id="filterNeedsUpdate" class="px-4 py-2 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-100">Needs Update</button>
           <button id="filterApproved" class="px-4 py-2 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-100">Approved</button>
           <button id="filterPublished" class="px-4 py-2 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-100">Published</button>
-          <button id="filterRejected" class="px-4 py-2 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-100">Rejected</button>
+
         </div>
 
         <!-- Table/List -->
@@ -632,7 +719,7 @@
         </div>
     </div>
 
-    <!-- ✅ FIXED Review Modal -->
+    <!-- Review Modal -->
     <div id="reviewModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4 z-50">
       <div class="bg-white rounded-2xl w-full max-w-6xl shadow-2xl flex flex-col max-h-[90vh]">
         <div class="p-4 border-b border-gray-200 flex items-center justify-between">
@@ -772,7 +859,9 @@
             articleStatusFilter: '',
             currentItemId: null,
             reviewing: null,
-            isRequestingChanges: false // Track if request changes is in progress
+            isRequestingChanges: false,
+            notifications: [],
+            unreadNotifications: 0
         };
 
         // DOM elements
@@ -800,6 +889,260 @@
         };
 
         let pollingInterval = null;
+        let notificationPollingInterval = null;
+
+        // ============================================
+        // NOTIFICATION SYSTEM
+        // ============================================
+        
+        async function fetchNotifications() {
+            try {
+                const response = await fetch('/api/notifications', {
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) return;
+                
+                const data = await response.json();
+                state.notifications = data.notifications || [];
+                state.unreadNotifications = state.notifications.filter(n => !n.read).length;
+                updateNotificationBadge();
+                
+                const dropdown = document.getElementById('notificationDropdown');
+                if (!dropdown.classList.contains('hidden')) {
+                    renderNotificationList();
+                }
+            } catch (error) {
+                console.error('Error fetching notifications:', error);
+            }
+        }
+
+        function updateNotificationBadge() {
+            const badge = document.getElementById('notificationBadge');
+            if (!badge) return;
+            
+            if (state.unreadNotifications > 0) {
+                badge.textContent = state.unreadNotifications > 99 ? '99+' : state.unreadNotifications;
+                badge.classList.remove('hidden');
+                
+                if (state.unreadNotifications > 0) {
+                    badge.classList.add('notification-badge-pulse');
+                } else {
+                    badge.classList.remove('notification-badge-pulse');
+                }
+            } else {
+                badge.classList.add('hidden');
+                badge.classList.remove('notification-badge-pulse');
+            }
+        }
+
+        function renderNotificationList() {
+            const container = document.getElementById('notificationList');
+            if (!container) return;
+            
+            if (state.notifications.length === 0) {
+                container.innerHTML = `
+                    <div class="p-8 text-center text-gray-500">
+                        <i class="bx bx-bell-off text-4xl mb-2"></i>
+                        <p>No notifications</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const notificationsHtml = state.notifications.map(notification => {
+                const icon = getNotificationIcon(notification.type);
+                const timeAgo = formatTimeAgo(notification.createdAt);
+                const readClass = notification.read ? '' : 'bg-blue-50';
+                
+                return `
+                    <div class="notification-item ${readClass} p-4 hover:bg-gray-50 cursor-pointer transition-colors" 
+                         data-id="${notification.id}" 
+                         data-read="${notification.read}"
+                         onclick="handleNotificationClick('${notification.id}', '${notification.type}', '${notification.articleId || ''}')">
+                        <div class="flex items-start gap-3">
+                            <div class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${getNotificationIconColor(notification.type)}">
+                                <i class="bx ${icon} text-lg"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between mb-1">
+                                    <h4 class="font-semibold text-gray-900 text-sm truncate">${notification.title || getNotificationTitle(notification.type)}</h4>
+                                    ${!notification.read ? '<span class="w-2 h-2 bg-blue-500 rounded-full"></span>' : ''}
+                                </div>
+                                <p class="text-sm text-gray-600 mb-1 truncate">${notification.message}</p>
+                                <span class="text-xs text-gray-500">${timeAgo}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            container.innerHTML = notificationsHtml;
+        }
+
+        function getNotificationIcon(type) {
+            const icons = {
+                'application_submitted': 'bx-user-plus',
+                'status_change': 'bx-refresh',
+                'service_request': 'bx-cog',
+                'article_submitted': 'bx-edit',
+                'article_published': 'bx-check-circle',
+                'needs_update': 'bx-message-error',
+                'update_request': 'bx-message-detail'
+            };
+            return icons[type] || 'bx-bell';
+        }
+
+        function getNotificationIconColor(type) {
+            const colors = {
+                'application_submitted': 'bg-purple-100 text-purple-600',
+                'status_change': 'bg-green-100 text-green-600',
+                'service_request': 'bg-blue-100 text-blue-600',
+                'article_submitted': 'bg-yellow-100 text-yellow-600',
+                'article_published': 'bg-teal-100 text-teal-600',
+                'needs_update': 'bg-orange-100 text-orange-600',
+                'update_request': 'bg-red-100 text-red-600'
+            };
+            return colors[type] || 'bg-gray-100 text-gray-600';
+        }
+
+        function getNotificationTitle(type) {
+            const titles = {
+                'application_submitted': 'New Application',
+                'status_change': 'Status Updated',
+                'service_request': 'Service Request',
+                'article_submitted': 'Article Submitted',
+                'article_published': 'Article Published',
+                'needs_update': 'Changes Required',
+                'update_request': 'Update Requested'
+            };
+            return titles[type] || 'Notification';
+        }
+
+        function formatTimeAgo(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+            
+            if (diffMins < 1) return 'Just now';
+            if (diffMins < 60) return `${diffMins}m ago`;
+            if (diffHours < 24) return `${diffHours}h ago`;
+            if (diffDays < 7) return `${diffDays}d ago`;
+            return date.toLocaleDateString();
+        }
+
+        async function handleNotificationClick(notificationId, type, articleId) {
+            try {
+                await markNotificationRead(notificationId);
+                
+                if (articleId && (type === 'article_submitted' || type === 'needs_update' || type === 'article_published')) {
+                    openReviewModal(articleId);
+                    closeNotificationDropdown();
+                }
+                
+                fetchNotifications();
+            } catch (error) {
+                console.error('Error handling notification click:', error);
+            }
+        }
+
+        async function markNotificationRead(notificationId) {
+            try {
+                const response = await fetch(`/api/notifications/${notificationId}/read`, {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to mark notification as read');
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error('Error marking notification as read:', error);
+                throw error;
+            }
+        }
+
+        async function markAllNotificationsRead() {
+            try {
+                const response = await fetch('/api/notifications/mark-all-read', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to mark all notifications as read');
+                }
+                
+                await fetchNotifications();
+                showToast('All notifications marked as read');
+            } catch (error) {
+                console.error('Error marking all notifications as read:', error);
+                showToast('Failed to mark all notifications as read', true);
+            }
+        }
+
+        function toggleNotificationDropdown() {
+            const dropdown = document.getElementById('notificationDropdown');
+            const isHidden = dropdown.classList.contains('hidden');
+            
+            if (isHidden) {
+                dropdown.classList.remove('hidden');
+                renderNotificationList();
+                setupClickOutsideListener();
+            } else {
+                closeNotificationDropdown();
+            }
+        }
+
+        function closeNotificationDropdown() {
+            const dropdown = document.getElementById('notificationDropdown');
+            dropdown.classList.add('hidden');
+            removeClickOutsideListener();
+        }
+
+        function setupClickOutsideListener() {
+            document.addEventListener('click', handleClickOutside);
+        }
+
+        function removeClickOutsideListener() {
+            document.removeEventListener('click', handleClickOutside);
+        }
+
+        function handleClickOutside(event) {
+            const dropdown = document.getElementById('notificationDropdown');
+            const bell = document.getElementById('notificationBell');
+            
+            if (!dropdown.classList.contains('hidden') && 
+                !dropdown.contains(event.target) && 
+                !bell.contains(event.target)) {
+                closeNotificationDropdown();
+            }
+        }
+
+        function startNotificationPolling() {
+            if (notificationPollingInterval) {
+                clearInterval(notificationPollingInterval);
+            }
+            
+            notificationPollingInterval = setInterval(() => {
+                fetchNotifications();
+            }, 30000); // Poll every 30 seconds
+            
+            console.log('🔔 Notification polling started');
+        }
+
+        function stopNotificationPolling() {
+            if (notificationPollingInterval) {
+                clearInterval(notificationPollingInterval);
+                notificationPollingInterval = null;
+            }
+            console.log('🔔 Notification polling stopped');
+        }
 
         // ============================================
         // HELPER FUNCTIONS
@@ -873,7 +1216,7 @@
           if (s === 'pending') return 'border-yellow-300 text-yellow-700 bg-yellow-50';
           if (s === 'needs_update') return 'border-orange-300 text-orange-700 bg-orange-50';
           if (s === 'published') return 'border-blue-300 text-blue-700 bg-blue-50';
-          if (s === 'rejected' || s === 'inactive') return 'border-red-300 text-red-700 bg-red-50';
+
           return 'border-gray-300 text-gray-700 bg-gray-50';
         }
 
@@ -989,6 +1332,7 @@
                     fetch('/admin/api/journey/summary', { credentials: 'include' })
                 ]);
                 
+                // Ambassadors
                 if (ambassadorsRes.status === 'fulfilled' && ambassadorsRes.value.ok) {
                     const data = await ambassadorsRes.value.json();
                     const total = data.ambassadors.length;
@@ -998,17 +1342,35 @@
                     document.getElementById('activeAmbassadors').textContent = active;
                 }
                 
+                // Articles - INCLUDING NEW CARDS
                 if (articlesRes.status === 'fulfilled' && articlesRes.value.ok) {
                     const data = await articlesRes.value.json();
-                    document.getElementById('totalArticles').textContent = data.articles ? data.articles.length : (data.items ? data.items.length : 0);
+                    const articles = data.articles || data.items || [];
+                    const totalArticles = articles.length;
+                    
+                    // Card 3: Total Articles
+                    document.getElementById('totalArticles').textContent = totalArticles;
+                    
+                    // NEW Card 5: Pending Approval (pending OR needs_update)
+                    const pendingCount = articles.filter(a => 
+                        a.status === 'pending' || a.status === 'needs_update'
+                    ).length;
+                    document.getElementById('pendingArticles').textContent = pendingCount;
+                    
+                    // NEW Card 6: LinkedIn Ready (approved OR published articles)
+                    const linkedinReadyCount = articles.filter(a => 
+                        a.status === 'approved' || a.status === 'published'
+                    ).length;
+                    document.getElementById('linkedinReady').textContent = linkedinReadyCount;
                 }
                 
+                // Journey Progress
                 if (journeyRes.status === 'fulfilled' && journeyRes.value.ok) {
                     const data = await journeyRes.value.json();
                     const avgProgress = data.ambassadors.length > 0 
                         ? Math.round(data.ambassadors.reduce((sum, a) => sum + a.overallProgress, 0) / data.ambassadors.length)
                         : 0;
-                    document.getElementById('avgProgress').textContent = `${avgProgress}%`;
+                    // Note: avgProgress element might not exist in your HTML
                 }
                 
             } catch (error) {
@@ -1563,7 +1925,7 @@
         }
 
         // ============================================
-        // ✅ ULTIMATE FIX - MODAL FUNCTIONS
+        // MODAL FUNCTIONS
         // ============================================
 
         function openReviewModal(id) {
@@ -1655,7 +2017,6 @@
             state.reviewing = null;
         }
 
-        // ✅ ULTIMATE FIX - HANDLES ANY BACKEND RESPONSE
         function renderReviewModal(article) {
             console.log('🎨 ULTIMATE RENDER: article =', article);
             
@@ -1763,11 +2124,9 @@
             console.log('✅ ULTIMATE FIX: Modal rendered successfully');
         }
 
-// ✅ ULTIMATE FIX FOR REQUEST CHANGES - WITH LOADER
 async function handleSimpleRequestChange(articleId) {
     console.log('🚀 ULTIMATE FIX: Request Changes for article:', articleId);
     
-    // Prevent multiple clicks
     if (state.isRequestingChanges) {
         console.log('⚠️ Request already in progress');
         return;
@@ -1779,7 +2138,6 @@ async function handleSimpleRequestChange(articleId) {
         return;
     }
     
-    // Get button elements
     const requestChangesBtn = document.getElementById('requestChangesBtn');
     const requestChangesText = document.getElementById('requestChangesText');
     const requestChangesLoader = document.getElementById('requestChangesLoader');
@@ -1790,7 +2148,6 @@ async function handleSimpleRequestChange(articleId) {
         return;
     }
     
-    // Set loading state
     state.isRequestingChanges = true;
     requestChangesBtn.disabled = true;
     requestChangesText.textContent = 'Requesting Changes...';
@@ -1799,7 +2156,6 @@ async function handleSimpleRequestChange(articleId) {
     console.log('📤 Message:', message);
     
     try {
-        // 1. First get article details
         console.log('🔍 Step 1: Fetching article details...');
         const articleResponse = await fetch(`/admin/api/articles/${articleId}`, { 
             credentials: 'include' 
@@ -1812,18 +2168,14 @@ async function handleSimpleRequestChange(articleId) {
         const articleData = await articleResponse.json();
         console.log('✅ Article data received:', articleData);
         
-        // 🔥 CRITICAL: Check ALL possible locations for ambassador_id
         let ambassadorId = null;
         
-        // Try direct field first
         if (articleData.ambassador_id) {
             ambassadorId = articleData.ambassador_id;
         } 
-        // Try ambassador object
         else if (articleData.ambassador && articleData.ambassador.ambassador_id) {
             ambassadorId = articleData.ambassador.ambassador_id;
         }
-        // Try nested in ambassadors array
         else if (articleData.ambassadors && articleData.ambassadors.ambassador_id) {
             ambassadorId = articleData.ambassadors.ambassador_id;
         }
@@ -1831,16 +2183,10 @@ async function handleSimpleRequestChange(articleId) {
         if (!ambassadorId) {
             console.error('❌ No ambassador_id found. Article data structure:', articleData);
             
-            // 🚨 EMERGENCY FIX: If we can't find ambassador_id, try to get it from a different API
-            console.log('🆘 Attempting emergency lookup...');
-            
-            // Try to get ambassador ID from articles list or ambassador API
-            // This is a fallback - the REAL fix should be in server.js
             showToast('Could not find ambassador. Please check the article data in console.', true);
             console.log('🆘 ADMIN: You need to fix the /admin/api/articles/:id endpoint in server.js');
             console.log('🆘 The endpoint MUST return ambassador_id in the response');
             
-            // Reset button state
             resetRequestChangesButton(requestChangesBtn, requestChangesText, requestChangesLoader);
             state.isRequestingChanges = false;
             return;
@@ -1848,7 +2194,6 @@ async function handleSimpleRequestChange(articleId) {
         
         console.log('✅ Ambassador ID found:', ambassadorId);
 
-        // 2. Send notification to ambassador
         console.log('📬 Step 2: Sending notification to ambassador...');
         const notifResponse = await fetch('/admin/api/notifications', { 
             method: 'POST', 
@@ -1871,7 +2216,6 @@ async function handleSimpleRequestChange(articleId) {
         const notifData = await notifResponse.json();
         console.log('✅ Notification created:', notifData);
         
-        // 3. Update article status to 'needs_update'
         console.log('📝 Step 3: Updating article status...');
         const updateResponse = await fetch(`/admin/api/articles/${articleId}`, { 
             method: 'PATCH', 
@@ -1889,18 +2233,15 @@ async function handleSimpleRequestChange(articleId) {
         const updateData = await updateResponse.json();
         console.log('✅ Article status updated:', updateData);
         
-        // 4. Success - Update button to show success
         requestChangesText.textContent = 'Changes Requested! ✓';
         requestChangesBtn.style.backgroundColor = '#10b981';
         requestChangesLoader.classList.add('hidden');
         
-        // Clear the message field
         document.getElementById('simpleNotifMessage').value = '';
         
         console.log('✅ Change request process completed successfully');
         showToast('✅ Change request sent to ambassador!');
         
-        // 5. Close modal and refresh after delay
         setTimeout(() => {
             resetRequestChangesButton(requestChangesBtn, requestChangesText, requestChangesLoader);
             state.isRequestingChanges = false;
@@ -1908,20 +2249,19 @@ async function handleSimpleRequestChange(articleId) {
             closeReviewModal();
             if (state.tab === 'articles') {
                 fetchList();
+                fetchStats(); // Refresh stats to update pending count
             }
         }, 1500);
         
     } catch (error) {
         console.error('❌ ULTIMATE FIX Error:', error);
         
-        // Show error on button
         requestChangesText.textContent = 'Failed!';
         requestChangesBtn.style.backgroundColor = '#ef4444';
         requestChangesLoader.classList.add('hidden');
         
         showToast(`Failed to send change request: ${error.message}`, true);
         
-        // Reset button after 3 seconds
         setTimeout(() => {
             resetRequestChangesButton(requestChangesBtn, requestChangesText, requestChangesLoader);
             state.isRequestingChanges = false;
@@ -1929,7 +2269,6 @@ async function handleSimpleRequestChange(articleId) {
     }
 }
 
-// Helper function to reset button state
 function resetRequestChangesButton(btn, text, loader) {
     if (!btn || !text || !loader) return;
     
@@ -1956,7 +2295,10 @@ function resetRequestChangesButton(btn, text, loader) {
             })
             .then(() => { 
                 showToast(`Status updated to ${newStatus}`);
-                if (state.tab === 'articles') fetchList();
+                if (state.tab === 'articles') {
+                    fetchList();
+                    fetchStats(); // Refresh stats
+                }
             })
             .catch((err) => { 
                 console.error('Error:', err);
@@ -2254,7 +2596,7 @@ function resetRequestChangesButton(btn, text, loader) {
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ 
                             status: 'published',
-                            publication_link: publicationLink  // Fixed: use snake_case to match server
+                            publication_link: publicationLink
                         }),
                         credentials: 'include'
                     });
@@ -2290,7 +2632,7 @@ function resetRequestChangesButton(btn, text, loader) {
                 
                 if (state.tab === 'articles') {
                     fetchList();
-                    fetchStats();
+                    fetchStats(); // Refresh stats
                 }
                 
             } catch (error) {
@@ -2588,6 +2930,10 @@ function resetRequestChangesButton(btn, text, loader) {
             bindEvents();
             setupTabsWithPolling();
             
+            // Initialize notifications
+            fetchNotifications();
+            startNotificationPolling();
+            
             const pushPublicationForm = document.getElementById('pushPublicationForm');
             if (pushPublicationForm) {
                 const newForm = pushPublicationForm.cloneNode(true);
@@ -2643,6 +2989,11 @@ function resetRequestChangesButton(btn, text, loader) {
         window.handleSimpleRequestChange = handleSimpleRequestChange;
         window.handleSimpleStatusUpdate = handleSimpleStatusUpdate;
         window.resetRequestChangesButton = resetRequestChangesButton;
+        window.toggleNotificationDropdown = toggleNotificationDropdown;
+        window.markAllNotificationsRead = markAllNotificationsRead;
+        window.markNotificationRead = markNotificationRead;
+        window.handleNotificationClick = handleNotificationClick;
+        window.closeNotificationDropdown = closeNotificationDropdown;
     </script>
 </body>
 </html>
