@@ -598,20 +598,12 @@ async function loadArticle() {
     showDebugInfo(articleId, source);
 
     try {
-        console.log('📡 Fetching article:', articleId);
-        
         const response = await fetch(`/api/ambassador/articles/${articleId}`, {
             credentials: 'include'
         });
 
         if (response.ok) {
             const data = await response.json();
-            
-            console.log('📦 Received data:', {
-                hasArticle: !!data.article,
-                hasNotifications: !!data.notifications,
-                notificationCount: data.notifications?.length || 0
-            });
             
             if (!data || !data.article) {
                 throw new Error('Article data missing');
@@ -620,18 +612,12 @@ async function loadArticle() {
             saveArticleToLocalStorage(data.article);
             showArticleView();
             displayArticle(data.article, false);
-            
-            // ✅ CRITICAL: Display notifications with debug
-            console.log('🔔 About to display notifications:', data.notifications);
             displayNotifications(data.notifications || []);
             
             localStorage.setItem('lastSubmittedArticleId', articleId);
             sessionStorage.setItem('currentArticleId', articleId);
             
             showToast('✅ Article loaded successfully');
-            
-            // ✅ DEBUG: Verify notifications
-            await debugNotifications(articleId);
             return;
         }
 
@@ -643,7 +629,6 @@ async function loadArticle() {
             displayNotifications([]);
             localStorage.setItem('lastSubmittedArticleId', articleId);
             sessionStorage.setItem('currentArticleId', articleId);
-            
             showWarning('Loaded from cache - some features may be limited');
             return;
         } else {
@@ -727,9 +712,9 @@ async function loadArticle() {
 
         // ✅ FIXED: Conditional "Open in Editor" button - ONLY ENABLED FOR "needs_update" STATUS
         const btnOpenEditor = document.getElementById('btnOpenEditor');
-        const articleStatus = (article.status || '').toLowerCase();
+        const currentArticleStatus = (article.status || '').toLowerCase();
         
-        if (articleStatus === 'needs_update') {
+        if (currentArticleStatus === 'needs_update') {
           // Enable button for "needs_update" status
           btnOpenEditor.disabled = false;
           btnOpenEditor.className = 'w-full px-4 py-2 rounded-lg border border-purple-600 bg-purple-600 text-white hover:bg-purple-700 text-sm font-semibold cursor-pointer transition-all';
@@ -776,13 +761,13 @@ async function loadArticle() {
           btnOpenEditor.className = 'w-full px-4 py-2 rounded-lg border border-gray-300 bg-gray-100 text-gray-500 text-sm cursor-not-allowed';
           
           // Set appropriate message based on status
-          if (articleStatus === 'pending') {
+          if (currentArticleStatus === 'pending') {
             btnOpenEditor.textContent = 'Awaiting Review';
-          } else if (articleStatus === 'approved') {
+          } else if (currentArticleStatus === 'approved') {
             btnOpenEditor.textContent = 'Article Approved ✓';
-          } else if (articleStatus === 'published') {
+          } else if (currentArticleStatus === 'published') {
             btnOpenEditor.textContent = 'Article Published ✓';
-          } else if (articleStatus === 'rejected') {
+          } else if (currentArticleStatus === 'rejected') {
             btnOpenEditor.textContent = 'Article Rejected';
           } else {
             btnOpenEditor.textContent = 'Editor Unavailable';
@@ -791,11 +776,11 @@ async function loadArticle() {
           btnOpenEditor.onclick = (e) => {
             e.preventDefault();
             let toastMessage = 'Editor is only available when admin requests updates';
-            if (articleStatus === 'pending') {
+            if (currentArticleStatus === 'pending') {
               toastMessage = 'Your article is still under review. Please wait for admin feedback.';
-            } else if (articleStatus === 'approved' || articleStatus === 'published') {
+            } else if (currentArticleStatus === 'approved' || currentArticleStatus === 'published') {
               toastMessage = 'Your article has been approved. No edits needed.';
-            } else if (articleStatus === 'rejected') {
+            } else if (currentArticleStatus === 'rejected') {
               toastMessage = 'This article has been rejected. Please create a new one.';
             }
             showToast(toastMessage, true);
@@ -937,7 +922,7 @@ async function debugNotifications(articleId) {
                 <div class="text-center py-12">
                   <i class="bx bx-error-circle text-6xl text-red-500 mb-4"></i>
                   <h3 class="text-xl font-semibold text-gray-900 mb-2">Unable to load review</h3>
-                  <p class="text-gray-600 mb-4">Please sign in again or check your connection</p>
+                  <p class="text-gray-600 mb-4">${err.message || 'Please sign in again or check your connection'}</p>
                   <a href="/signin" class="inline-block px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
                     Go to Sign In
                   </a>
@@ -945,6 +930,7 @@ async function debugNotifications(articleId) {
               `;
             }
             if (err.message !== 'redirect') {
+              console.error('❌ Error loading review page:', err);
               showToast('Could not load review data', true);
             }
           });

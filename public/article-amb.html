@@ -806,8 +806,37 @@
             // ✅ SHOW LOADING TOAST
             showLoadingToast(isEditMode ? 'Updating article...' : 'Submitting article...');
 
-            // Ensure authenticated before submit
-            checkAuth().then(() => {
+            // ✅ FIX: For edit mode, check current status and only reset if "needs_update"
+            // Otherwise, preserve the admin's status (approved, published, etc.)
+            const submitUpdate = async () => {
+                let statusToSend = null;
+                
+                if (isEditMode) {
+                    // Fetch current article to check its status
+                    try {
+                        const currentArticleResponse = await fetch(`/api/ambassador/articles/${editArticleId}`, {
+                            credentials: 'include'
+                        });
+                        if (currentArticleResponse.ok) {
+                            const currentArticleData = await currentArticleResponse.json();
+                            const currentStatus = currentArticleData.article?.status || currentArticleData.status;
+                            
+                            // Only reset to "pending" if admin requested changes
+                            // Preserve "approved", "published", etc.
+                            if (currentStatus === 'needs_update') {
+                                statusToSend = 'pending';
+                                console.log('🔄 Resetting status from "needs_update" to "pending"');
+                            } else {
+                                console.log(`✅ Preserving current status: "${currentStatus}"`);
+                                // Don't send status field - backend will preserve it
+                            }
+                        }
+                    } catch (err) {
+                        console.warn('⚠️ Could not fetch current article status, defaulting to preserve status:', err);
+                        // If we can't fetch, don't send status to preserve existing one
+                    }
+                }
+
                 return fetch(endpoint, {
                     method: method,
                     headers: { 'Content-Type': 'application/json' },
@@ -816,10 +845,15 @@
                         title, 
                         contentHtml, 
                         byline,
-                        // For PATCH requests, reset status to pending
-                        ...(isEditMode && { status: 'pending' })
+                        // Only send status if we explicitly want to change it
+                        ...(statusToSend && { status: statusToSend })
                     })
                 });
+            };
+
+            // Ensure authenticated before submit
+            checkAuth().then(() => {
+                return submitUpdate();
             }).then(async res => {
                 if (!res.ok) {
                     if (res.status === 401) {

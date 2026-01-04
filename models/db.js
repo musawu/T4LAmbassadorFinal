@@ -264,6 +264,7 @@ async function createUser(userData, role = 'ambassador') {
         state: userData.state || '',
         continent: userData.continent || '',
         cv_filename: userData.cv_filename || null,
+        generated_password: userData.generated_password || null, // Store plain text password for admin reference
       };
     } else if (role === 'partner') {
       roleTable = 'partners';
@@ -275,6 +276,7 @@ async function createUser(userData, role = 'ambassador') {
       phone_number: userData.phone_number || userData.phoneNumber || null,
       location: userData.location || null,
       partner_type: userData.partner_type || userData.partnerType || null,
+      generated_password: userData.generated_password || null, // Store plain text password for admin reference
     };
     } else if (role === 'admin') {
       roleTable = 'admins';

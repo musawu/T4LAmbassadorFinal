@@ -8,103 +8,213 @@ const JOURNEY_MONTHS = require("./journey-db.js");
 const app = express();
 const { v4: uuidv4 } = require("uuid");
 
-// ========== MAILSLURP EMAIL SERVICE ==========
-const { MailSlurp } = require("mailslurp-client");
+// ========== EMAIL SERVICE (NODEMAILER) ==========
+const nodemailer = require("nodemailer");
+
+// Gmail SMTP Configuration (hardcoded)
+const SMTP_CONFIG = {
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false, // true for 465, false for other ports
+  auth: {
+    user: "syntichemusawu645@gmail.com",
+    pass: "ouwkdejtuwqryqf", // Gmail App Password (spaces removed automatically)
+  },
+};
+
+const SMTP_FROM = "syntichemusawu645@gmail.com";
 
 class EmailService {
   constructor() {
-    if (!process.env.MAILSLURP_API_KEY) {
-      console.warn("⚠️  MailSlurp API key missing - emails disabled");
-      this.client = null;
-      return;
-    }
+    // Initialize Nodemailer with hardcoded Gmail credentials
+    this.nodemailerTransporter = null;
+    this.etherealAccount = null;
 
-    try {
-      this.client = new MailSlurp({
-        apiKey: process.env.MAILSLURP_API_KEY,
-      });
-      console.log("✅ MailSlurp email service initialized");
-    } catch (error) {
-      console.error("❌ MailSlurp init failed:", error.message);
-      this.client = null;
+    // Check if Ethereal should be used for testing
+    if (process.env.USE_ETHEREAL === "true") {
+      console.log("🔄 Ethereal mode enabled - will initialize on startup");
+      // Ethereal will be initialized asynchronously after EmailService is created
+    } else {
+      // Use Gmail SMTP (hardcoded credentials)
+      try {
+        // Remove spaces from password if present (Gmail shows them with spaces)
+        const smtpPass = SMTP_CONFIG.auth.pass.replace(/\s+/g, "");
+
+        this.nodemailerTransporter = nodemailer.createTransport({
+          host: SMTP_CONFIG.host,
+          port: SMTP_CONFIG.port,
+          secure: SMTP_CONFIG.secure,
+          auth: {
+            user: SMTP_CONFIG.auth.user,
+            pass: smtpPass,
+          },
+        });
+
+        // Verify connection
+        this.nodemailerTransporter.verify((error, success) => {
+          if (error) {
+            console.error(
+              "❌ SMTP connection verification failed:",
+              error.message
+            );
+            console.error("   Please check:");
+            console.error(
+              "   1. App password is correct (16 characters, no spaces)"
+            );
+            console.error("   2. 2-Step Verification is enabled on Gmail");
+            console.error("   3. App password hasn't been revoked");
+          } else {
+            console.log("✅ Nodemailer email service initialized (Gmail SMTP)");
+            console.log(
+              `   Connected to: ${SMTP_CONFIG.host}:${SMTP_CONFIG.port}`
+            );
+            console.log(`   From: ${SMTP_CONFIG.auth.user}`);
+          }
+        });
+      } catch (error) {
+        console.error("❌ Nodemailer init failed:", error.message);
+        this.nodemailerTransporter = null;
+      }
     }
   }
 
-  // Send ambassador welcome email
+  // Initialize Ethereal for testing
+  async initializeEthereal() {
+    try {
+      console.log("🔄 Creating Ethereal test account...");
+      this.etherealAccount = await nodemailer.createTestAccount();
+
+      this.nodemailerTransporter = nodemailer.createTransport({
+        host: "smtp.ethereal.email",
+        port: 587,
+        secure: false,
+        auth: {
+          user: this.etherealAccount.user,
+          pass: this.etherealAccount.pass,
+        },
+      });
+
+      console.log("✅ Ethereal email service initialized");
+      console.log("📧 Test account created:");
+      console.log(`   Email: ${this.etherealAccount.user}`);
+      console.log(`   Password: ${this.etherealAccount.pass}`);
+      console.log(`   Web UI: https://ethereal.email`);
+    } catch (error) {
+      console.error("❌ Ethereal init failed:", error.message);
+      this.nodemailerTransporter = null;
+      this.etherealAccount = null;
+    }
+  }
+
+  // Send ambassador welcome email using Nodemailer
   async sendAmbassadorWelcome(ambassadorData) {
     console.log("=== AMBASSADOR EMAIL START ===");
     console.log("To:", ambassadorData.email);
     console.log("Name:", ambassadorData.name);
     console.log("Code:", ambassadorData.access_code);
-    if (!this.client) {
-      console.log("⚠️  MailSlurp not available - skipping email");
+
+    if (!this.nodemailerTransporter) {
+      console.log("⚠️  Nodemailer not available - skipping email");
       return { success: false, error: "Email service not configured" };
     }
 
     try {
-      // Create a sender inbox
-      const inbox = await this.client.createInbox();
-
-      // Send to the actual ambassador email
-      const email = await this.client.sendEmail(inbox.id, {
-        to: [ambassadorData.email], // Ambassador's email
+      const mailOptions = {
+        from: this.etherealAccount?.user || SMTP_FROM,
+        to: ambassadorData.email,
         subject: `🎉 Welcome ${ambassadorData.name} to T4LA Ambassador Program!`,
-        body: this.createAmbassadorEmailBody(ambassadorData),
-        isHTML: true,
-      });
-
-      console.log(`✅ Ambassador email sent to ${ambassadorData.email}`);
-      console.log(
-        `📧 View email: https://app.mailslurp.com/inboxes/${inbox.id}`
-      );
-
-      return {
-        success: true,
-        emailId: email.id,
-        inboxId: inbox.id,
-        viewUrl: `https://app.mailslurp.com/inboxes/${inbox.id}`,
+        html: this.createAmbassadorEmailBody(ambassadorData),
       };
+
+      const info = await this.nodemailerTransporter.sendMail(mailOptions);
+
+      // If using Ethereal, get the preview URL
+      if (this.etherealAccount) {
+        const previewUrl = nodemailer.getTestMessageUrl(info);
+        console.log(
+          `✅ Ambassador email sent via Ethereal to ${ambassadorData.email}`
+        );
+        console.log(`📧 Preview URL: ${previewUrl}`);
+        return {
+          success: true,
+          method: "ethereal",
+          messageId: info.messageId,
+          previewUrl: previewUrl,
+          etherealAccount: {
+            user: this.etherealAccount.user,
+            pass: this.etherealAccount.pass,
+          },
+        };
+      } else {
+        console.log(
+          `✅ Ambassador email sent via Nodemailer to ${ambassadorData.email}`
+        );
+        console.log(`📧 Message ID: ${info.messageId}`);
+        return {
+          success: true,
+          method: "nodemailer",
+          messageId: info.messageId,
+        };
+      }
     } catch (error) {
-      console.error(`❌ Failed to send ambassador email:`, error.message);
+      console.error(`❌ Nodemailer failed:`, error.message);
       return { success: false, error: error.message };
     }
   }
 
-  // Send partner welcome email
+  // Send partner welcome email using Nodemailer
   async sendPartnerWelcome(partnerData) {
     console.log("=== PARTNER EMAIL START ===");
     console.log("To:", partnerData.email);
     console.log("Name:", partnerData.name);
     console.log("Company:", partnerData.company);
     console.log("Code:", partnerData.access_code);
-    if (!this.client) {
-      console.log("⚠️  MailSlurp not available - skipping email");
+
+    if (!this.nodemailerTransporter) {
+      console.log("⚠️  Nodemailer not available - skipping email");
       return { success: false, error: "Email service not configured" };
     }
 
     try {
-      const inbox = await this.client.createInbox();
-
-      const email = await this.client.sendEmail(inbox.id, {
-        to: [partnerData.email], // Partner's email
+      const mailOptions = {
+        from: this.etherealAccount?.user || SMTP_FROM,
+        to: partnerData.email,
         subject: `🤝 Welcome ${partnerData.name} to T4LA Partner Network!`,
-        body: this.createPartnerEmailBody(partnerData),
-        isHTML: true,
-      });
-
-      console.log(`✅ Partner email sent to ${partnerData.email}`);
-      console.log(
-        `📧 View email: https://app.mailslurp.com/inboxes/${inbox.id}`
-      );
-
-      return {
-        success: true,
-        emailId: email.id,
-        inboxId: inbox.id,
-        viewUrl: `https://app.mailslurp.com/inboxes/${inbox.id}`,
+        html: this.createPartnerEmailBody(partnerData),
       };
+
+      const info = await this.nodemailerTransporter.sendMail(mailOptions);
+
+      // If using Ethereal, get the preview URL
+      if (this.etherealAccount) {
+        const previewUrl = nodemailer.getTestMessageUrl(info);
+        console.log(
+          `✅ Partner email sent via Ethereal to ${partnerData.email}`
+        );
+        console.log(`📧 Preview URL: ${previewUrl}`);
+        return {
+          success: true,
+          method: "ethereal",
+          messageId: info.messageId,
+          previewUrl: previewUrl,
+          etherealAccount: {
+            user: this.etherealAccount.user,
+            pass: this.etherealAccount.pass,
+          },
+        };
+      } else {
+        console.log(
+          `✅ Partner email sent via Nodemailer to ${partnerData.email}`
+        );
+        console.log(`📧 Message ID: ${info.messageId}`);
+        return {
+          success: true,
+          method: "nodemailer",
+          messageId: info.messageId,
+        };
+      }
     } catch (error) {
-      console.error(`❌ Failed to send partner email:`, error.message);
+      console.error(`❌ Nodemailer failed:`, error.message);
       return { success: false, error: error.message };
     }
   }
@@ -141,7 +251,9 @@ class EmailService {
             <p><strong>Access Code:</strong> <span class="code">${
               data.access_code
             }</span></p>
-            <p><strong>Default Password:</strong> welcome123</p>
+            <p><strong>Password:</strong> <span class="code">${
+              data.password || "welcome123"
+            }</span></p>
             <p><em>Please change your password after first login</em></p>
           </div>
           
@@ -196,7 +308,9 @@ class EmailService {
             <p><strong>Partner Access Code:</strong> <span class="code">${
               data.access_code
             }</span></p>
-            <p><strong>Default Password:</strong> welcome123</p>
+            <p><strong>Password:</strong> <span class="code">${
+              data.password || "welcome123"
+            }</span></p>
             <p><em>Please change your password after first login</em></p>
           </div>
           
@@ -224,8 +338,15 @@ class EmailService {
 // Initialize the email service
 const emailService = new EmailService();
 
+// Initialize Ethereal if requested (async initialization)
+if (process.env.USE_ETHEREAL === "true") {
+  emailService.initializeEthereal().catch((error) => {
+    console.error("Failed to initialize Ethereal:", error);
+  });
+}
+
 // ========== TEST ENDPOINT ==========
-app.get("/api/test-mailslurp", async (req, res) => {
+app.get("/api/test-email", async (req, res) => {
   try {
     const testData = {
       name: "Test Ambassador",
@@ -237,15 +358,18 @@ app.get("/api/test-mailslurp", async (req, res) => {
 
     res.json({
       success: true,
-      message: "Test email sent via MailSlurp",
+      message: "Test email sent via Nodemailer",
       result: result,
-      note: "Check MailSlurp dashboard to see the email",
+      note:
+        result.method === "ethereal"
+          ? `Check preview URL: ${result.previewUrl}`
+          : "Check the recipient's email inbox",
     });
   } catch (error) {
     res.status(500).json({
       success: false,
       error: error.message,
-      note: "Make sure MAILSLURP_API_KEY is set in .env",
+      note: "Make sure Gmail SMTP credentials are configured in server.js",
     });
   }
 });
@@ -4463,13 +4587,13 @@ app.post(
     try {
       console.log("📝 Creating ambassador:", req.body);
 
-      const { first_name, email, access_code } = req.body; // CHANGED: name → first_name
+      const { first_name, email, access_code, password } = req.body; // CHANGED: name → first_name
 
-      if (!first_name || !email || !access_code) {
+      if (!first_name || !email || !access_code || !password) {
         // CHANGED: name → first_name
-        return res
-          .status(400)
-          .json({ error: "Name, email, and access code are required" });
+        return res.status(400).json({
+          error: "Name, email, access code, and password are required",
+        });
       }
 
       const emailLower = email.toLowerCase().trim();
@@ -4482,7 +4606,7 @@ app.post(
       }
 
       const salt = crypto.randomBytes(8).toString("hex");
-      const hashedPassword = hashPassword("welcome123", salt);
+      const hashedPassword = hashPassword(password, salt);
 
       const userData = {
         first_name: first_name, // CHANGED: name → first_name
@@ -4490,6 +4614,7 @@ app.post(
         access_code: accessCodeUpper,
         password_hash: hashedPassword,
         salt: salt,
+        generated_password: password, // Store the plain text password for admin reference
         status: "active",
       };
 
@@ -4516,6 +4641,7 @@ app.post(
         name: newAmbassador.first_name || first_name,
         email: newAmbassador.email,
         access_code: newAmbassador.access_code,
+        password: password, // Include the generated password in the email
       });
 
       if (!emailResult.success) {
@@ -4671,16 +4797,20 @@ app.post(
     try {
       console.log("📝 Creating partner:", req.body);
 
-      const { contact_person, organization_name, email, access_code } =
-        req.body; // CHANGED
+      const {
+        contact_person,
+        organization_name,
+        email,
+        access_code,
+        password,
+      } = req.body; // CHANGED
 
-      if (!contact_person || !email || !access_code) {
+      if (!contact_person || !email || !access_code || !password) {
         // CHANGED: name → contact_person
-        return res
-          .status(400)
-          .json({
-            error: "Contact person, email, and access code are required",
-          });
+        return res.status(400).json({
+          error:
+            "Contact person, email, access code, and password are required",
+        });
       }
 
       const emailLower = email.toLowerCase().trim();
@@ -4693,7 +4823,7 @@ app.post(
       }
 
       const salt = crypto.randomBytes(8).toString("hex");
-      const hashedPassword = hashPassword("welcome123", salt);
+      const hashedPassword = hashPassword(password, salt);
 
       const userData = {
         contact_person: contact_person, // CHANGED: contact_name → contact_person
@@ -4702,6 +4832,7 @@ app.post(
         access_code: accessCodeUpper,
         password_hash: hashedPassword,
         salt: salt,
+        generated_password: password, // Store the plain text password for admin reference
         status: "approved",
       };
 
@@ -4718,6 +4849,7 @@ app.post(
         email: newPartner.email,
         company: newPartner.organization_name || organization_name,
         access_code: newPartner.access_code,
+        password: password, // Include the generated password in the email
       });
 
       if (!emailResult.success) {
@@ -4847,6 +4979,56 @@ app.post(
       console.error("❌ Error generating partner code:", error);
       return res.status(500).json({
         error: "Failed to generate code",
+        details: error.message,
+      });
+    }
+  }
+);
+
+// Generate secure password
+app.post(
+  "/api/admin/generate-password",
+  requireAuth,
+  requireRole("admin"),
+  async (req, res) => {
+    try {
+      console.log("🔑 Generating secure password...");
+
+      // Generate a secure random password
+      // 12 characters: mix of uppercase, lowercase, numbers, and special characters
+      const uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+      const lowercase = "abcdefghijklmnopqrstuvwxyz";
+      const numbers = "0123456789";
+      const special = "!@#$%^&*";
+      const allChars = uppercase + lowercase + numbers + special;
+
+      let password = "";
+      // Ensure at least one of each type
+      password += uppercase[Math.floor(Math.random() * uppercase.length)];
+      password += lowercase[Math.floor(Math.random() * lowercase.length)];
+      password += numbers[Math.floor(Math.random() * numbers.length)];
+      password += special[Math.floor(Math.random() * special.length)];
+
+      // Fill the rest randomly
+      for (let i = password.length; i < 12; i++) {
+        password += allChars[Math.floor(Math.random() * allChars.length)];
+      }
+
+      // Shuffle the password
+      password = password
+        .split("")
+        .sort(() => Math.random() - 0.5)
+        .join("");
+
+      return res.json({
+        success: true,
+        password: password,
+        message: "Secure password generated successfully",
+      });
+    } catch (error) {
+      console.error("❌ Error generating password:", error);
+      return res.status(500).json({
+        error: "Failed to generate password",
         details: error.message,
       });
     }
@@ -5186,7 +5368,15 @@ app.patch(
         throw updateError;
       }
 
-      console.log("✅ Article updated successfully:", updatedArticle);
+      console.log("✅ Article updated successfully:", {
+        article_id: updatedArticle.article_id,
+        old_status: existingArticle.status,
+        new_status: updatedArticle.status,
+        status_match:
+          existingArticle.status === updatedArticle.status
+            ? "⚠️ SAME"
+            : "✅ CHANGED",
+      });
 
       return res.json({
         success: true,
@@ -5524,6 +5714,14 @@ app.get(
         views: article.views || 0,
         likes: article.likes || 0,
       };
+
+      // ✅ DEBUG: Log the status being returned
+      console.log("📊 Returning article status to ambassador:", {
+        article_id: article.article_id,
+        status_from_db: article.status,
+        status_type: typeof article.status,
+        formatted_status: formattedArticle.status,
+      });
 
       const formattedNotifications = (notifications || []).map((notif) => ({
         id: notif.notification_id,
@@ -5940,14 +6138,33 @@ app.patch(
       const articleId = req.params.id;
       const { title, contentHtml, byline, status } = req.body;
 
+      // ✅ CRITICAL: Get ambassador_id from the user
+      const ambassador = await getUserById(req.auth.userId, "ambassador");
+      if (!ambassador) {
+        console.error("❌ Ambassador not found for user_id:", req.auth.userId);
+        return res.status(404).json({ error: "Ambassador not found" });
+      }
+
+      const ambassadorId = ambassador.ambassador_id || ambassador.id;
+      console.log(
+        "✅ Found ambassador_id:",
+        ambassadorId,
+        "for user_id:",
+        req.auth.userId
+      );
+
       // Check if article exists and belongs to the user
       const existingArticle = await getArticleById(articleId);
       if (!existingArticle) {
         return res.status(404).json({ error: "Article not found" });
       }
 
-      // Verify the article belongs to the current user
-      if (existingArticle.ambassador_id !== req.auth.userId) {
+      // ✅ FIX: Verify the article belongs to the current user using ambassador_id
+      if (existingArticle.ambassador_id !== ambassadorId) {
+        console.error("❌ Article ownership mismatch:", {
+          article_ambassador_id: existingArticle.ambassador_id,
+          user_ambassador_id: ambassadorId,
+        });
         return res
           .status(403)
           .json({ error: "You can only edit your own articles" });
@@ -6200,11 +6417,9 @@ app.delete(
         .single();
 
       if (fetchError || !post) {
-        return res
-          .status(404)
-          .json({
-            error: "Post not found or you do not have permission to delete it",
-          });
+        return res.status(404).json({
+          error: "Post not found or you do not have permission to delete it",
+        });
       }
 
       // Delete the post
@@ -6414,39 +6629,49 @@ app.get("/api/dashboard/stats", requireAuth, async (req, res) => {
 
       // Get ambassador's articles stats
       const { data: ambassadorArticles } = await supabase
-        .from('articles')
-        .select('*')
-        .eq('ambassador_id', ambassadorId);
-      
+        .from("articles")
+        .select("*")
+        .eq("ambassador_id", ambassadorId);
+
       const myArticles = ambassadorArticles || [];
-      const pendingArticles = myArticles.filter(a => a.status === 'pending' || a.status === 'needs_update');
-      const publishedArticles = myArticles.filter(a => a.status === 'published');
-      
+      const pendingArticles = myArticles.filter(
+        (a) => a.status === "pending" || a.status === "needs_update"
+      );
+      const publishedArticles = myArticles.filter(
+        (a) => a.status === "published"
+      );
+
       // Calculate next article due date (monthly article requirement)
       const currentMonth = progress.current_month || 1;
       const startDate = new Date(user.created_at || Date.now());
       const nextArticleDue = new Date(startDate);
       nextArticleDue.setMonth(nextArticleDue.getMonth() + currentMonth);
-      
+
       // Get ambassador's partner applications
       const { data: applications } = await supabase
-        .from('applications')
-        .select('*, posts(title)')
-        .eq('ambassador_id', ambassadorId);
-      
+        .from("applications")
+        .select("*, posts(title)")
+        .eq("ambassador_id", ambassadorId);
+
       const myApplications = applications || [];
-      const pendingApps = myApplications.filter(a => a.status === 'pending');
-      const acceptedApps = myApplications.filter(a => a.status === 'accepted');
-      const rejectedApps = myApplications.filter(a => a.status === 'rejected');
+      const pendingApps = myApplications.filter((a) => a.status === "pending");
+      const acceptedApps = myApplications.filter(
+        (a) => a.status === "accepted"
+      );
+      const rejectedApps = myApplications.filter(
+        (a) => a.status === "rejected"
+      );
 
       // Get service requests
       const { data: serviceRequests } = await supabase
-        .from('service_requests')
-        .select('*')
-        .eq('ambassador_id', ambassadorId);
-      
+        .from("service_requests")
+        .select("*")
+        .eq("ambassador_id", ambassadorId);
+
       const myServiceRequests = serviceRequests || [];
-      const pendingServiceReqs = myServiceRequests.filter(r => r.status === 'pending');
+      const pendingServiceReqs = myServiceRequests.filter(
+        (r) => r.status === "pending"
+      );
 
       // Get recent published articles for display
       const recentArticles = publishedArticles.slice(0, 3).map((article) => ({
@@ -6458,9 +6683,13 @@ app.get("/api/dashboard/stats", requireAuth, async (req, res) => {
       }));
 
       // Calculate upcoming tasks count
-      const currentMonthData = JOURNEY_MONTHS.find(m => m.month === currentMonth);
-      const upcomingTasks = currentMonthData 
-        ? currentMonthData.tasks.filter(t => !completedTasks[`month${currentMonth}_${t.id}`]).length
+      const currentMonthData = JOURNEY_MONTHS.find(
+        (m) => m.month === currentMonth
+      );
+      const upcomingTasks = currentMonthData
+        ? currentMonthData.tasks.filter(
+            (t) => !completedTasks[`month${currentMonth}_${t.id}`]
+          ).length
         : 0;
 
       return res.json({
@@ -6477,7 +6706,7 @@ app.get("/api/dashboard/stats", requireAuth, async (req, res) => {
           total: myArticles.length,
           pending: pendingArticles.length,
           published: publishedArticles.length,
-          nextDueDate: nextArticleDue.toISOString().split('T')[0],
+          nextDueDate: nextArticleDue.toISOString().split("T")[0],
         },
         applications: {
           total: myApplications.length,

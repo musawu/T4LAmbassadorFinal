@@ -45,9 +45,24 @@
           <!-- Password -->
           <div>
             <label class="text-sm font-semibold text-gray-800 block mb-2">Password</label>
-            <input 
-              id="password" type="password" name="password" placeholder="password123" 
-              class="w-full border border-gray-300 rounded-lg px-4 py-3.5 text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent focus:outline-none transition" />
+            <div class="relative">
+              <input 
+                id="password" type="password" name="password" placeholder="password123" 
+                class="w-full border border-gray-300 rounded-lg px-4 py-3.5 pr-12 text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent focus:outline-none transition" />
+              <button 
+                type="button" 
+                id="togglePassword" 
+                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none transition"
+                aria-label="Toggle password visibility">
+                <svg id="eyeIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                </svg>
+                <svg id="eyeOffIcon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
+                </svg>
+              </button>
+            </div>
           </div>
 
           <!-- Remember me + Forgot -->
@@ -67,6 +82,12 @@
           >
             Sign In
           </button>
+
+          <!-- Sign Up Link -->
+          <div class="text-center text-sm text-gray-600">
+            Don't have an account? 
+            <a href="/admin-signup.html" class="font-semibold transition" style="color:#4b0d7f">Sign Up</a>
+          </div>
 
           <!-- Helper: Test creds -->
           <div class="text-xs text-gray-500">
@@ -97,14 +118,65 @@
       border-radius: 9999px; z-index:0"></div>
 
     <script>
-      // // Prefill test credentials
-      // (function prefill() {
-      //   try {
-      //     document.getElementById('email').value = 'admin@test.com';
-      //     document.getElementById('accessCode').value = 'T4LA-ADMIN';
-      //     document.getElementById('password').value = 'password123';
-      //   } catch (_) {}
-      // })();
+      // Auto-populate credentials from localStorage (from signup or remember me)
+      (function prefillCredentials() {
+        try {
+          // First check for signup credentials (temporary)
+          let storedCredentials = localStorage.getItem('adminSignupCredentials');
+          let isRememberMe = false;
+          
+          // If no signup credentials, check for remember me credentials (persistent)
+          if (!storedCredentials) {
+            storedCredentials = localStorage.getItem('adminRememberMeCredentials');
+            isRememberMe = true;
+          }
+          
+          if (storedCredentials) {
+            const credentials = JSON.parse(storedCredentials);
+            const emailInput = document.getElementById('email');
+            const accessCodeInput = document.getElementById('accessCode');
+            const passwordInput = document.getElementById('password');
+            const rememberMeCheckbox = document.querySelector('input[name="rememberMe"]');
+            
+            if (emailInput && credentials.email) emailInput.value = credentials.email;
+            if (accessCodeInput && credentials.accessCode) accessCodeInput.value = credentials.accessCode;
+            if (passwordInput && credentials.password) passwordInput.value = credentials.password;
+            
+            // Check the remember me checkbox if credentials were from remember me
+            if (isRememberMe && rememberMeCheckbox) {
+              rememberMeCheckbox.checked = true;
+            }
+            
+            // Clear signup credentials after populating (they're temporary)
+            if (!isRememberMe) {
+              localStorage.removeItem('adminSignupCredentials');
+            }
+          }
+        } catch (err) {
+          console.error('Error loading stored credentials:', err);
+        }
+      })();
+
+      // Password toggle functionality
+      (function setupPasswordToggle() {
+        const passwordInput = document.getElementById('password');
+        const toggleButton = document.getElementById('togglePassword');
+        const eyeIcon = document.getElementById('eyeIcon');
+        const eyeOffIcon = document.getElementById('eyeOffIcon');
+
+        toggleButton.addEventListener('click', function() {
+          const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+          passwordInput.setAttribute('type', type);
+          
+          if (type === 'password') {
+            eyeIcon.classList.remove('hidden');
+            eyeOffIcon.classList.add('hidden');
+          } else {
+            eyeIcon.classList.add('hidden');
+            eyeOffIcon.classList.remove('hidden');
+          }
+        });
+      })();
 
       // Handle submit with fetch for error display
       (function bindSubmit() {
@@ -133,6 +205,23 @@
           })
           .then(async (res) => {
             if (res.ok) {
+              // Handle Remember Me feature
+              if (payload.rememberMe) {
+                // Store credentials for remember me
+                const rememberMeCredentials = {
+                  email: payload.email,
+                  accessCode: payload.accessCode,
+                  password: payload.password
+                };
+                localStorage.setItem('adminRememberMeCredentials', JSON.stringify(rememberMeCredentials));
+              } else {
+                // Clear remember me credentials if not checked
+                localStorage.removeItem('adminRememberMeCredentials');
+              }
+              
+              // Clear temporary signup credentials after successful signin
+              localStorage.removeItem('adminSignupCredentials');
+              
               // JSON success -> redirect
               window.location.href = '/admin-dashboard.html';
               return;

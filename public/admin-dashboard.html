@@ -544,10 +544,10 @@
         <div class="bg-white rounded-xl shadow-sm border mb-6">
             <div class="border-b border-gray-200">
                 <div class="flex space-x-2 p-4">
-                    <button id="tabAmbassadors" class="px-4 py-2 rounded-xl text-sm font-semibold text-white" style="background-color: #4b0d7f;">Ambassadors</button>
-                    <button id="tabPartners" class="px-4 py-2 rounded-xl text-sm font-semibold text-gray-700">Partners</button>
-                    <button id="tabArticles" class="px-4 py-2 rounded-xl text-sm font-semibold text-gray-700">Articles</button>
-                    <button id="tabJourney" class="px-4 py-2 rounded-xl text-sm font-semibold text-gray-700">Journey Progress</button>
+                    <button id="tabAmbassadors" onclick="switchTab('ambassadors')" class="px-4 py-2 rounded-xl text-sm font-semibold text-white" style="background-color: #4b0d7f; cursor: pointer;">Ambassadors</button>
+                    <button id="tabPartners" onclick="switchTab('partners')" class="px-4 py-2 rounded-xl text-sm font-semibold text-gray-700" style="cursor: pointer;">Partners</button>
+                    <button id="tabArticles" onclick="switchTab('articles')" class="px-4 py-2 rounded-xl text-sm font-semibold text-gray-700" style="cursor: pointer;">Articles</button>
+                    <button id="tabJourney" onclick="switchTab('journey')" class="px-4 py-2 rounded-xl text-sm font-semibold text-gray-700" style="cursor: pointer;">Journey Progress</button>
                 </div>
             </div>
         </div>
@@ -2082,6 +2082,19 @@
                                 rows="3" 
                                 placeholder="Type your feedback here..."
                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-800 bg-white mb-3"></textarea>
+                            
+                            <!-- Status Select moved here (under feedback input) -->
+                            <select 
+                                id="simpleStatusSelect" 
+                                onchange="handleSimpleStatusUpdate('${articleId}')"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-800 bg-white mb-3">
+                                <option value="pending" ${status === 'pending' ? 'selected' : ''}>Pending Review</option>
+                                <option value="needs_update" ${status === 'needs_update' ? 'selected' : ''}>Needs Update</option>
+                                <option value="approved" ${status === 'approved' ? 'selected' : ''}>Approved</option>
+                                <option value="published" ${status === 'published' ? 'selected' : ''}>Published</option>
+                                <option value="rejected" ${status === 'rejected' ? 'selected' : ''}>Rejected</option>
+                            </select>
+                            
                             <div class="relative">
                                 <button 
                                     onclick="handleSimpleRequestChange('${articleId}')" 
@@ -2093,23 +2106,6 @@
                                     </div>
                                 </button>
                             </div>
-                        </div>
-                        
-                        <div class="mb-4">
-                            <select 
-                                id="simpleStatusSelect" 
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-800 bg-white mb-3">
-                                <option value="pending" ${status === 'pending' ? 'selected' : ''}>Pending Review</option>
-                                <option value="needs_update" ${status === 'needs_update' ? 'selected' : ''}>Needs Update</option>
-                                <option value="approved" ${status === 'approved' ? 'selected' : ''}>Approved</option>
-                                <option value="published" ${status === 'published' ? 'selected' : ''}>Published</option>
-                                <option value="rejected" ${status === 'rejected' ? 'selected' : ''}>Rejected</option>
-                            </select>
-                            <button 
-                                onclick="handleSimpleStatusUpdate('${articleId}')" 
-                                class="w-full px-4 py-2 rounded-lg text-white font-semibold bg-purple-600 hover:bg-purple-700">
-                                Update Status
-                            </button>
                         </div>
                         
                         <div class="mt-6 pt-4 border-t border-gray-200">
@@ -2851,9 +2847,41 @@ function resetRequestChangesButton(btn, text, loader) {
         }
 
         // ============================================
-        // TAB SETUP FUNCTION
+        // TAB SWITCH FUNCTION (Called by inline onclick)
         // ============================================
-        function setupTabsWithPolling() {
+        function switchTab(tabName) {
+            console.log(`📋 Switching to tab: ${tabName}`);
+            
+            // Stop journey polling if switching away from journey tab
+            if (state.tab === 'journey' && tabName !== 'journey') {
+                if (typeof stopJourneyPolling === 'function') {
+                    stopJourneyPolling();
+                }
+            }
+            
+            // Update state
+            state.tab = tabName;
+            state.page = 1;
+            state.search = '';
+            state.status = 'all';
+            state.articleStatusFilter = '';
+            
+            // Show/hide article status filters
+            const articleStatusFilters = document.getElementById('articleStatusFilters');
+            if (tabName === 'articles') {
+                if (articleStatusFilters) {
+                    articleStatusFilters.style.display = 'flex';
+                    if (typeof setActiveArticleFilter === 'function') {
+                        setActiveArticleFilter('filterAll');
+                    }
+                }
+            } else {
+                if (articleStatusFilters) {
+                    articleStatusFilters.style.display = 'none';
+                }
+            }
+            
+            // Update tab button styles
             const tabs = {
                 ambassadors: document.getElementById('tabAmbassadors'),
                 partners: document.getElementById('tabPartners'),
@@ -2861,44 +2889,153 @@ function resetRequestChangesButton(btn, text, loader) {
                 journey: document.getElementById('tabJourney')
             };
             
+            Object.entries(tabs).forEach(([name, element]) => {
+                if (!element) return;
+                
+                if (name === tabName) {
+                    element.className = 'px-4 py-2 rounded-xl text-sm font-semibold text-white';
+                    element.style.backgroundColor = '#4b0d7f';
+                    element.style.cursor = 'pointer';
+                } else {
+                    element.className = 'px-4 py-2 rounded-xl text-sm font-semibold text-gray-700';
+                    element.style.backgroundColor = '';
+                    element.style.cursor = 'pointer';
+                }
+            });
+            
+            // Fetch and render the selected tab's data
+            if (typeof fetchList === 'function') {
+                fetchList().then(() => {
+                    if (tabName === 'journey' && typeof startJourneyPolling === 'function') {
+                        startJourneyPolling();
+                    }
+                }).catch(error => {
+                    console.error(`Error fetching ${tabName}:`, error);
+                });
+            }
+            
+            if (typeof fetchStats === 'function') {
+                fetchStats();
+            }
+        }
+
+        // ============================================
+        // TAB SETUP FUNCTION
+        // ============================================
+        function setupTabsWithPolling() {
+            const tabIds = {
+                ambassadors: 'tabAmbassadors',
+                partners: 'tabPartners',
+                articles: 'tabArticles',
+                journey: 'tabJourney'
+            };
+            
+            // Get all tab elements
+            const tabs = {};
+            Object.entries(tabIds).forEach(([name, id]) => {
+                const element = document.getElementById(id);
+                if (!element) {
+                    console.error(`❌ Tab element not found: ${id}`);
+                } else {
+                    tabs[name] = element;
+                }
+            });
+            
+            // Check if all tab elements exist
+            if (Object.keys(tabs).length === 0) {
+                console.error('❌ No tab elements found!');
+                return;
+            }
+            
+            console.log('✅ Setting up tab event listeners for:', Object.keys(tabs));
+            
+            // Function to update tab styles
+            function updateTabStyles(activeTabName) {
+                Object.entries(tabs).forEach(([name, element]) => {
+                    if (!element) return;
+                    
+                    if (name === activeTabName) {
+                        element.className = 'px-4 py-2 rounded-xl text-sm font-semibold text-white';
+                        element.style.backgroundColor = '#4b0d7f';
+                        element.style.cursor = 'pointer';
+                    } else {
+                        element.className = 'px-4 py-2 rounded-xl text-sm font-semibold text-gray-700';
+                        element.style.backgroundColor = '';
+                        element.style.cursor = 'pointer';
+                    }
+                });
+            }
+            
+            // Add click event listeners to each tab
             Object.entries(tabs).forEach(([tabName, tabElement]) => {
-                tabElement.addEventListener('click', () => {
+                if (!tabElement) return;
+                
+                // Remove any existing listeners by cloning
+                const newTabElement = tabElement.cloneNode(true);
+                tabElement.parentNode.replaceChild(newTabElement, tabElement);
+                tabs[tabName] = newTabElement; // Update reference
+                
+                // Add click event listener
+                newTabElement.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    console.log(`📋 Tab clicked: ${tabName}`);
+                    
+                    // Stop journey polling if switching away from journey tab
                     if (state.tab === 'journey' && tabName !== 'journey') {
-                        stopJourneyPolling();
+                        if (typeof stopJourneyPolling === 'function') {
+                            stopJourneyPolling();
+                        }
                     }
                     
+                    // Update state
                     state.tab = tabName;
                     state.page = 1;
                     state.search = '';
                     state.status = 'all';
                     state.articleStatusFilter = '';
                     
+                    // Show/hide article status filters
                     const articleStatusFilters = document.getElementById('articleStatusFilters');
                     if (tabName === 'articles') {
-                        articleStatusFilters.style.display = 'flex';
-                        setActiveArticleFilter('filterAll');
+                        if (articleStatusFilters) {
+                            articleStatusFilters.style.display = 'flex';
+                            if (typeof setActiveArticleFilter === 'function') {
+                                setActiveArticleFilter('filterAll');
+                            }
+                        }
                     } else {
-                        articleStatusFilters.style.display = 'none';
+                        if (articleStatusFilters) {
+                            articleStatusFilters.style.display = 'none';
+                        }
                     }
                     
-                    Object.entries(tabs).forEach(([name, element]) => {
-                        if (name === tabName) {
-                            element.className = 'px-4 py-2 rounded-xl text-sm font-semibold text-white';
-                            element.style.backgroundColor = '#4b0d7f';
-                        } else {
-                            element.className = 'px-4 py-2 rounded-xl text-sm font-semibold text-gray-700';
-                            element.style.backgroundColor = '';
-                        }
-                    });
+                    // Update tab button styles
+                    updateTabStyles(tabName);
                     
-                    fetchList().then(() => {
-                        if (tabName === 'journey') {
-                            startJourneyPolling();
-                        }
-                    });
-                    fetchStats();
+                    // Fetch and render the selected tab's data
+                    if (typeof fetchList === 'function') {
+                        fetchList().then(() => {
+                            if (tabName === 'journey' && typeof startJourneyPolling === 'function') {
+                                startJourneyPolling();
+                            }
+                        }).catch(error => {
+                            console.error(`Error fetching ${tabName}:`, error);
+                        });
+                    }
+                    
+                    if (typeof fetchStats === 'function') {
+                        fetchStats();
+                    }
                 });
+                
+                // Ensure cursor pointer style
+                newTabElement.style.cursor = 'pointer';
+                console.log(`✅ Event listener attached to ${tabName} tab`);
             });
+            
+            console.log('✅ All tab event listeners set up successfully');
         }
 
         // ============================================
@@ -2994,6 +3131,7 @@ function resetRequestChangesButton(btn, text, loader) {
         window.markNotificationRead = markNotificationRead;
         window.handleNotificationClick = handleNotificationClick;
         window.closeNotificationDropdown = closeNotificationDropdown;
+        window.switchTab = switchTab; // Expose switchTab function for inline onclick handlers
     </script>
 </body>
 </html>
